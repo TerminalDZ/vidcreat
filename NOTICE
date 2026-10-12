@@ -1,0 +1,23 @@
+ReelForge
+Copyright 2026 Idriss Boukmouche
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+Documentation, example scripts and theme sample text are licensed under the
+Creative Commons Attribution 4.0 International License (see
+docs/LICENSE-CONTENT.md).
+
+This product includes third-party software and data, each under its own
+license. See THIRD-PARTY-NOTICES.md for the list and the full license texts,
+including:
+
+- the Cairo, Inter, JetBrains Mono, Manrope, Noto Kufi Arabic, Noto Naskh
+  Arabic, Playfair Display, Readex Pro and Space Grotesk fonts (SIL Open Font
+  License 1.1);
+- icons from Lucide (ISC; some derived from Feather, MIT);
+- country outlines from Natural Earth (public domain);
+- the RNNoise "somnolent-hogwash" model by Gregor Richards
+  (packages/renderer/assets/rnnoise/sh.rnnn), which its author states is not
+  subject to copyright.
+
+FFmpeg, Chromium and the optional speech models installed by
+`reelforge align --setup` are not distributed with this product.
