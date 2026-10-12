@@ -1,0 +1,16 @@
+dist
+coverage
+node_modules
+pnpm-lock.yaml
+fixtures/golden
+docs/PRD.md
+docs/SRS.md
+**/cues.json
+documentation
+marketing
+THIRD-PARTY-NOTICES.md
+fixtures/align/**/truth.json
+docs/.site
+docs/.vitepress/cache
+# Pack templates hold {{slot}} placeholders (not valid YAML until filled)
+packs/*/templates
