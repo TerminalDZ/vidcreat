@@ -1,0 +1,46 @@
+{
+  "name": "@reelforge/audio",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "author": "Idriss Boukmouche <boukemoucheidriss@gmail.com>",
+  "homepage": "https://terminaldz.github.io/vidcreat",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TerminalDZ/vidcreat.git",
+    "directory": "packages/audio"
+  },
+  "bugs": {
+    "url": "https://github.com/TerminalDZ/vidcreat/issues"
+  },
+  "keywords": [
+    "reelforge",
+    "audio",
+    "wav",
+    "onset-detection",
+    "sound-effects",
+    "procedural-audio"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}
