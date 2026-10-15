@@ -6,9 +6,14 @@
   "main": "./dist/server/index.js",
   "types": "./dist/server/index.d.ts",
   "exports": {
-    ".": { "types": "./dist/server/index.d.ts", "default": "./dist/server/index.js" }
+    ".": {
+      "types": "./dist/server/index.d.ts",
+      "default": "./dist/server/index.js"
+    }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -b && vite build"
   },

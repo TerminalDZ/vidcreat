@@ -1,0 +1,15 @@
+{
+  "v01-unknown-key": "V-1",
+  "v02-bad-time": "V-2",
+  "v03-non-monotonic": "V-3",
+  "v04-voice-changed": "V-4",
+  "v05-exit-before-enter": "V-5",
+  "v06-off-stage": "V-6",
+  "v07-safe-zone": "V-7",
+  "v08-overlap": "V-8",
+  "v09-text-overflow": "V-9",
+  "v10-caption-lines": "V-10",
+  "v11-dead-air": "V-11",
+  "v12-blink": "V-12",
+  "v13-unknown-component": "V-13"
+}

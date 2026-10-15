@@ -38,10 +38,22 @@ export const node: RuntimeComponent = {
         css(subEl, 'display', sub === undefined ? 'none' : 'block');
         css(subEl, 'color', status === 'idle' ? theme.colors.dim : c);
         css(root, 'border-color', c);
-        css(root, 'background', `linear-gradient(160deg, ${rgba(c, 0.13 + 0.12 * flash)}, ${rgba(theme.colors.card, 0.96)} 70%)`);
-        css(root, 'box-shadow', `0 0 ${(40 + 50 * flash).toFixed(0)}px ${rgba(c, 0.22 + 0.4 * flash)}, inset 0 0 0 1px ${rgba(c, 0.25)}`);
+        css(
+          root,
+          'background',
+          `linear-gradient(160deg, ${rgba(c, 0.13 + 0.12 * flash)}, ${rgba(theme.colors.card, 0.96)} 70%)`,
+        );
+        css(
+          root,
+          'box-shadow',
+          `0 0 ${(40 + 50 * flash).toFixed(0)}px ${rgba(c, 0.22 + 0.4 * flash)}, inset 0 0 0 1px ${rgba(c, 0.25)}`,
+        );
         css(root, 'opacity', status === 'off' ? '0.45' : '1');
-        css(root, 'transform', flash > 0 ? `scale(${(1 + 0.05 * Math.sin(Math.PI * (1 - flash))).toFixed(4)})` : 'none');
+        css(
+          root,
+          'transform',
+          flash > 0 ? `scale(${(1 + 0.05 * Math.sin(Math.PI * (1 - flash))).toFixed(4)})` : 'none',
+        );
         const b = st.badge ?? p.badge;
         css(badge, 'display', b ? 'block' : 'none');
         if (b) {
@@ -71,7 +83,10 @@ interface Pt {
 }
 
 /** Samples an arrow path as a polyline with cumulative lengths. */
-export function samplePath(points: Pt[], route: string): { pts: Pt[]; acc: number[]; len: number; d: string } {
+export function samplePath(
+  points: Pt[],
+  route: string,
+): { pts: Pt[]; acc: number[]; len: number; d: string } {
   let pts: Pt[];
   let d: string;
   if (route === 'curve' && points.length === 3) {
@@ -79,7 +94,10 @@ export function samplePath(points: Pt[], route: string): { pts: Pt[]; acc: numbe
     pts = [];
     for (let i = 0; i <= 40; i++) {
       const k = i / 40;
-      pts.push({ x: (1 - k) ** 2 * a.x + 2 * (1 - k) * k * c.x + k * k * b.x, y: (1 - k) ** 2 * a.y + 2 * (1 - k) * k * c.y + k * k * b.y });
+      pts.push({
+        x: (1 - k) ** 2 * a.x + 2 * (1 - k) * k * c.x + k * k * b.x,
+        y: (1 - k) ** 2 * a.y + 2 * (1 - k) * k * c.y + k * k * b.y,
+      });
     }
     d = `M${a.x} ${a.y} Q${c.x} ${c.y} ${b.x} ${b.y}`;
   } else {
@@ -87,7 +105,8 @@ export function samplePath(points: Pt[], route: string): { pts: Pt[]; acc: numbe
     d = points.map((q, i) => `${i ? 'L' : 'M'}${q.x} ${q.y}`).join(' ');
   }
   const acc = [0];
-  for (let i = 1; i < pts.length; i++) acc.push(acc[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
+  for (let i = 1; i < pts.length; i++)
+    acc.push(acc[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
   return { pts, acc, len: acc[acc.length - 1] || 1, d };
 }
 
@@ -117,13 +136,40 @@ export const arrow: RuntimeComponent = {
     const path = samplePath(p.points as Pt[], p.route);
     const svg = s('svg', { width: w, height: hh, viewBox: `0 0 ${w} ${hh}` });
     const maskId = `m-${ctx.el.id.replace(/[^\w-]/g, '')}-${ctx.seed % 100000}`;
-    const mask = s('mask', { id: maskId, maskUnits: 'userSpaceOnUse', x: -50, y: -50, width: w + 100, height: hh + 100 });
-    const maskPath = s('path', { d: path.d, fill: 'none', stroke: '#fff', 'stroke-width': p.width + 12, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+    const mask = s('mask', {
+      id: maskId,
+      maskUnits: 'userSpaceOnUse',
+      x: -50,
+      y: -50,
+      width: w + 100,
+      height: hh + 100,
+    });
+    const maskPath = s('path', {
+      d: path.d,
+      fill: 'none',
+      stroke: '#fff',
+      'stroke-width': p.width + 12,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+    });
     mask.append(maskPath);
     const defs = s('defs');
     defs.append(mask);
-    const glow = s('path', { d: path.d, fill: 'none', 'stroke-width': p.width * 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0.16 });
-    const line = s('path', { d: path.d, fill: 'none', 'stroke-width': p.width, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+    const glow = s('path', {
+      d: path.d,
+      fill: 'none',
+      'stroke-width': p.width * 4,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+      opacity: 0.16,
+    });
+    const line = s('path', {
+      d: path.d,
+      fill: 'none',
+      'stroke-width': p.width,
+      'stroke-linecap': 'round',
+      'stroke-linejoin': 'round',
+    });
     const g = s('g', { mask: `url(#${maskId})` });
     g.append(glow, line);
     const headEnd = s('polygon');
@@ -133,10 +179,20 @@ export const arrow: RuntimeComponent = {
     let labelEl: HTMLElement | undefined;
     const mid = pointAt(path, 0.5);
     if (p.label) {
-      labelEl = h('div', { class: 'a-label', dir: 'auto', style: `left:${mid.x}px;top:${mid.y}px;font-family:${fontFor(theme, p.label, 'mono')}` }, p.label);
+      labelEl = h(
+        'div',
+        {
+          class: 'a-label',
+          dir: 'auto',
+          style: `left:${mid.x}px;top:${mid.y}px;font-family:${fontFor(theme, p.label, 'mono')}`,
+        },
+        p.label,
+      );
       root.append(labelEl);
     }
-    const packets = (p.packets as { at: number; dur: number; color?: string; reverse: boolean; label?: string }[]).map((pk) => {
+    const packets = (
+      p.packets as { at: number; dur: number; color?: string; reverse: boolean; label?: string }[]
+    ).map((pk) => {
       const dot = h('i', { class: 'a-pk', style: 'display:none' });
       const lab = pk.label ? h('span', { class: 'a-pkl', style: 'display:none' }, pk.label) : undefined;
       root.append(dot);
@@ -204,7 +260,10 @@ export const arrow: RuntimeComponent = {
 export const chip: RuntimeComponent = {
   name: 'chip',
   mount(root, p, theme, ctx) {
-    const pill = h('div', { class: 'pill', style: `font-size:${p.size}px;font-family:${fontFor(theme, p.text, 'mono')}` });
+    const pill = h('div', {
+      class: 'pill',
+      style: `font-size:${p.size}px;font-family:${fontFor(theme, p.text, 'mono')}`,
+    });
     const label = h('span', { dir: 'auto', 'data-fit': true });
     let iconWrap: HTMLElement | undefined;
     if (p.icon) {
@@ -215,7 +274,12 @@ export const chip: RuntimeComponent = {
     const strike = h('i', { class: 'strike', style: 'display:none' });
     pill.append(strike);
     root.append(pill);
-    const strikeAt = typeof p.strike === 'number' ? p.strike : p.strike === true ? ctx.el.enter.t + ctx.el.enter.dur : undefined;
+    const strikeAt =
+      typeof p.strike === 'number'
+        ? p.strike
+        : p.strike === true
+          ? ctx.el.enter.t + ctx.el.enter.dur
+          : undefined;
     let lastC = '';
     return {
       update(t, _l, st) {
@@ -244,7 +308,9 @@ export const chip: RuntimeComponent = {
         css(label, 'opacity', (1 - 0.45 * sk).toFixed(3));
         if (iconWrap && c !== lastC) {
           lastC = c;
-          iconWrap.replaceChildren(iconSvg(p.icon, p.size * 1.1, variant === 'solid' ? theme.colors.bg : c, 2.2));
+          iconWrap.replaceChildren(
+            iconSvg(p.icon, p.size * 1.1, variant === 'solid' ? theme.colors.bg : c, 2.2),
+          );
         }
       },
     };
@@ -255,16 +321,24 @@ export const iconC: RuntimeComponent = {
   name: 'icon',
   mount(root, p, _theme, ctx) {
     const size = Math.min(p.size, ctx.box.w, ctx.box.h);
-    const ring = h('i', { class: 'ring', style: `width:${size}px;height:${size}px;border-color:${p.color};display:none` });
+    const ring = h('i', {
+      class: 'ring',
+      style: `width:${size}px;height:${size}px;border-color:${p.color};display:none`,
+    });
     const wrap = h('div', { style: 'position:relative;display:flex' });
     if (p.src) wrap.append(h('img', { src: ctx.asset(p.src), width: size, height: size, alt: '' }));
     else wrap.append(iconSvg(p.name, size, p.color, 1.8));
     root.append(ring, wrap);
     return {
       update(t, local) {
-        if (p.pulse) css(wrap, 'transform', `scale(${(1 + 0.05 * Math.sin(2 * Math.PI * 1.1 * local.since)).toFixed(4)})`);
+        if (p.pulse)
+          css(
+            wrap,
+            'transform',
+            `scale(${(1 + 0.05 * Math.sin(2 * Math.PI * 1.1 * local.since)).toFixed(4)})`,
+          );
         if (p.ring) {
-          const k = ((local.since % 1.6) + 1.6) % 1.6 / 1.6;
+          const k = (((local.since % 1.6) + 1.6) % 1.6) / 1.6;
           css(ring, 'display', 'block');
           css(ring, 'transform', `scale(${(0.8 + 0.9 * k).toFixed(4)})`);
           css(ring, 'opacity', ((1 - k) * 0.7).toFixed(3));

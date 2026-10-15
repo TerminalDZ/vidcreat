@@ -18,7 +18,7 @@ export interface Unit {
 const LATIN_WORD_RE = /^[A-Za-z][A-Za-z0-9'’\-_]*[؟،.,?!]?$/;
 const ENDS_WITH_PUNCT_RE = /[؟،.,?!؛:]$/;
 /** Latin runs inside a token: letters/digits with internal spaces, dots, hyphens, apostrophes. */
-const LATIN_RUN_RE = /[A-Za-z0-9](?:[A-Za-z0-9'’\-_+#/&]|[  .](?=[A-Za-z0-9]))*/g;
+const LATIN_RUN_RE = /[A-Za-z0-9](?:[A-Za-z0-9'\u2019\-_+#/&]|[ \u00A0.](?=[A-Za-z0-9]))*/g;
 
 /**
  * Tokenizes the words of a line. Rules 1–2 (Latin run merge, tatweel joiner) only apply when the
@@ -82,7 +82,8 @@ export function tokenParts(text: string, rtl: boolean): CaptionPart[] {
   return parts;
 }
 
-const chars = (units: Unit[]) => units.reduce((n, u) => n + [...u.text].length, 0) + Math.max(0, units.length - 1);
+const chars = (units: Unit[]) =>
+  units.reduce((n, u) => n + [...u.text].length, 0) + Math.max(0, units.length - 1);
 
 /** §9.1: split at punctuation closest to the middle, then by word count, until ≤ maxChars. */
 export function chunkUnits(units: Unit[], maxChars: number): Unit[][] {

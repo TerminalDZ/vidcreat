@@ -102,7 +102,11 @@ function sendFile(req: IncomingMessage, res: ServerResponse, file: string | unde
       res.writeHead(416, { 'content-range': `bytes */${size}` }).end();
       return;
     }
-    res.writeHead(206, { ...headers, 'content-range': `bytes ${start}-${end}/${size}`, 'content-length': end - start + 1 });
+    res.writeHead(206, {
+      ...headers,
+      'content-range': `bytes ${start}-${end}/${size}`,
+      'content-length': end - start + 1,
+    });
     createReadStream(file, { start, end }).pipe(res);
     return;
   }
@@ -146,7 +150,8 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
   const compile = () => {
     const t0 = performance.now();
     result = compileEpisode(paths, { draftCues: true, preset: opts.preset, decode: opts.decode });
-    if (result.timeline && !result.issues.some((i) => i.rule === 'V-1' && i.level === 'error')) lastGood = result.timeline;
+    if (result.timeline && !result.issues.some((i) => i.rule === 'V-1' && i.level === 'error'))
+      lastGood = result.timeline;
     const cuesFile = readCues(paths.cues).cues;
     state = {
       mode: opts.mode,
@@ -176,7 +181,10 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
         .then((issues) => {
           if (seq !== measureSeq) return;
           measured = issues;
-          state = { ...state, issues: [...state.issues.filter((i) => i.rule !== 'V-9' && i.rule !== 'V-10'), ...measured] };
+          state = {
+            ...state,
+            issues: [...state.issues.filter((i) => i.rule !== 'V-9' && i.rule !== 'V-10'), ...measured],
+          };
           broadcast();
         })
         .catch((e) => log(`measure skipped: ${(e as Error).message.split('\n')[0]}`));
@@ -229,7 +237,9 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
   const server = createServer(async (req, res) => {
     try {
       if (!sameOrigin(req)) {
-        res.writeHead(403, { 'content-type': 'text/plain' }).end('Forbidden: studio accepts local same-origin requests only');
+        res
+          .writeHead(403, { 'content-type': 'text/plain' })
+          .end('Forbidden: studio accepts local same-origin requests only');
         return;
       }
       const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
@@ -241,13 +251,18 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
         return;
       }
       if (p === '/api/state') {
-        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
+        res.writeHead(200, {
+          'content-type': 'application/json; charset=utf-8',
+          'cache-control': 'no-store',
+        });
         res.end(JSON.stringify(state));
         return;
       }
       if (p.startsWith('/episode/voice')) return sendFile(req, res, result.voice?.file);
-      if (p.startsWith('/episode/assets/')) return sendFile(req, res, safeJoin(paths.assets, p.slice('/episode/assets/'.length)));
-      if (p.startsWith('/runtime/')) return sendFile(req, res, safeJoin(RUNTIME_DIR, p.slice('/runtime/'.length)));
+      if (p.startsWith('/episode/assets/'))
+        return sendFile(req, res, safeJoin(paths.assets, p.slice('/episode/assets/'.length)));
+      if (p.startsWith('/runtime/'))
+        return sendFile(req, res, safeJoin(RUNTIME_DIR, p.slice('/runtime/'.length)));
       const rel = p === '/' ? 'index.html' : p.slice(1);
       return sendFile(req, res, safeJoin(CLIENT_DIR, rel));
     } catch (e) {
@@ -262,31 +277,47 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
     try {
       body = JSON.parse(await readBody(req));
     } catch (e) {
-      res.writeHead(400, { 'content-type': 'application/json' }).end(JSON.stringify({ error: `Invalid JSON: ${(e as Error).message}` }));
+      res
+        .writeHead(400, { 'content-type': 'application/json' })
+        .end(JSON.stringify({ error: `Invalid JSON: ${(e as Error).message}` }));
       return;
     }
     const parsed = cuesSchema.safeParse(body);
     if (!parsed.success) {
-      res.writeHead(422, { 'content-type': 'application/json' }).end(JSON.stringify({ error: parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ') }));
+      res.writeHead(422, { 'content-type': 'application/json' }).end(
+        JSON.stringify({
+          error: parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '),
+        }),
+      );
       return;
     }
     const known = new Set(state.script.map((l) => l.id));
     const unknown = Object.keys(parsed.data.cues).filter((k) => !known.has(k));
     if (unknown.length) {
-      res.writeHead(422, { 'content-type': 'application/json' }).end(JSON.stringify({ error: `Unknown script ids: ${unknown.join(', ')}` }));
+      res
+        .writeHead(422, { 'content-type': 'application/json' })
+        .end(JSON.stringify({ error: `Unknown script ids: ${unknown.join(', ')}` }));
       return;
     }
     const v = result.voice;
     const data = {
       ...parsed.data,
-      audio: v ? { file: path.basename(v.file), duration: Math.round(v.duration * 1000) / 1000, sha1: sha1(readFileSync(v.file)) } : parsed.data.audio,
+      audio: v
+        ? {
+            file: path.basename(v.file),
+            duration: Math.round(v.duration * 1000) / 1000,
+            sha1: sha1(readFileSync(v.file)),
+          }
+        : parsed.data.audio,
       updated: new Date().toISOString(),
       draft: undefined,
     };
     writeCues(paths.cues, data);
     compile();
     broadcast();
-    res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify({ ok: true, updated: data.updated }));
+    res
+      .writeHead(200, { 'content-type': 'application/json' })
+      .end(JSON.stringify({ ok: true, updated: data.updated }));
   }
 
   // ---- WebSocket (change events)

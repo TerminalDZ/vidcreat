@@ -12,7 +12,7 @@ export interface YamlSource {
 
 export function parseYaml(text: string, file: string): YamlSource {
   const lines = new LineCounter();
-  const doc = parseDocument(text, { lineCounter: lines, prettyErrors: false, uniqueKeys: true });
+  const doc = parseDocument(text, { lineCounter: lines, prettyErrors: true, uniqueKeys: true });
   const errors: Issue[] = [];
   for (const e of [...doc.errors, ...doc.warnings]) {
     const pos = e.linePos?.[0];

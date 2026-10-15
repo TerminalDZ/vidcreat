@@ -33,7 +33,8 @@ export function highlight(line: string): Tok[] {
     else if (str) out.push({ text: s, cls: 'tk-str' });
     else if (num) out.push({ text: s, cls: 'tk-num' });
     else if (fn) out.push({ text: s, cls: KEYWORDS.has(fn) ? 'tk-kw' : 'tk-fn' });
-    else if (id) out.push({ text: s, cls: KEYWORDS.has(id) ? 'tk-kw' : /^[A-Z][a-z]/.test(id) ? 'tk-ty' : undefined });
+    else if (id)
+      out.push({ text: s, cls: KEYWORDS.has(id) ? 'tk-kw' : /^[A-Z][a-z]/.test(id) ? 'tk-ty' : undefined });
     else if (op) out.push({ text: s, cls: 'tk-op' });
     else out.push({ text: s });
   }
@@ -60,8 +61,8 @@ export const code: RuntimeComponent = {
   handles: ['type'],
   mount(root, p, theme, ctx) {
     root.classList.add('rf-card');
-    const lines = (p.lines as (string | { text: string; color?: string; at?: number; dim?: boolean })[]).map((l) =>
-      typeof l === 'string' ? { text: l } : l,
+    const lines = (p.lines as (string | { text: string; color?: string; at?: number; dim?: boolean })[]).map(
+      (l) => (typeof l === 'string' ? { text: l } : l),
     );
     const bar = h('div', { class: 'bar' }, h('i'), h('i'), h('i'));
     if (p.title) bar.append(h('b', {}, p.title));
@@ -80,10 +81,12 @@ export const code: RuntimeComponent = {
       body.append(ln);
       return { ln, tx, hl, toks: highlight(l.text), total: [...l.text].length, color: l.color, last: -1 };
     });
-    const highlights = (p.highlight as { line: number; at?: number; until?: number; color: string }[]).map((x) => ({
-      ...x,
-      at: x.at ?? enterEnd,
-    }));
+    const highlights = (p.highlight as { line: number; at?: number; until?: number; color: string }[]).map(
+      (x) => ({
+        ...x,
+        at: x.at ?? enterEnd,
+      }),
+    );
     return {
       update(t) {
         let typingLine = -1;
@@ -101,10 +104,15 @@ export const code: RuntimeComponent = {
           let target = typingLine;
           if (target < 0) {
             // after typing: caret blinks at the end of the last started line
-            for (let i = views.length - 1; i >= 0; i--) if (t >= sched[i].start) { target = i; break; }
+            for (let i = views.length - 1; i >= 0; i--)
+              if (t >= sched[i].start) {
+                target = i;
+                break;
+              }
           }
           const show = target >= 0 && (typingLine >= 0 || caretOn(t));
-          if (target >= 0 && caret.parentElement !== views[target].tx) views[target].tx.after(caret);
+          if (target < 0) caret.remove();
+          else if (caret.previousSibling !== views[target].tx) views[target].tx.after(caret);
           css(caret, 'opacity', show ? '1' : '0');
         }
         for (const v of views) css(v.hl, 'display', 'none');

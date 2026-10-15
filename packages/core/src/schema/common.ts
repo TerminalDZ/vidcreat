@@ -18,7 +18,9 @@ export const ELEMENT_ID = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 export const lineId = () =>
   z.string().regex(LINE_ID, 'Ids must start with a letter or "_" and contain only letters, digits and "_"');
 export const elementId = () =>
-  z.string().regex(ELEMENT_ID, 'Ids must start with a letter or "_" and contain only letters, digits, "_" and "-"');
+  z
+    .string()
+    .regex(ELEMENT_ID, 'Ids must start with a letter or "_" and contain only letters, digits, "_" and "-"');
 
 export const int = () => z.number().int();
 

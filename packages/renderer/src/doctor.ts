@@ -22,14 +22,34 @@ const FFMPEG_HINT: Record<string, string> = {
 export async function runDoctor(): Promise<Check[]> {
   const checks: Check[] = [];
   const nodeMajor = Number(process.versions.node.split('.')[0]);
-  checks.push({ name: 'Node.js ≥ 22', ok: nodeMajor >= 22, detail: `v${process.versions.node}`, fix: 'Install Node.js 22 LTS from https://nodejs.org' });
+  checks.push({
+    name: 'Node.js ≥ 22',
+    ok: nodeMajor >= 22,
+    detail: `v${process.versions.node}`,
+    fix: 'Install Node.js 22 LTS from https://nodejs.org',
+  });
 
   const ff = probeFfmpeg();
   const hint = FFMPEG_HINT[process.platform] ?? FFMPEG_HINT.linux;
-  checks.push({ name: 'ffmpeg ≥ 6.0', ok: ff.ok && (ff.major ?? 0) >= 6, detail: ff.ok ? `version ${ff.version}` : `not found (${ff.error ?? ''})`.trim(), fix: hint });
+  checks.push({
+    name: 'ffmpeg ≥ 6.0',
+    ok: ff.ok && (ff.major ?? 0) >= 6,
+    detail: ff.ok ? `version ${ff.version}` : `not found (${ff.error ?? ''})`.trim(),
+    fix: hint,
+  });
   if (ff.ok) {
-    checks.push({ name: 'ffmpeg encoders: libx264, aac, mjpeg', ok: ff.encoders.libx264 && ff.encoders.aac && ff.encoders.mjpeg, detail: JSON.stringify(ff.encoders), fix: `Use a full ffmpeg build: ${hint}` });
-    checks.push({ name: 'ffmpeg filters: loudnorm, sidechaincompress, alimiter', ok: Object.values(ff.filters).every(Boolean), detail: JSON.stringify(ff.filters), fix: `Use a full ffmpeg build: ${hint}` });
+    checks.push({
+      name: 'ffmpeg encoders: libx264, aac, mjpeg',
+      ok: ff.encoders.libx264 && ff.encoders.aac && ff.encoders.mjpeg,
+      detail: JSON.stringify(ff.encoders),
+      fix: `Use a full ffmpeg build: ${hint}`,
+    });
+    checks.push({
+      name: 'ffmpeg filters: loudnorm, sidechaincompress, alimiter',
+      ok: Object.values(ff.filters).every(Boolean),
+      detail: JSON.stringify(ff.filters),
+      fix: `Use a full ffmpeg build: ${hint}`,
+    });
   }
 
   let chromeDetail = '';
@@ -42,13 +62,20 @@ export async function runDoctor(): Promise<Check[]> {
   } catch (e) {
     chromeDetail = (e as Error).message.split('\n')[0];
   }
-  checks.push({ name: 'Playwright Chromium (pinned)', ok: chromeOk, detail: chromeDetail, fix: 'reelforge doctor --fix   (runs: npx playwright install chromium)' });
+  checks.push({
+    name: 'Playwright Chromium (pinned)',
+    ok: chromeOk,
+    detail: chromeDetail,
+    fix: 'reelforge doctor --fix   (runs: npx playwright install chromium)',
+  });
 
   const fontsCss = path.join(RUNTIME_DIR, 'fonts', 'fonts.css');
   let fontsOk = existsSync(fontsCss);
   let fontDetail = fontsOk ? 'Cairo, JetBrains Mono, Space Grotesk' : 'runtime not built';
   if (fontsOk) {
-    const missing = [...readFileSync(fontsCss, 'utf8').matchAll(/url\(\.\/([^)]+)\)/g)].map((m) => m[1]).filter((f) => !existsSync(path.join(RUNTIME_DIR, 'fonts', f)));
+    const missing = [...readFileSync(fontsCss, 'utf8').matchAll(/url\(\.\/([^)]+)\)/g)]
+      .map((m) => m[1])
+      .filter((f) => !existsSync(path.join(RUNTIME_DIR, 'fonts', f)));
     if (missing.length) {
       fontsOk = false;
       fontDetail = `missing ${missing.join(', ')}`;

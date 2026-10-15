@@ -20,9 +20,22 @@ interface LoudnormStats {
 }
 
 /** First loudnorm pass: measure the voice. */
-export async function measureLoudness(voice: string, signal?: AbortSignal): Promise<LoudnormStats | undefined> {
+export async function measureLoudness(
+  voice: string,
+  signal?: AbortSignal,
+): Promise<LoudnormStats | undefined> {
   const { stderr } = await run(
-    ['-hide_banner', '-nostats', '-i', voice, '-af', `loudnorm=I=${LOUDNESS.I}:TP=${LOUDNESS.TP}:LRA=${LOUDNESS.LRA}:print_format=json`, '-f', 'null', '-'],
+    [
+      '-hide_banner',
+      '-nostats',
+      '-i',
+      voice,
+      '-af',
+      `loudnorm=I=${LOUDNESS.I}:TP=${LOUDNESS.TP}:LRA=${LOUDNESS.LRA}:print_format=json`,
+      '-f',
+      'null',
+      '-',
+    ],
     { signal },
   );
   const m = stderr.match(/\{[\s\S]*?"target_offset"[\s\S]*?\}/);
@@ -63,7 +76,9 @@ export async function mixAudio(o: MixOptions): Promise<void> {
   args.push('-i', o.sfx);
   const parts = [voiceChain];
   if (o.withSfx) {
-    parts.push(`[1:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,volume=${o.sfxGainDb}dB[s0]`);
+    parts.push(
+      `[1:a]aresample=48000,aformat=sample_fmts=fltp:channel_layouts=stereo,volume=${o.sfxGainDb}dB[s0]`,
+    );
     if (o.duck && o.voice) {
       parts.push('[v]asplit=2[v1][vk]');
       parts.push('[s0][vk]sidechaincompress=threshold=0.05:ratio=3:attack=8:release=220[s]');
@@ -74,6 +89,20 @@ export async function mixAudio(o: MixOptions): Promise<void> {
   } else {
     parts.push('[v]alimiter=limit=0.95:level=false[a]');
   }
-  args.push('-filter_complex', parts.join(';'), '-map', '[a]', '-t', o.duration.toFixed(3), '-ar', '48000', '-ac', '2', '-c:a', 'pcm_s16le', o.out);
+  args.push(
+    '-filter_complex',
+    parts.join(';'),
+    '-map',
+    '[a]',
+    '-t',
+    o.duration.toFixed(3),
+    '-ar',
+    '48000',
+    '-ac',
+    '2',
+    '-c:a',
+    'pcm_s16le',
+    o.out,
+  );
   await run(args, { signal: o.signal });
 }

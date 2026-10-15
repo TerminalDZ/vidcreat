@@ -99,7 +99,11 @@ export class ElementView {
       filters.push(`drop-shadow(${(-a * 0.35 * (1 - j)).toFixed(1)}px 0 0 rgba(85,220,255,.85))`);
     }
     css(this.el, 'filter', filters.length ? filters.join(' ') : 'none');
-    css(this.el, 'clip-path', tr.clip < 0.999 ? `inset(-20px ${((1 - tr.clip) * 100).toFixed(2)}% -20px -20px)` : 'none');
+    css(
+      this.el,
+      'clip-path',
+      tr.clip < 0.999 ? `inset(-20px ${((1 - tr.clip) * 100).toFixed(2)}% -20px -20px)` : 'none',
+    );
 
     const ease = enter.anim === 'pop' ? easeOutBack(this.theme.motion.pop_overshoot) : easeOutCubic;
     const local: LocalTime = {
@@ -117,6 +121,10 @@ export class ElementView {
   overflows(): boolean {
     const root = this.el.firstElementChild as HTMLElement;
     const tol = 2;
+    return this.overflowsNow(root, tol);
+  }
+
+  private overflowsNow(root: HTMLElement, tol: number): boolean {
     if (root.scrollWidth > this.spec.box.w + tol || root.scrollHeight > this.spec.box.h + tol) return true;
     // Text containers marked data-fit must not overflow horizontally (vertical ink overflow of
     // tight line-heights is expected and is covered by the element-box check above).
@@ -326,7 +334,11 @@ export class SceneView {
       }
     }
     css(this.el, 'opacity', opacity >= 0.999 ? '1' : opacity.toFixed(3));
-    css(this.el, 'transform', scale === 1 && ty === 0 ? 'none' : `translateY(${ty.toFixed(2)}px) scale(${scale.toFixed(4)})`);
+    css(
+      this.el,
+      'transform',
+      scale === 1 && ty === 0 ? 'none' : `translateY(${ty.toFixed(2)}px) scale(${scale.toFixed(4)})`,
+    );
     css(this.el, 'filter', blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : 'none');
     // Elements freeze at the scene end while the scene fades out.
     const et = Math.min(t, this.spec.end - 0.0005);

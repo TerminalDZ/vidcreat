@@ -1,0 +1,18 @@
+# Seeded bug for rule V-13: unknown component.
+meta:
+  id: lint
+  series: 'LINT'
+  title: 'Seeded bug'
+  theme: default
+script:
+  - text: 'المشكلة دي اسمها Duplicate Charge'
+  - text: 'الـ client بعت الـ request مرتين'
+  - text: 'والحل؟ Idempotency key'
+
+scenes:
+  - id: s1
+    at: l1
+    elements:
+      - use: chipp
+        id: c1
+        props: { text: 'ok' }

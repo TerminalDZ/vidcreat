@@ -80,7 +80,11 @@ export class Engine {
       sy += jitter(tl.seed + 202, t, 40) * s.amp * 0.7 * d;
       rot += jitter(tl.seed + 303, t, 40) * 0.6 * d;
     }
-    css(this.world, 'transform', sx || sy ? `translate(${sx.toFixed(2)}px, ${sy.toFixed(2)}px) rotate(${rot.toFixed(3)}deg)` : 'none');
+    css(
+      this.world,
+      'transform',
+      sx || sy ? `translate(${sx.toFixed(2)}px, ${sy.toFixed(2)}px) rotate(${rot.toFixed(3)}deg)` : 'none',
+    );
     for (const s of this.scenes) s.update(t, frame);
     this.header.update(t);
     this.captions.update(t);
@@ -94,28 +98,39 @@ export class Engine {
     for (const s of this.scenes) {
       for (const e of s.elements) {
         if (['arrow', 'particles', 'trap', 'icon'].includes(e.spec.component)) continue;
+        // Measured at the settled state (all text typed, rows inserted, entry overshoots finished),
+        // and only reported when it still overflows a moment earlier (ignores transient bumps).
         const end = Math.min(e.spec.exit?.t ?? s.spec.end, s.spec.end) - 0.02;
-        const times = [Math.min(e.spec.enter.t + e.spec.enter.dur + 0.01, end), end];
-        for (const t of times) {
+        const before = Math.max(e.spec.enter.t + e.spec.enter.dur, end - 0.6);
+        let over = true;
+        for (const t of [end, before]) {
           this.render(t);
-          if (e.visibleAt(t) && e.overflows()) {
-            overflow.push({ id: e.spec.id, scene: s.spec.id, t: Math.round(t * 1000) / 1000 });
-            break;
-          }
+          over &&= e.visibleAt(t) && e.overflows();
         }
+        if (over) overflow.push({ id: e.spec.id, scene: s.spec.id, t: Math.round(end * 1000) / 1000 });
       }
     }
     return { overflow, captions: this.captions.measureLines() };
   }
 
   /** Element boxes (canvas coordinates) for the studio overlay. */
-  boxes(t: number): { id: string; component: string; x: number; y: number; w: number; h: number; visible: boolean }[] {
+  boxes(
+    t: number,
+  ): { id: string; component: string; x: number; y: number; w: number; h: number; visible: boolean }[] {
     const out = [];
     for (const s of this.scenes) {
       const vis = s.visibleAt(t);
       for (const e of s.elements) {
         const b = e.spec.box;
-        out.push({ id: e.spec.id, component: e.spec.component, x: b.x + s.spec.origin.x, y: b.y + s.spec.origin.y, w: b.w, h: b.h, visible: vis && e.visibleAt(t) });
+        out.push({
+          id: e.spec.id,
+          component: e.spec.component,
+          x: b.x + s.spec.origin.x,
+          y: b.y + s.spec.origin.y,
+          w: b.w,
+          h: b.h,
+          visible: vis && e.visibleAt(t),
+        });
       }
     }
     return out;

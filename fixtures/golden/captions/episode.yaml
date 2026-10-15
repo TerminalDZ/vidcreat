@@ -1,0 +1,18 @@
+# Caption fixture suite (SRS §9.3): one script line per normative case, 2 s each.
+meta:
+  id: captions
+  title: "Caption fixtures"
+  theme: ../golden.theme.yaml
+  lang: ar-EG
+
+script:
+  - text: "المشكلة دي اسمها Duplicate Charge"
+  - text: "الـ client بعت الـ request"
+  - text: "عايز الجزء الجاي عن الـ Double-entry ledger؟"
+  - text: "There are only two hard things"
+  - text: "وافتكر Conway's law"
+  - text: "بـ SELECT FOR UPDATE"
+
+scenes:
+  - id: s
+    at: l1

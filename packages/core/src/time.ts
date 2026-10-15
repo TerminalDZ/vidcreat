@@ -48,7 +48,11 @@ export function parseTime(input: string | number): TimeExpr {
   }
   const source = input;
   let s = input.trim();
-  if (!s) throw new TimeError('Empty time expression', "Use seconds ('12.5s'), a line ('l7') or a word (\"l7:'word'\")");
+  if (!s)
+    throw new TimeError(
+      'Empty time expression',
+      "Use seconds ('12.5s'), a line ('l7') or a word (\"l7:'word'\")",
+    );
   let base: TimeBase;
   let m: RegExpMatchArray | null;
   if ((m = s.match(RE_SCENE))) {
@@ -77,7 +81,10 @@ export function parseTime(input: string | number): TimeExpr {
   while (s.length) {
     const o = s.match(RE_OFFSET);
     if (!o) {
-      throw new TimeError(`Unexpected "${s}" in time expression "${source}"`, 'Offsets look like +0.4 or -0.2');
+      throw new TimeError(
+        `Unexpected "${s}" in time expression "${source}"`,
+        'Offsets look like +0.4 or -0.2',
+      );
     }
     offset += (o[1] === '-' ? -1 : 1) * Number(o[2]);
     s = s.slice(o[0].length).trimStart();
@@ -107,7 +114,10 @@ function lineOf(ctx: TimeContext, id: string, source: string): LineTiming {
   const line = ctx.lines.get(id);
   if (!line) {
     const alt = closest(id, ctx.lines.keys());
-    throw new TimeError(`Unknown script line "${id}" in "${source}"`, alt ? `Did you mean "${alt}"?` : undefined);
+    throw new TimeError(
+      `Unknown script line "${id}" in "${source}"`,
+      alt ? `Did you mean "${alt}"?` : undefined,
+    );
   }
   return line;
 }
@@ -120,13 +130,17 @@ function findWord(line: LineTiming, word: string, occurrence: number, source: st
   const eq = (a: string, b: string, loose: boolean) => (loose ? a.includes(b) : a === b);
   for (const loose of [false, true]) {
     for (let i = 0; i + target.length <= norms.length; i++) {
-      if (target.every((t, k) => eq(norms[i + k], t, loose && (k === 0 || k === target.length - 1)))) matches.push(i);
+      if (target.every((t, k) => eq(norms[i + k], t, loose && (k === 0 || k === target.length - 1))))
+        matches.push(i);
     }
     if (matches.length >= occurrence) break;
     matches.length = 0;
   }
   if (matches.length < occurrence) {
-    const alt = closest(word, line.words.map((w) => w.text));
+    const alt = closest(
+      word,
+      line.words.map((w) => w.text),
+    );
     throw new TimeError(
       occurrence > 1
         ? `Word "${word}" occurs fewer than ${occurrence} times in line ${line.id} ("${source}")`
@@ -169,14 +183,18 @@ export function evalTime(expr: TimeExpr, ctx: TimeContext): number {
       const ids = ctx.sceneIds?.() ?? [];
       if (!ids.includes(b.id)) {
         const alt = closest(b.id, ids);
-        throw new TimeError(`Unknown scene "@${b.id}" in "${expr.source}"`, alt ? `Did you mean "@${alt}"?` : undefined);
+        throw new TimeError(
+          `Unknown scene "@${b.id}" in "${expr.source}"`,
+          alt ? `Did you mean "@${alt}"?` : undefined,
+        );
       }
       t = ctx.sceneTime(b.id, b.part);
       break;
     }
   }
   t = round3(t + expr.offset);
-  if (t < 0) throw new TimeError(`"${expr.source}" resolves to ${t}s, which is before the start of the episode`);
+  if (t < 0)
+    throw new TimeError(`"${expr.source}" resolves to ${t}s, which is before the start of the episode`);
   if (t > round3(ctx.duration) + 0.0005) {
     throw new TimeError(
       `"${expr.source}" resolves to ${t}s, which is after the end of the episode (${round3(ctx.duration)}s)`,

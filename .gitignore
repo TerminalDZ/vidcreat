@@ -10,3 +10,4 @@ fixtures/**/out/
 examples/**/voice.wav
 !fixtures/mini/voice.wav
 .vite/
+*.diff.png

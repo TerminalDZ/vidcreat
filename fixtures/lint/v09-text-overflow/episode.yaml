@@ -1,0 +1,19 @@
+# Seeded bug for rule V-9: text overflow.
+meta:
+  id: lint
+  series: 'LINT'
+  title: 'Seeded bug'
+  theme: default
+script:
+  - text: 'المشكلة دي اسمها Duplicate Charge'
+  - text: 'الـ client بعت الـ request مرتين'
+  - text: 'والحل؟ Idempotency key'
+
+scenes:
+  - id: s1
+    at: l1
+    elements:
+      - use: node
+        id: n1
+        props: { title: 'A very very long service name that cannot fit', sub: 'x' }
+        place: { x: 100, y: 100, w: 300, h: 170 }

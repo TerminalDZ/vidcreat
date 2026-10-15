@@ -3,7 +3,7 @@
 export const ARABIC_RE = /[؀-ۿ]/;
 export const LATIN_RE = /[A-Za-z]/;
 export const TATWEEL = 'ـ';
-export const NBSP = ' ';
+export const NBSP = '\u00A0';
 /** Punctuation ignored for word weighting and matching (SRS §5.2). */
 const PUNCT_RE = /[،؟؛.,?!:;"'“”«»()[\]{}…\-–—]/g;
 const DIACRITICS_RE = /[ً-ٰٟۖ-ۭ]/g;

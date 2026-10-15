@@ -11,6 +11,24 @@ importers:
       '@eslint/js':
         specifier: 9.39.1
         version: 9.39.1
+      '@reelforge/audio':
+        specifier: workspace:*
+        version: link:packages/audio
+      '@reelforge/cli':
+        specifier: workspace:*
+        version: link:packages/cli
+      '@reelforge/core':
+        specifier: workspace:*
+        version: link:packages/core
+      '@reelforge/renderer':
+        specifier: workspace:*
+        version: link:packages/renderer
+      '@reelforge/runtime':
+        specifier: workspace:*
+        version: link:packages/runtime
+      '@reelforge/studio':
+        specifier: workspace:*
+        version: link:packages/studio
       '@types/node':
         specifier: 22.19.1
         version: 22.19.1
@@ -29,6 +47,9 @@ importers:
       pixelmatch:
         specifier: 7.1.0
         version: 7.1.0
+      playwright:
+        specifier: 1.56.1
+        version: 1.56.1
       pngjs:
         specifier: 7.0.0
         version: 7.0.0

@@ -4,7 +4,10 @@ import { COMPONENTS } from './components/index.js';
 import { episodeSchema } from './schema/episode.js';
 
 export function episodeJsonSchema(): object {
-  const base = zodToJsonSchema(episodeSchema, { name: 'Episode', $refStrategy: 'none' }) as Record<string, unknown>;
+  const base = zodToJsonSchema(episodeSchema, { name: 'Episode', $refStrategy: 'none' }) as Record<
+    string,
+    unknown
+  >;
   const components = Object.fromEntries(
     Object.values(COMPONENTS).map((c) => [c.name, zodToJsonSchema(c.schema, { $refStrategy: 'none' })]),
   );

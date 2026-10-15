@@ -18,7 +18,9 @@ export const title: RuntimeComponent = {
     root.style.color = p.color;
     root.dir = rtl ? 'rtl' : 'ltr';
     if (rtl) root.style.lineHeight = '1.3';
-    const reveal = new Reveal(parseAccent(String(p.text)).map((s) => ({ text: s.text, color: s.accent ? p.accent : undefined })));
+    const reveal = new Reveal(
+      parseAccent(String(p.text)).map((s) => ({ text: s.text, color: s.accent ? p.accent : undefined })),
+    );
     const main = h('div', { class: 't-main', 'data-fit': true });
     main.append(reveal.el);
     root.append(main);
@@ -49,7 +51,8 @@ export const label: RuntimeComponent = {
   mount(root, p, theme) {
     root.style.color = p.color;
     root.style.fontSize = `${p.size ?? theme.type.label}px`;
-    root.style.justifyContent = p.align === 'center' ? 'center' : p.align === 'right' ? 'flex-end' : 'flex-start';
+    root.style.justifyContent =
+      p.align === 'center' ? 'center' : p.align === 'right' ? 'flex-end' : 'flex-start';
     if (p.dot) root.append(h('i', { class: 'dot' }));
     root.append(h('span', { dir: 'auto', 'data-fit': true }, p.text));
     return { update() {} };
@@ -63,7 +66,14 @@ export const quote: RuntimeComponent = {
     root.dir = rtl ? 'rtl' : 'ltr';
     root.classList.add('rf-card');
     root.style.textAlign = rtl ? 'right' : 'left';
-    const mark = h('div', { class: 'qm', style: `color:${p.color};${rtl ? 'right' : 'left'}:44px;font-family:${fontFor(theme, 'A', 'display')}` }, rtl ? '”' : '“');
+    const mark = h(
+      'div',
+      {
+        class: 'qm',
+        style: `color:${p.color};${rtl ? 'right' : 'left'}:44px;font-family:${fontFor(theme, 'A', 'display')}`,
+      },
+      rtl ? '”' : '“',
+    );
     // Highlighted words are rendered in the accent color.
     const words = new Set((p.highlight as string[]).map((w) => w.toLowerCase()));
     const segs: { text: string; color?: string }[] = [];
@@ -128,7 +138,11 @@ export const cta: RuntimeComponent = {
   name: 'cta',
   mount(root, p, theme, ctx) {
     const lbl = h('div', { class: 'cl', style: `color:${p.color}` }, p.label);
-    const next = h('div', { class: 'cn', dir: 'auto', 'data-fit': true, style: `font-family:${fontFor(theme, p.next)}` }, p.next);
+    const next = h(
+      'div',
+      { class: 'cn', dir: 'auto', 'data-fit': true, style: `font-family:${fontFor(theme, p.next)}` },
+      p.next,
+    );
     root.append(lbl, next);
     let input: HTMLElement | undefined;
     let typed: HTMLElement | undefined;
@@ -139,8 +153,15 @@ export const cta: RuntimeComponent = {
       const av = h('div', { class: 'av', style: `background:${rgba(p.color, 0.16)}` });
       av.append(icon('user', 38, p.color));
       typed = h('span');
-      caret = h('span', { class: 'caret', style: `display:inline-block;width:3px;height:1.05em;margin:0 2px;vertical-align:-0.15em;background:${p.color}` });
-      ph = h('span', { class: 'ph', dir: 'auto', style: `font-family:${fontFor(theme, p.prompt)}` }, p.prompt);
+      caret = h('span', {
+        class: 'caret',
+        style: `display:inline-block;width:3px;height:1.05em;margin:0 2px;vertical-align:-0.15em;background:${p.color}`,
+      });
+      ph = h(
+        'span',
+        { class: 'ph', dir: 'auto', style: `font-family:${fontFor(theme, p.prompt)}` },
+        p.prompt,
+      );
       input = h('div', { class: 'inp' }, typed, caret, ph);
       send = h('div', { class: 'send', style: `background:${theme.colors.line}` }, 'POST');
       root.append(h('div', { class: 'box' }, av, input, send));

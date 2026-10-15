@@ -56,9 +56,12 @@ function readHeader(buf: Uint8Array): WavInfo {
   if (!fmt) throw new WavError('Missing "fmt " chunk');
   if (dataOffset < 0) throw new WavError('Missing "data" chunk');
   const isFloat = fmt.format === 3;
-  if (!(fmt.format === 1 || isFloat)) throw new WavError(`Unsupported WAV encoding (format tag ${fmt.format})`);
-  if (isFloat && fmt.bits !== 32 && fmt.bits !== 64) throw new WavError(`Unsupported float width ${fmt.bits}`);
-  if (!isFloat && ![8, 16, 24, 32].includes(fmt.bits)) throw new WavError(`Unsupported PCM width ${fmt.bits}`);
+  if (!(fmt.format === 1 || isFloat))
+    throw new WavError(`Unsupported WAV encoding (format tag ${fmt.format})`);
+  if (isFloat && fmt.bits !== 32 && fmt.bits !== 64)
+    throw new WavError(`Unsupported float width ${fmt.bits}`);
+  if (!isFloat && ![8, 16, 24, 32].includes(fmt.bits))
+    throw new WavError(`Unsupported PCM width ${fmt.bits}`);
   if (fmt.channels < 1) throw new WavError('WAV has no channels');
   const frameBytes = (fmt.bits / 8) * fmt.channels;
   const frames = Math.floor(dataLength / frameBytes);

@@ -6,13 +6,17 @@ import type { Issue, Preset } from './types.js';
 import { didYouMean } from './util.js';
 import { parseYaml } from './yamlsrc.js';
 
-const rect = z.object({ name: z.string(), x: z.number(), y: z.number(), w: z.number(), h: z.number() }).strict();
+const rect = z
+  .object({ name: z.string(), x: z.number(), y: z.number(), w: z.number(), h: z.number() })
+  .strict();
 
 const presetFile = z
   .object({
     name: z.string(),
     label: z.string().optional(),
-    canvas: z.object({ width: z.number().int(), height: z.number().int(), fps: z.number().int().positive() }).strict(),
+    canvas: z
+      .object({ width: z.number().int(), height: z.number().int(), fps: z.number().int().positive() })
+      .strict(),
     header_top: z.number(),
     stage: z.object({ y: z.number(), h: z.number().positive() }).strict(),
     captions_y: z.number(),
@@ -39,7 +43,11 @@ export const FALLBACK_PRESET: Preset = {
   maxDuration: 600,
 };
 
-export function loadPreset(name: string, root: string, episodeDir: string): { preset: Preset; file?: string; issues: Issue[] } {
+export function loadPreset(
+  name: string,
+  root: string,
+  episodeDir: string,
+): { preset: Preset; file?: string; issues: Issue[] } {
   const file = findResource('preset', name, root, episodeDir);
   if (!file) {
     const alt = didYouMean(name, listResources('preset', root), 3);
@@ -63,7 +71,12 @@ export function loadPreset(name: string, root: string, episodeDir: string): { pr
     return {
       preset: FALLBACK_PRESET,
       file,
-      issues: parsed.error.issues.map((i) => ({ rule: 'V-1', level: 'error' as const, message: `Preset: ${i.path.join('.')}: ${i.message}`, file })),
+      issues: parsed.error.issues.map((i) => ({
+        rule: 'V-1',
+        level: 'error' as const,
+        message: `Preset: ${i.path.join('.')}: ${i.message}`,
+        file,
+      })),
     };
   }
   const d = parsed.data;

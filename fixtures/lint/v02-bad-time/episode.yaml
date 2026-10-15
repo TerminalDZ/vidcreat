@@ -1,0 +1,20 @@
+# Seeded bug for rule V-2: bad time.
+meta:
+  id: lint
+  series: 'LINT'
+  title: 'Seeded bug'
+  theme: default
+script:
+  - text: 'المشكلة دي اسمها Duplicate Charge'
+  - text: 'الـ client بعت الـ request مرتين'
+  - text: 'والحل؟ Idempotency key'
+
+scenes:
+  - id: s1
+    at: l1
+    elements:
+      - use: chip
+        id: c1
+        props: { text: 'ok' }
+        place: { x: 100, y: 100, w: 300, h: 90 }
+        enter: { at: "l2:'timeout'" }

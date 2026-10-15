@@ -3,7 +3,7 @@
  * @reelforge/runtime under the same name; this side owns validation, defaults, sizing and SFX hooks.
  *
  * Convention: any prop key named `at` or `until` (at any depth) is a time expression and is resolved
- * to seconds by the compiler. Keys named `color`, `accent`, `danger` (and `colors[]`) accept theme
+ * to seconds by the compiler; so are `strike` and `highlight` when they are not booleans. Keys named `color`, `accent`, `danger` (and `colors[]`) accept theme
  * color names and are resolved to CSS colors.
  */
 import { z } from 'zod';
@@ -95,7 +95,12 @@ export const codeProps = z
     highlight: z
       .array(
         z
-          .object({ line: int().min(1), at: time().optional(), until: time().optional(), color: color().default('lime') })
+          .object({
+            line: int().min(1),
+            at: time().optional(),
+            until: time().optional(),
+            color: color().default('lime'),
+          })
           .strict(),
       )
       .default([]),
@@ -159,7 +164,11 @@ export const stampProps = z
   })
   .strict();
 
-const cell = z.union([z.string(), z.number(), z.object({ text: z.union([z.string(), z.number()]), color: color() }).strict()]);
+const cell = z.union([
+  z.string(),
+  z.number(),
+  z.object({ text: z.union([z.string(), z.number()]), color: color() }).strict(),
+]);
 
 export const tableProps = z
   .object({
@@ -215,7 +224,9 @@ export const lanesProps = z
 export const checklistProps = z
   .object({
     title: z.string().optional(),
-    items: z.array(z.object({ text: z.string(), at: time().optional(), ok: z.boolean().default(true) }).strict()).min(1),
+    items: z
+      .array(z.object({ text: z.string(), at: time().optional(), ok: z.boolean().default(true) }).strict())
+      .min(1),
     fontSize: z.number().positive().default(36),
     color: color().default('lime'),
   })
@@ -269,7 +280,11 @@ export const timelineProps = z
     start: z.string().optional(),
     end: z.string().optional(),
     color: color().default('cyan'),
-    cursor: z.array(z.object({ at: time(), pos: z.number().min(0).max(1), dur: z.number().min(0).optional() }).strict()).default([]),
+    cursor: z
+      .array(
+        z.object({ at: time(), pos: z.number().min(0).max(1), dur: z.number().min(0).optional() }).strict(),
+      )
+      .default([]),
   })
   .strict();
 
@@ -279,7 +294,14 @@ export const gridProps = z
   .object({
     cols: int().min(1).max(12),
     rows: int().min(1).max(12),
-    tiles: z.array(z.union([z.string(), z.object({ label: z.string().optional(), state: tileState.optional() }).strict()])).default([]),
+    tiles: z
+      .array(
+        z.union([
+          z.string(),
+          z.object({ label: z.string().optional(), state: tileState.optional() }).strict(),
+        ]),
+      )
+      .default([]),
     steps: z.array(z.object({ at: time(), set: z.record(tileState) }).strict()).default([]),
     gap: z.number().min(0).default(14),
     label: z.string().optional(),
@@ -380,4 +402,6 @@ export const iconProps = z
     ring: z.boolean().default(false),
   })
   .strict()
-  .refine((p) => p.name || p.src, { message: 'icon needs either "name" (bundled icon) or "src" (assets/…svg)' });
+  .refine((p) => p.name || p.src, {
+    message: 'icon needs either "name" (bundled icon) or "src" (assets/…svg)',
+  });

@@ -3,7 +3,14 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import { decodeWav, frameEnvelope, hashString, toMono, type PcmAudio, type SoundName } from '@reelforge/audio';
+import {
+  decodeWav,
+  frameEnvelope,
+  hashString,
+  toMono,
+  type PcmAudio,
+  type SoundName,
+} from '@reelforge/audio';
 import { buildCaptions } from './captions.js';
 import { COMPONENTS, COMPONENT_NAMES } from './components/index.js';
 import { readCues, type CuesFile } from './cues.js';
@@ -105,11 +112,17 @@ const DEFAULT_FX: Record<TFx['do'], { amp: number; dur: number }> = {
   bump: { amp: 0.12, dur: 0.3 },
 };
 
-const DEFAULT_ENTER_DUR: Partial<Record<EnterAnim, number>> = { draw: 0.6, stamp: 0.5, glitch: 0.5, none: 0.001, type: 0.3 };
+const DEFAULT_ENTER_DUR: Partial<Record<EnterAnim, number>> = {
+  draw: 0.6,
+  stamp: 0.5,
+  glitch: 0.5,
+  none: 0.001,
+  type: 0.3,
+};
 const COLOR_KEYS = new Set(['color', 'accent', 'danger']);
-const TIME_KEYS = new Set(['at', 'until']);
-const SIDES = ['left', 'right', 'top', 'bottom', 'center'] as const;
-type Side = (typeof SIDES)[number];
+/** Prop keys holding time expressions (booleans in `strike`/`highlight` pass through unchanged). */
+const TIME_KEYS = new Set(['at', 'until', 'strike', 'highlight']);
+type Side = 'left' | 'right' | 'top' | 'bottom' | 'center';
 
 class Compiler {
   issues: Issue[] = [];
@@ -133,7 +146,13 @@ class Compiler {
     return posAt(this.src, p);
   }
 
-  issue(rule: string, level: Issue['level'], message: string, p?: (string | number)[], extra: Partial<Issue> = {}) {
+  issue(
+    rule: string,
+    level: Issue['level'],
+    message: string,
+    p?: (string | number)[],
+    extra: Partial<Issue> = {},
+  ) {
     const pos = p ? this.pos(p) : undefined;
     this.issues.push({
       rule,
@@ -170,7 +189,8 @@ class Compiler {
     if (v && typeof v === 'object') {
       const out: Record<string, unknown> = {};
       for (const [k, x] of Object.entries(v as Record<string, unknown>)) {
-        if (TIME_KEYS.has(k) && (typeof x === 'string' || typeof x === 'number')) out[k] = this.time(x, [...p, k], fallback);
+        if (TIME_KEYS.has(k) && (typeof x === 'string' || typeof x === 'number'))
+          out[k] = this.time(x, [...p, k], fallback);
         else if (COLOR_KEYS.has(k)) out[k] = this.color(x);
         else out[k] = this.resolveProps(x, [...p, k], fallback, k);
       }
@@ -232,11 +252,17 @@ function autoSide(from: Rect, toward: { x: number; y: number }): Side {
   const c = center(from);
   const dx = toward.x - c.x;
   const dy = toward.y - c.y;
-  if (Math.abs(dx) / Math.max(1, from.w) >= Math.abs(dy) / Math.max(1, from.h)) return dx >= 0 ? 'right' : 'left';
+  if (Math.abs(dx) / Math.max(1, from.w) >= Math.abs(dy) / Math.max(1, from.h))
+    return dx >= 0 ? 'right' : 'left';
   return dy >= 0 ? 'bottom' : 'top';
 }
 
-const roundRect = (r: Rect): Rect => ({ x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.w), h: Math.round(r.h) });
+const roundRect = (r: Rect): Rect => ({
+  x: Math.round(r.x),
+  y: Math.round(r.y),
+  w: Math.round(r.w),
+  h: Math.round(r.h),
+});
 
 export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): CompileResult {
   const files = new Set<string>([paths.yaml]);
@@ -244,7 +270,14 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
   if (text === undefined) {
     return {
       ok: false,
-      issues: [{ rule: 'V-1', level: 'error', message: `episode.yaml not found in ${paths.dir}`, hint: 'Create one with `reelforge new <id>`' }],
+      issues: [
+        {
+          rule: 'V-1',
+          level: 'error',
+          message: `episode.yaml not found in ${paths.dir}`,
+          hint: 'Create one with `reelforge new <id>`',
+        },
+      ],
       files: [...files],
       script: [],
     };
@@ -271,19 +304,32 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
   const script = spec.script.map((l, i) => ({ ...l, id: l.id ?? `l${i + 1}` }));
   const seenIds = new Map<string, number>();
   script.forEach((l, i) => {
-    if (seenIds.has(l.id)) c.issue('V-1', 'error', `Duplicate script id "${l.id}" (also line ${seenIds.get(l.id)! + 1})`, ['script', i, 'id']);
+    if (seenIds.has(l.id))
+      c.issue('V-1', 'error', `Duplicate script id "${l.id}" (also line ${seenIds.get(l.id)! + 1})`, [
+        'script',
+        i,
+        'id',
+      ]);
     seenIds.set(l.id, i);
   });
 
   // ---- theme & preset
   const themeRes = loadTheme(spec.meta.theme, paths.root, paths.dir);
   themeRes.files.forEach((f) => files.add(f));
-  for (const i of themeRes.issues) c.issue(i.rule, i.level, i.message, i.path ? ['meta', 'theme'] : undefined, { hint: i.hint, ...(i.file ? { file: i.file } : {}) });
+  for (const i of themeRes.issues)
+    c.issue(i.rule, i.level, i.message, i.path ? ['meta', 'theme'] : undefined, {
+      hint: i.hint,
+      ...(i.file ? { file: i.file } : {}),
+    });
   c.theme = themeRes.theme;
   const presetName = opts.preset ?? process.env.REELFORGE_PRESET ?? spec.meta.preset;
   const presetRes = loadPreset(presetName, paths.root, paths.dir);
   if (presetRes.file) files.add(presetRes.file);
-  for (const i of presetRes.issues) c.issue(i.rule, i.level, i.message, i.path ? ['meta', 'preset'] : undefined, { hint: i.hint, ...(i.file ? { file: i.file } : {}) });
+  for (const i of presetRes.issues)
+    c.issue(i.rule, i.level, i.message, i.path ? ['meta', 'preset'] : undefined, {
+      hint: i.hint,
+      ...(i.file ? { file: i.file } : {}),
+    });
   c.preset = presetRes.preset;
   const fps = c.preset.fps;
 
@@ -297,14 +343,26 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
       try {
         voice = loadVoice(voiceFile, opts.decode);
       } catch (e) {
-        c.issue('V-4', 'error', `Cannot read voice file ${spec.audio.voice}: ${(e as Error).message}`, ['audio', 'voice'], {
-          hint: 'Export the recording as PCM WAV (16/24-bit or float), or install ffmpeg so ReelForge can convert it',
-        });
+        c.issue(
+          'V-4',
+          'error',
+          `Cannot read voice file ${spec.audio.voice}: ${(e as Error).message}`,
+          ['audio', 'voice'],
+          {
+            hint: 'Export the recording as PCM WAV (16/24-bit or float), or install ffmpeg so ReelForge can convert it',
+          },
+        );
       }
     } else {
-      c.issue('V-4', 'warn', `Voice file "${spec.audio.voice}" not found; render needs it`, ['audio', 'voice'], {
-        hint: `Record ${spec.audio.voice} into ${paths.dir} (or render with --silent for a silent preview)`,
-      });
+      c.issue(
+        'V-4',
+        'warn',
+        `Voice file "${spec.audio.voice}" not found; render needs it`,
+        ['audio', 'voice'],
+        {
+          hint: `Record ${spec.audio.voice} into ${paths.dir} (or render with --silent for a silent preview)`,
+        },
+      );
     }
   }
 
@@ -313,7 +371,14 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
   let cues: CuesFile | undefined = opts.cues ?? undefined;
   if (opts.cues === undefined) {
     const r = readCues(paths.cues);
-    if (r.error) c.issues.push({ rule: 'V-3', level: 'error', message: r.error, file: paths.cues, hint: 'Fix the JSON or re-mark cues with `reelforge cue`' });
+    if (r.error)
+      c.issues.push({
+        rule: 'V-3',
+        level: 'error',
+        message: r.error,
+        file: paths.cues,
+        hint: 'Fix the JSON or re-mark cues with `reelforge cue`',
+      });
     cues = r.cues;
   }
   if (!cues) {
@@ -328,7 +393,12 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
     }
     cues = draftCues(script, spec.audio.voice);
   } else if (cues.draft) {
-    c.issues.push({ rule: 'V-3', level: 'info', message: 'cues.json holds draft (estimated) cues; mark real cues before publishing', file: paths.cues });
+    c.issues.push({
+      rule: 'V-3',
+      level: 'info',
+      message: 'cues.json holds draft (estimated) cues; mark real cues before publishing',
+      file: paths.cues,
+    });
   }
   const cueMap: Record<string, number> = {};
   let prevCue = -Infinity;
@@ -336,14 +406,22 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
   script.forEach((l, i) => {
     const v = cues!.cues[l.id];
     if (v === undefined) {
-      c.issue('V-3', 'error', `Missing cue for script line ${l.id}`, ['script', i], { hint: `Mark it with \`reelforge cue ${paths.id}\`` });
+      c.issue('V-3', 'error', `Missing cue for script line ${l.id}`, ['script', i], {
+        hint: `Mark it with \`reelforge cue ${paths.id}\``,
+      });
       cueMap[l.id] = Math.max(0, prevCue === -Infinity ? 0 : prevCue);
     } else {
       if (v < prevCue) {
-        c.issue('V-3', 'error', `Cues are not in script order: ${l.id} (${v}s) is before ${prevId} (${prevCue}s)`, ['script', i], {
-          hint: 'Re-mark the line in the cue marker, or reorder the script',
-          time: v,
-        });
+        c.issue(
+          'V-3',
+          'error',
+          `Cues are not in script order: ${l.id} (${v}s) is before ${prevId} (${prevCue}s)`,
+          ['script', i],
+          {
+            hint: 'Re-mark the line in the cue marker, or reorder the script',
+            time: v,
+          },
+        );
       }
       cueMap[l.id] = v;
       prevCue = Math.max(prevCue, v);
@@ -353,7 +431,13 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
   for (const id of Object.keys(cues.cues)) {
     if (!seenIds.has(id)) {
       const alt = closest(id, seenIds.keys());
-      c.issues.push({ rule: 'V-3', level: 'warn', message: `cues.json has a cue for unknown line "${id}"`, file: paths.cues, hint: alt ? `Renamed to "${alt}"? Re-mark it` : undefined });
+      c.issues.push({
+        rule: 'V-3',
+        level: 'warn',
+        message: `cues.json has a cue for unknown line "${id}"`,
+        file: paths.cues,
+        hint: alt ? `Renamed to "${alt}"? Re-mark it` : undefined,
+      });
     }
   }
   for (const [id, w] of Object.entries(cues.words ?? {})) {
@@ -382,12 +466,22 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
   let duration = voice?.duration ?? cues.audio.duration ?? 0;
   if (!(duration > 0)) duration = lastCue + 3;
   if (lastCue > duration) {
-    c.issues.push({ rule: 'V-3', level: 'error', message: `Cue at ${lastCue}s is after the end of the audio (${round3(duration)}s)`, file: paths.cues });
+    c.issues.push({
+      rule: 'V-3',
+      level: 'error',
+      message: `Cue at ${lastCue}s is after the end of the audio (${round3(duration)}s)`,
+      file: paths.cues,
+    });
   }
   duration = round3(duration);
   const frames = Math.ceil(duration * fps - 1e-6);
   if (duration > c.preset.maxDuration) {
-    c.issue('V-1', 'warn', `Duration ${duration}s exceeds the ${c.preset.label} limit of ${c.preset.maxDuration}s`, ['meta', 'preset']);
+    c.issue(
+      'V-1',
+      'warn',
+      `Duration ${duration}s exceeds the ${c.preset.label} limit of ${c.preset.maxDuration}s`,
+      ['meta', 'preset'],
+    );
   }
 
   // ---- time context
@@ -418,10 +512,16 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
     const start = c.sceneTime(spec.scenes, s.id, 'start');
     let end = c.sceneTime(spec.scenes, s.id, 'end');
     if (end <= start) {
-      c.issue('V-5', 'error', `Scene "${s.id}" ends (${end}s) before it starts (${start}s)`, [...sp, s.end !== undefined ? 'end' : 'at'], {
-        hint: 'Scenes must be listed in time order; check "at" and "end"',
-        time: start,
-      });
+      c.issue(
+        'V-5',
+        'error',
+        `Scene "${s.id}" ends (${end}s) before it starts (${start}s)`,
+        [...sp, s.end !== undefined ? 'end' : 'at'],
+        {
+          hint: 'Scenes must be listed in time order; check "at" and "end"',
+          time: start,
+        },
+      );
       end = Math.min(duration, start + 0.5);
     }
     const area = sceneArea(s.layout, c.preset);
@@ -431,7 +531,12 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
     // glow keyframes
     if (typeof s.glow === 'string') glow.push({ t: start, color: resolveColor(c.theme, s.glow) });
     else if (Array.isArray(s.glow)) {
-      s.glow.forEach((g, gi) => glow.push({ t: c.time(g.at, [...sp, 'glow', gi, 'at'], start), color: resolveColor(c.theme, g.color) }));
+      s.glow.forEach((g, gi) =>
+        glow.push({
+          t: c.time(g.at, [...sp, 'glow', gi, 'at'], start),
+          color: resolveColor(c.theme, g.color),
+        }),
+      );
     }
 
     if (si > 0 && s.transition !== 'cut' && sfxMode === 'auto') addSfx(start, 'whoosh', -14, `scene:${s.id}`);
@@ -444,13 +549,23 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
       const def = COMPONENTS[e.use];
       if (!def) {
         const alt = didYouMean(e.use, COMPONENT_NAMES, 3);
-        c.issue('V-13', 'error', `Unknown component "${e.use}"${alt ? `. Did you mean "${alt}"?` : ''}`, [...ep, 'use'], {
-          hint: `Components: ${COMPONENT_NAMES.join(', ')}`,
-        });
+        c.issue(
+          'V-13',
+          'error',
+          `Unknown component "${e.use}"${alt ? `. Did you mean "${alt}"?` : ''}`,
+          [...ep, 'use'],
+          {
+            hint: `Components: ${COMPONENT_NAMES.join(', ')}`,
+          },
+        );
         return;
       }
       const id = e.id ?? `${s.id}-${e.use}-${ej + 1}`;
-      if (seenEl.has(id)) c.issue('V-1', 'error', `Duplicate element id "${id}" (also in scene "${seenEl.get(id)}")`, [...ep, 'id']);
+      if (seenEl.has(id))
+        c.issue('V-1', 'error', `Duplicate element id "${id}" (also in scene "${seenEl.get(id)}")`, [
+          ...ep,
+          'id',
+        ]);
       seenEl.set(id, s.id);
       const pr = def.schema.safeParse(e.props);
       if (!pr.success) {
@@ -462,19 +577,31 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
       const enterDur = e.enter?.dur ?? DEFAULT_ENTER_DUR[anim] ?? c.theme.motion.default_dur;
       const rawExit = e.exit ? c.time(e.exit.at, [...ep, 'exit', 'at'], end) : undefined;
       if (rawEnter < start - 0.0005 || rawEnter > end + 0.0005) {
-        c.issue('V-5', 'error', `Element "${id}" enters at ${rawEnter}s, outside its scene "${s.id}" (${start}s–${end}s)`, [...ep, 'enter', 'at'], {
-          hint: 'Move the element to the scene that is visible then, or change enter.at',
-          time: rawEnter,
-          sceneId: s.id,
-          elementId: id,
-        });
+        c.issue(
+          'V-5',
+          'error',
+          `Element "${id}" enters at ${rawEnter}s, outside its scene "${s.id}" (${start}s–${end}s)`,
+          [...ep, 'enter', 'at'],
+          {
+            hint: 'Move the element to the scene that is visible then, or change enter.at',
+            time: rawEnter,
+            sceneId: s.id,
+            elementId: id,
+          },
+        );
       }
       if (rawExit !== undefined && rawExit < rawEnter) {
-        c.issue('V-5', 'error', `Element "${id}" exits (${rawExit}s) before it enters (${rawEnter}s)`, [...ep, 'exit', 'at'], {
-          time: rawExit,
-          sceneId: s.id,
-          elementId: id,
-        });
+        c.issue(
+          'V-5',
+          'error',
+          `Element "${id}" exits (${rawExit}s) before it enters (${rawEnter}s)`,
+          [...ep, 'exit', 'at'],
+          {
+            time: rawExit,
+            sceneId: s.id,
+            elementId: id,
+          },
+        );
       }
       const enterT = round3(Math.min(Math.max(rawEnter, start), end));
       const exitT = rawExit === undefined ? undefined : round3(Math.min(Math.max(rawExit, enterT), end));
@@ -498,11 +625,13 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
         const fxColor = resolveColor(c.theme, f.color ?? (f.do === 'flash' ? 'ink' : 'lime'));
         const amp = f.amp ?? d.amp;
         const dur = f.dur ?? d.dur;
-        if (f.do === 'flash') c.flashes.push({ t, color: fxColor, dur, intensity: Math.min(1, f.amp ?? d.amp) });
+        if (f.do === 'flash')
+          c.flashes.push({ t, color: fxColor, dur, intensity: Math.min(1, f.amp ?? d.amp) });
         else if (f.do === 'shake' && f.target === 'camera') c.shakes.push({ t, amp, dur });
         else fx.push({ t, do: f.do, amp, dur, color: fxColor, rate: f.rate ?? 2 });
         if (sfxMode === 'auto' && e.sfx !== 'none' && f.sound !== 'none') {
-          const auto: SoundName | undefined = f.sound ?? (f.do === 'flash' ? 'hit' : f.do === 'glitch' ? 'glitch' : undefined);
+          const auto: SoundName | undefined =
+            f.sound ?? (f.do === 'flash' ? 'hit' : f.do === 'glitch' ? 'glitch' : undefined);
           if (auto) addSfx(t, auto, f.sound ? 0 : -3, `${id}:fx`);
         }
       });
@@ -514,7 +643,8 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
         layer: e.layer ?? def.layer ?? 'base',
         z: e.z ?? ej,
         enter: { t: enterT, anim, dur: round3(enterDur), params },
-        exit: exitT === undefined ? null : { t: exitT, anim: e.exit?.anim ?? 'fade', dur: e.exit?.dur ?? 0.3 },
+        exit:
+          exitT === undefined ? null : { t: exitT, anim: e.exit?.anim ?? 'fade', dur: e.exit?.dur ?? 0.3 },
         states,
         fx: fx.sort((a, b) => a.t - b.t),
         source: c.pos(ep),
@@ -570,7 +700,9 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
         if (!box) {
           const alt = closest(id, boxes.keys());
           c.issue('V-1', 'error', `${p.el.id}.${key}: no element "${id}" in scene "${s.id}"`, [...ep, key], {
-            hint: alt ? `Did you mean "${alt}"? Arrows connect elements of the same scene` : 'Use an element id of this scene or {x, y}',
+            hint: alt
+              ? `Did you mean "${alt}"? Arrows connect elements of the same scene`
+              : 'Use an element id of this scene or {x, y}',
           });
           return { point: { x: W / 2, y: H / 2 } };
         }
@@ -581,7 +713,11 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
       const resolvePt = (e: ReturnType<typeof parse>, other: ReturnType<typeof parse>) => {
         if (!e) return undefined;
         if ('point' in e && e.point) return e.point;
-        const otherC = other ? ('point' in other && other.point ? other.point : center((other as { box: Rect }).box)) : { x: W / 2, y: H / 2 };
+        const otherC = other
+          ? 'point' in other && other.point
+            ? other.point
+            : center((other as { box: Rect }).box)
+          : { x: W / 2, y: H / 2 };
         const { box, side } = e as { box: Rect; side?: Side };
         return anchorPoint(box, side ?? autoSide(box, otherC));
       };
@@ -591,7 +727,8 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
         placeArrow(p.el, pa!, pb!, W, H);
       } else {
         if (!p.spec.place) p.el.box = { x: 0, y: 0, w: W, h: H };
-        const off = (pt?: { x: number; y: number }) => (pt ? { x: Math.round(pt.x - p.el.box.x), y: Math.round(pt.y - p.el.box.y) } : undefined);
+        const off = (pt?: { x: number; y: number }) =>
+          pt ? { x: Math.round(pt.x - p.el.box.x), y: Math.round(pt.y - p.el.box.y) } : undefined;
         p.el.props = { ...raw, from: off(pa), to: off(pb) };
       }
     }
@@ -600,17 +737,31 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
     for (const p of pending) {
       const el = p.el;
       if (el.component === 'arrow') {
-        const pr = el.props as { packet: unknown; packets: { at?: number; dur: number; color?: string; reverse: boolean }[] };
+        const pr = el.props as {
+          packet: unknown;
+          packets: { at?: number; dur: number; color?: string; reverse: boolean }[];
+        };
         const packets = [...pr.packets];
         if (pr.packet) {
-          const pk = typeof pr.packet === 'object' ? (pr.packet as (typeof packets)[number]) : { dur: 0.8, reverse: false };
+          const pk =
+            typeof pr.packet === 'object'
+              ? (pr.packet as (typeof packets)[number])
+              : { dur: 0.8, reverse: false };
           packets.unshift(pk);
         }
-        el.props = { ...el.props, packets: packets.map((pk) => ({ ...pk, at: pk.at ?? round3(el.enter.t + el.enter.dur) })) };
+        el.props = {
+          ...el.props,
+          packets: packets.map((pk) => ({ ...pk, at: pk.at ?? round3(el.enter.t + el.enter.dur) })),
+        };
       }
       if (el.component === 'stamp') {
         const hitT = round3(el.enter.t + el.enter.dur * 0.6);
-        c.flashes.push({ t: hitT, color: String((el.props as { color: string }).color), dur: 0.28, intensity: 0.22 });
+        c.flashes.push({
+          t: hitT,
+          color: String((el.props as { color: string }).color),
+          dur: 0.28,
+          intensity: 0.22,
+        });
         c.shakes.push({ t: hitT, amp: 14, dur: 0.35 });
       }
       if (el.component === 'trap') {
@@ -622,7 +773,14 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
         for (const ev of p.def.events(el.props, el)) addSfx(ev.t, ev.sound, ev.gain_db, el.id);
       }
       if (Array.isArray(p.spec.sfx) && sfxMode !== 'none') {
-        p.spec.sfx.forEach((x, k) => addSfx(c.time(x.at, [...sp, 'elements', p.ej, 'sfx', k, 'at'], el.enter.t), x.sound, x.gain_db, el.id));
+        p.spec.sfx.forEach((x, k) =>
+          addSfx(
+            c.time(x.at, [...sp, 'elements', p.ej, 'sfx', k, 'at'], el.enter.t),
+            x.sound,
+            x.gain_db,
+            el.id,
+          ),
+        );
       }
     }
 
@@ -642,7 +800,9 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
 
   // ---- audio.extra
   if (sfxMode !== 'none') {
-    spec.audio.extra.forEach((x, k) => addSfx(c.time(x.at, ['audio', 'extra', k, 'at'], 0), x.sound, x.gain_db, 'audio.extra'));
+    spec.audio.extra.forEach((x, k) =>
+      addSfx(c.time(x.at, ['audio', 'extra', k, 'at'], 0), x.sound, x.gain_db, 'audio.extra'),
+    );
   }
 
   // ---- chapters
@@ -682,15 +842,21 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
   }
 
   glow.sort((a, b) => a.t - b.t);
-  if (!glow.length || glow[0].t > 0) glow.unshift({ t: 0, color: glow[0]?.color ?? c.theme.colors.cyan ?? '#55dcff' });
+  if (!glow.length || glow[0].t > 0)
+    glow.unshift({ t: 0, color: glow[0]?.color ?? c.theme.colors.cyan ?? '#55dcff' });
 
   const theme = resolvedTheme(c.theme);
   for (const s of scenes) {
-    s.hash = sha1(stableStringify({ s: { ...s, hash: '', source: undefined }, theme, preset: c.preset })).slice(0, 16);
+    s.hash = sha1(
+      stableStringify({ s: { ...s, hash: '', source: undefined }, theme, preset: c.preset }),
+    ).slice(0, 16);
   }
 
-  const envelope = voice ? frameEnvelope(voice.mono, voice.sampleRate, fps, frames) : new Array<number>(frames).fill(0);
-  const dir = hasArabic(script.map((l) => l.text).join(' ')) || spec.meta.lang.startsWith('ar') ? 'rtl' : 'ltr';
+  const envelope = voice
+    ? frameEnvelope(voice.mono, voice.sampleRate, fps, frames)
+    : new Array<number>(frames).fill(0);
+  const dir =
+    hasArabic(script.map((l) => l.text).join(' ')) || spec.meta.lang.startsWith('ar') ? 'rtl' : 'ltr';
 
   const timeline: Timeline = {
     version: 1,
@@ -719,7 +885,13 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
     audio: { sfxGainDb: spec.audio.sfx_gain_db, duck: spec.audio.duck, envelope },
     script: script.map((l) => {
       const lt = lines.get(l.id)!;
-      return { id: l.id, text: l.text, start: lt.start, end: lt.next, words: lt.words.map((w) => ({ text: w.text, start: w.start })) };
+      return {
+        id: l.id,
+        text: l.text,
+        start: lt.start,
+        end: lt.next,
+        words: lt.words.map((w) => ({ text: w.text, start: w.start })),
+      };
     }),
     cues: cueMap,
     assetBase: '../episode/assets/',
@@ -752,8 +924,18 @@ function layoutFlow(
   const alignPos = (avail: number, len: number, align: string | undefined, origin: number) =>
     origin + (align === 'start' ? 0 : align === 'end' ? avail - len : (avail - len) / 2);
 
-  const stack = (list: typeof items, x0: number, colW: number, gap: number, y0: number, availH: number, align?: string) => {
-    const hs = list.map((p) => p.spec.size?.h ?? Math.min(size(p).h, (availH - gap * (list.length - 1)) / list.length));
+  const stack = (
+    list: typeof items,
+    x0: number,
+    colW: number,
+    gap: number,
+    y0: number,
+    availH: number,
+    align?: string,
+  ) => {
+    const hs = list.map(
+      (p) => p.spec.size?.h ?? Math.min(size(p).h, (availH - gap * (list.length - 1)) / list.length),
+    );
     const total = hs.reduce((a, b) => a + b, 0) + gap * (list.length - 1);
     let y = alignPos(availH, total, align, y0);
     list.forEach((p, i) => {
@@ -784,7 +966,9 @@ function layoutFlow(
   const f = s.row!;
   const gap = f.gap ?? 40;
   const availW = f.w ?? W - 2 * pad;
-  const ws = items.map((p) => p.spec.size?.w ?? Math.min(size(p).w, (availW - gap * (items.length - 1)) / items.length));
+  const ws = items.map(
+    (p) => p.spec.size?.w ?? Math.min(size(p).w, (availW - gap * (items.length - 1)) / items.length),
+  );
   const totalW = ws.reduce((a, b) => a + b, 0) + gap * (items.length - 1);
   let x = f.x ?? (W - totalW) / 2;
   items.forEach((p, i) => {
@@ -795,7 +979,13 @@ function layoutFlow(
   });
 }
 
-function placeArrow(el: TElement, a: { x: number; y: number }, b: { x: number; y: number }, W: number, H: number) {
+function placeArrow(
+  el: TElement,
+  a: { x: number; y: number },
+  b: { x: number; y: number },
+  W: number,
+  H: number,
+) {
   const props = el.props as { gap: number; route: string; label?: string };
   const len = Math.hypot(b.x - a.x, b.y - a.y) || 1;
   const ux = (b.x - a.x) / len;
@@ -841,14 +1031,20 @@ function extractScript(data: unknown): { id: string; text: string }[] {
   const s = (data as { script?: unknown })?.script;
   if (!Array.isArray(s)) return [];
   return s
-    .map((l, i) => ({ id: typeof l?.id === 'string' ? l.id : `l${i + 1}`, text: typeof l?.text === 'string' ? l.text : '' }))
+    .map((l, i) => ({
+      id: typeof l?.id === 'string' ? l.id : `l${i + 1}`,
+      text: typeof l?.text === 'string' ? l.text : '',
+    }))
     .filter((l) => l.text);
 }
 
 const LEVEL_ORDER = { error: 0, warn: 1, info: 2 } as const;
 export function sortIssues(issues: Issue[]): Issue[] {
   return [...issues].sort(
-    (a, b) => LEVEL_ORDER[a.level] - LEVEL_ORDER[b.level] || (a.line ?? 1e9) - (b.line ?? 1e9) || a.rule.localeCompare(b.rule),
+    (a, b) =>
+      LEVEL_ORDER[a.level] - LEVEL_ORDER[b.level] ||
+      (a.line ?? 1e9) - (b.line ?? 1e9) ||
+      a.rule.localeCompare(b.rule),
   );
 }
 

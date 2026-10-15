@@ -86,21 +86,33 @@ export async function openRuntime(browser: Browser, tl: Timeline, assetsDir?: st
       blocked.push(url);
       return route.abort('blockedbyclient');
     }
-    if (u.pathname === '/timeline.json') return route.fulfill({ status: 200, body: json, contentType: 'application/json' });
+    if (u.pathname === '/timeline.json')
+      return route.fulfill({ status: 200, body: json, contentType: 'application/json' });
     let file: string | undefined;
-    if (u.pathname.startsWith('/runtime/')) file = safeJoin(RUNTIME_DIR, u.pathname.slice('/runtime/'.length));
-    else if (u.pathname.startsWith('/episode/assets/') && assetsDir) file = safeJoin(assetsDir, u.pathname.slice('/episode/assets/'.length));
+    if (u.pathname.startsWith('/runtime/'))
+      file = safeJoin(RUNTIME_DIR, u.pathname.slice('/runtime/'.length));
+    else if (u.pathname.startsWith('/episode/assets/') && assetsDir)
+      file = safeJoin(assetsDir, u.pathname.slice('/episode/assets/'.length));
     if (!file || !existsSync(file)) return route.fulfill({ status: 404, body: 'not found' });
-    return route.fulfill({ status: 200, path: file, contentType: TYPES[path.extname(file)] ?? 'application/octet-stream' });
+    return route.fulfill({
+      status: 200,
+      path: file,
+      contentType: TYPES[path.extname(file)] ?? 'application/octet-stream',
+    });
   });
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(`${HOST}/runtime/runtime.html?timeline=/timeline.json`, { waitUntil: 'load' });
-  await page.evaluate(() => window.reelforge.ready).catch((e) => {
-    throw new Error(`Runtime failed to start: ${(e as Error).message}${errors.length ? `\n${errors.join('\n')}` : ''}`);
-  });
+  await page
+    .evaluate(() => window.reelforge.ready)
+    .catch((e) => {
+      throw new Error(
+        `Runtime failed to start: ${(e as Error).message}${errors.length ? `\n${errors.join('\n')}` : ''}`,
+      );
+    });
   const fonts = await page.evaluate(() => window.reelforge.fonts);
-  if (!fonts.ok) throw new Error(`Fonts failed to load: ${fonts.missing.join(', ')} (V-13). Rebuild the runtime package.`);
+  if (!fonts.ok)
+    throw new Error(`Fonts failed to load: ${fonts.missing.join(', ')} (V-13). Rebuild the runtime package.`);
   return {
     page,
     blocked,

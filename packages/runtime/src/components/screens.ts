@@ -13,14 +13,36 @@ export const phone: RuntimeComponent = {
   mount(root, p, theme, ctx) {
     const scr = h('div', { class: 'scr' });
     const wifi = h('span', { style: 'display:flex' });
-    const sb = h('div', { class: 'sb' }, h('span', {}, '9:41'), h('span', { class: 'ic' }, wifi, h('span', { style: `width:38px;height:18px;border-radius:5px;border:2px solid ${theme.colors.ink};padding:2px;display:flex` }, h('i', { style: `flex:1;background:${theme.colors.ink};border-radius:2px` }))));
+    const sb = h(
+      'div',
+      { class: 'sb' },
+      h('span', {}, '9:41'),
+      h(
+        'span',
+        { class: 'ic' },
+        wifi,
+        h(
+          'span',
+          {
+            style: `width:38px;height:18px;border-radius:5px;border:2px solid ${theme.colors.ink};padding:2px;display:flex`,
+          },
+          h('i', { style: `flex:1;background:${theme.colors.ink};border-radius:2px` }),
+        ),
+      ),
+    );
     const offB = h('div', { class: 'offb' });
     offB.append(icon('wifi-off', 26, theme.colors.red, 2.4), document.createTextNode('NO CONNECTION'));
     const off = h('div', { class: 'off' }, offB);
     const btnLabel = h('span', { dir: 'auto' });
     const spin = h('i', { class: 'spin' });
     const ripple = h('i', { class: 'ripple', style: 'display:none' });
-    const btn = h('div', { class: 'btn', style: `background:${theme.colors.lime};color:#07080c` }, spin, btnLabel, ripple);
+    const btn = h(
+      'div',
+      { class: 'btn', style: `background:${theme.colors.lime};color:#07080c` },
+      spin,
+      btnLabel,
+      ripple,
+    );
     const app = h(
       'div',
       { class: 'app' },
@@ -39,7 +61,9 @@ export const phone: RuntimeComponent = {
     const okText = h('b', { dir: 'auto' });
     const ok = h('div', { class: 'ok', style: 'display:none' }, okIcon, okText);
     scr.append(sb, off, app, ok);
-    const notes = (p.notifications as { title: string; text: string; at?: number; color: string; icon: string }[]).map((n) => {
+    const notes = (
+      p.notifications as { title: string; text: string; at?: number; color: string; icon: string }[]
+    ).map((n) => {
       const c = resolve(n.color);
       const ni = h('div', { class: 'ni', style: `background:${rgba(c, 0.18)}` });
       ni.append(icon(n.icon, 34, c, 2.2));
@@ -47,7 +71,12 @@ export const phone: RuntimeComponent = {
         'div',
         { class: 'nt', style: 'display:none' },
         ni,
-        h('div', { class: 'nb' }, h('div', { class: 'nh' }, n.title), h('div', { class: 'nx', dir: 'auto', style: `font-family:${fontFor(theme, n.text)}` }, n.text)),
+        h(
+          'div',
+          { class: 'nb' },
+          h('div', { class: 'nh' }, n.title),
+          h('div', { class: 'nx', dir: 'auto', style: `font-family:${fontFor(theme, n.text)}` }, n.text),
+        ),
       );
       scr.append(el);
       return { n, el };
@@ -60,7 +89,9 @@ export const phone: RuntimeComponent = {
         const offline = Boolean(st.offline ?? p.offline);
         if (offline !== wifiOff) {
           wifiOff = offline;
-          wifi.replaceChildren(icon(offline ? 'wifi-off' : 'wifi', 24, offline ? theme.colors.red : theme.colors.ink, 2.4));
+          wifi.replaceChildren(
+            icon(offline ? 'wifi-off' : 'wifi', 24, offline ? theme.colors.red : theme.colors.ink, 2.4),
+          );
         }
         const offK = offline ? easeOutCubic(progress(t, st.$since.offline ?? -1e9, 0.35)) : 0;
         css(off, 'opacity', offK.toFixed(3));
@@ -91,7 +122,10 @@ export const phone: RuntimeComponent = {
         // notifications: explicit `at`, or the first N from state.notifications
         const count = Number(st.notifications ?? 0);
         const shown = notes
-          .map((x, i) => ({ ...x, at: x.n.at ?? (i < count ? (st.$since.notifications ?? 0) + (i - (count - 1)) * 0 : undefined) }))
+          .map((x, i) => ({
+            ...x,
+            at: x.n.at ?? (i < count ? (st.$since.notifications ?? 0) + (i - (count - 1)) * 0 : undefined),
+          }))
           .filter((x) => x.at !== undefined && t >= x.at)
           .sort((a, b) => (b.at as number) - (a.at as number));
         for (const x of notes) css(x.el, 'display', 'none');
@@ -115,11 +149,23 @@ export const trap: RuntimeComponent = {
     const c = resolve(p.color);
     const bg = h('div', { class: 'bg' });
     const word = `${p.title} · `.repeat(14);
-    const tapeA = h('div', { class: 'tape', style: `top:${ctx.box.h * 0.16}px;background:${c};transform:rotate(-7deg)` }, word);
-    const tapeB = h('div', { class: 'tape', style: `top:${ctx.box.h * 0.74}px;background:${c};transform:rotate(5deg)` }, word);
+    const tapeA = h(
+      'div',
+      { class: 'tape', style: `top:${ctx.box.h * 0.16}px;background:${c};transform:rotate(-7deg)` },
+      word,
+    );
+    const tapeB = h(
+      'div',
+      { class: 'tape', style: `top:${ctx.box.h * 0.74}px;background:${c};transform:rotate(5deg)` },
+      word,
+    );
     const warn = h('div', { style: 'display:flex' });
     warn.append(icon('warn', 190, c, 1.6));
-    const title = h('div', { class: 'tt', style: `color:${c};font-family:${fontFor(theme, p.title)}` }, p.title);
+    const title = h(
+      'div',
+      { class: 'tt', style: `color:${c};font-family:${fontFor(theme, p.title)}` },
+      p.title,
+    );
     const center = h('div', { class: 'center' }, warn, title);
     if (p.sub) center.append(h('div', { class: 'ts', dir: 'auto' }, p.sub));
     root.append(bg, tapeA, tapeB, center);
@@ -139,10 +185,24 @@ export const trap: RuntimeComponent = {
         css(tapeB, 'transform', `rotate(5deg) translateX(${((1 - inK) * 1200 + drift - 400).toFixed(1)}px)`);
         const g = 1 - clamp((t - start) / 0.6);
         const j = jitter(ctx.seed, t, 24);
-        css(title, 'text-shadow', g > 0.02 ? `${(g * 14 * (1 + j)).toFixed(1)}px 0 rgba(255,74,92,.9), ${(-g * 14 * (1 - j)).toFixed(1)}px 0 rgba(85,220,255,.9)` : `0 0 60px ${rgba(c, 0.45)}`);
-        css(title, 'transform', `translateX(${(j * 18 * g).toFixed(1)}px) scale(${(0.9 + 0.1 * easeOutBack(2)(progress(t, start, 0.4))).toFixed(4)})`);
+        css(
+          title,
+          'text-shadow',
+          g > 0.02
+            ? `${(g * 14 * (1 + j)).toFixed(1)}px 0 rgba(255,74,92,.9), ${(-g * 14 * (1 - j)).toFixed(1)}px 0 rgba(85,220,255,.9)`
+            : `0 0 60px ${rgba(c, 0.45)}`,
+        );
+        css(
+          title,
+          'transform',
+          `translateX(${(j * 18 * g).toFixed(1)}px) scale(${(0.9 + 0.1 * easeOutBack(2)(progress(t, start, 0.4))).toFixed(4)})`,
+        );
         const pulse = 1 + 0.06 * Math.sin((t - start) * Math.PI * 2 * 1.2);
-        css(warn, 'transform', `scale(${(easeOutBack(2.4)(progress(t, start + 0.1, 0.45)) * pulse).toFixed(4)})`);
+        css(
+          warn,
+          'transform',
+          `scale(${(easeOutBack(2.4)(progress(t, start + 0.1, 0.45)) * pulse).toFixed(4)})`,
+        );
         css(warn, 'opacity', caretOn(t * 0.5) || t - start > 1.2 ? '1' : '0.75');
       },
     };

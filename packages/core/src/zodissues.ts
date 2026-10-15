@@ -43,7 +43,9 @@ function describe(issue: ZodIssue): string {
     if (inner) return describe(inner);
   }
   if (issue.code === 'invalid_type') {
-    return issue.received === 'undefined' ? `Required (expected ${issue.expected})` : `Expected ${issue.expected}, got ${issue.received}`;
+    return issue.received === 'undefined'
+      ? `Required (expected ${issue.expected})`
+      : `Expected ${issue.expected}, got ${issue.received}`;
   }
   if (issue.code === 'invalid_enum_value') {
     const alt = didYouMean(String(issue.received), issue.options.map(String));

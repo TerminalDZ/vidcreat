@@ -1,0 +1,268 @@
+# Component gallery: one scene per component group. Used for golden frames (SRS §12.1) and as a
+# visual reference while developing components.
+meta:
+  id: gallery
+  series: "SYSTEM DESIGN"
+  title: "Component gallery"
+  episode: 1
+  preset: tiktok
+  theme: ../golden.theme.yaml
+  lang: ar-EG
+
+audio:
+  sfx: auto
+
+script:
+  - text: "كل حاجة هنا اسمها title و chip"
+  - text: "الكود بيكتب نفسه"
+  - text: "الـ client بيكلم الـ server"
+  - text: "اتخصم منك مرتين"
+  - text: "جدول الـ ledger"
+  - text: "اتنين بيكتبوا في نفس الوقت"
+  - text: "الخطوات واحدة واحدة"
+  - text: "الـ backoff بيكبر"
+  - text: "الـ bucket بيفضى"
+  - text: "التليفون والنت فصل"
+  - text: "There are only two hard things"
+  - text: "خلي بالك من الفخ"
+  - text: "الحلقة الجاية"
+
+chapters:
+  - { at: l1, label: "01 · TEXT" }
+  - { at: l3, label: "02 · DIAGRAMS" }
+  - { at: l5, label: "03 · DATA" }
+  - { at: l10, label: "04 · SCREENS" }
+
+scenes:
+  - id: text
+    at: l1
+    glow: violet
+    elements:
+      - use: label
+        id: lbl
+        props: { text: "Chapter one", dot: true, color: lime }
+        place: { x: 60, y: 60, w: 600, h: 60 }
+      - use: title
+        id: ttl
+        props: { text: "The **Idempotency** Key", sub: "exactly-once effects" }
+        place: { x: 60, y: 180, w: 960, h: 360 }
+        enter: { anim: type, cps: 30 }
+      - use: chip
+        id: chip_ok
+        props: { text: "Idempotency-Key", color: lime, icon: key }
+        place: { x: 160, y: 640, w: 560, h: 96 }
+        enter: { at: "l1:'chip'" }
+      - use: chip
+        id: chip_bad
+        props: { text: "retry blindly", color: red, strike: "l1:'chip'+0.6", variant: outline }
+        place: { x: 160, y: 780, w: 560, h: 96 }
+        enter: { at: "l1:'chip'+0.2" }
+
+  - id: code
+    at: l2
+    glow: cyan
+    elements:
+      - use: code
+        id: snippet
+        props:
+          title: "payments.ts"
+          lines:
+            - "async function charge(req: Request) {"
+            - "  const key = req.headers['idempotency-key'];"
+            - "  if (await seen(key)) return cached(key);"
+            - "  return pay(req.body.amount, 42);"
+            - "}"
+          highlight: [{ line: 3, at: "l2+1.6" }]
+          cps: 60
+        place: { x: 40, y: 140, w: 1000, h: 520 }
+
+  - id: diagram
+    at: l3
+    glow: cyan
+    elements:
+      - use: node
+        id: client
+        props: { title: "Client", sub: "mobile app", icon: phone }
+        place: { x: 60, y: 160, w: 340, h: 170 }
+      - use: node
+        id: server
+        props: { title: "Server", sub: "POST /pay", icon: server, color: violet }
+        place: { x: 640, y: 160, w: 340, h: 170 }
+        states:
+          - { at: "l3+1.6", set: { status: busy, sub: "processing…" } }
+      - use: node
+        id: db
+        props: { title: "DB", sub: "payments", icon: db, color: amber, status: ok }
+        place: { x: 640, y: 620, w: 340, h: 170 }
+      - use: arrow
+        id: a1
+        props: { from: client, to: server, label: "request", color: cyan, packet: { at: "l3+0.9", dur: 0.9 } }
+        enter: { at: "l3+0.3" }
+      - use: arrow
+        id: a2
+        props: { from: server.bottom, to: db.top, color: amber, dashed: true }
+        enter: { at: "l3+0.6" }
+      - use: arrow
+        id: a3
+        props: { from: client.bottom, to: db.left, route: elbow, color: dim, label: "retry", head: end }
+        enter: { at: "l3+0.9" }
+      - use: icon
+        id: ic
+        props: { name: lock, size: 140, color: lime, ring: true }
+        place: { x: 150, y: 760, w: 160, h: 160 }
+
+  - id: hits
+    at: l4
+    glow: red
+    elements:
+      - use: counter
+        id: cnt
+        props: { keyframes: [{ at: l4, value: 49 }, { at: "l4+1.2", value: 98 }], prefix: "$", decimals: 2, label: "charged" }
+        place: { x: 130, y: 120, w: 820, h: 320 }
+      - use: stamp
+        id: st
+        props: { text: "×2", color: red }
+        place: { x: 290, y: 520, w: 500, h: 260 }
+        enter: { at: "l4+1.2" }
+
+  - id: table
+    at: l5
+    glow: lime
+    elements:
+      - use: table
+        id: ledger
+        props:
+          columns: ["account", "debit", "credit"]
+          widths: [2, 1, 1]
+          rows:
+            - { cells: ["cash", "100", ""] }
+            - { cells: ["revenue", "", "100"], at: "l5+0.6" }
+            - { cells: ["refund", { text: "-40", color: red }, ""], at: "l5+1.2", highlight: "l5+1.8" }
+        place: { x: 60, y: 200, w: 960, h: 380 }
+
+  - id: lanes
+    at: l6
+    glow: amber
+    elements:
+      - use: lanes
+        id: race
+        props:
+          lanes:
+            - title: "Tx A"
+              color: cyan
+              steps:
+                - { text: "read balance=100", at: l6 }
+                - { text: "write 50", at: "l6+1.0" }
+            - title: "Tx B"
+              color: violet
+              steps:
+                - { text: "read balance=100", at: "l6+0.5" }
+                - { text: "write 70", at: "l6+1.5", mark: err }
+        place: { x: 60, y: 80, w: 960, h: 760 }
+
+  - id: lists
+    at: l7
+    glow: lime
+    elements:
+      - use: checklist
+        id: cl
+        props:
+          title: "before you retry"
+          items:
+            - { text: "Idempotency key", at: l7 }
+            - { text: "Timeout", at: "l7+0.6" }
+            - { text: "Retry forever", at: "l7+1.2", ok: false }
+        place: { x: 100, y: 40, w: 880, h: 440 }
+      - use: meter
+        id: mt
+        props: { label: "requests / s", keyframes: [{ at: l7, value: 40 }, { at: "l7+1.4", value: 130 }], max: 150, threshold: 100 }
+        place: { x: 100, y: 620, w: 880, h: 180 }
+
+  - id: time
+    at: l8
+    glow: violet
+    elements:
+      - use: timeline
+        id: tlx
+        props:
+          start: "0s"
+          end: "16s"
+          markers:
+            - { pos: 0.0625, label: "1s", at: l8 }
+            - { pos: 0.125, label: "2s", at: "l8+0.4" }
+            - { pos: 0.25, label: "4s", at: "l8+0.8" }
+            - { pos: 0.5, label: "8s", at: "l8+1.2", color: amber, sub: "+ jitter" }
+        place: { x: 60, y: 60, w: 960, h: 260 }
+      - use: grid
+        id: pool
+        props:
+          label: "thread pool"
+          cols: 4
+          rows: 2
+          tiles: ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8"]
+          steps:
+            - { at: "l8+0.6", set: { "0-3": busy } }
+            - { at: "l8+1.4", set: { "4-6": busy, "7": err } }
+        place: { x: 220, y: 400, w: 640, h: 440 }
+
+  - id: bucket
+    at: l9
+    glow: lime
+    elements:
+      - use: bucket
+        id: bk
+        props: { capacity: 10, label: "token bucket", rate: "+1 token / 100ms", keyframes: [{ at: "l9+0.5", tokens: 6 }, { at: "l9+1.2", tokens: 2 }] }
+        place: { x: 320, y: 80, w: 440, h: 560 }
+
+  - id: phone
+    at: l10
+    glow: red
+    elements:
+      - use: phone
+        id: ph
+        props:
+          title: "Checkout"
+          item: "Annual plan"
+          amount: "$49.00"
+          button: "Pay $49"
+          taps: [{ at: "l10+0.3" }]
+          notifications:
+            - { title: "Bank", text: "Charged $49.00" }
+            - { title: "Bank", text: "Charged $49.00 again" }
+        place: { x: 320, y: 40, w: 440, h: 900 }
+        states:
+          - { at: "l10+0.4", set: { loading: true } }
+          - { at: "l10:'فصل'", set: { offline: true } }
+          - { at: "l10+1.6", set: { notifications: 2 } }
+
+  - id: quote
+    at: l11
+    glow: violet
+    elements:
+      - use: quote
+        id: qt
+        props: { text: "There are only two hard things in Computer Science: cache invalidation and naming things.", author: "Phil Karlton", highlight: ["cache", "invalidation"], cps: 60 }
+        place: { x: 70, y: 160, w: 940, h: 560 }
+
+  - id: trap
+    at: l12
+    glow: amber
+    elements:
+      - use: particles
+        id: herd
+        props: { kind: herd, count: 60, dur: 2, color: amber, to: { x: 540, y: 500 } }
+      - use: trap
+        id: tr
+        props: { sub: "retry without a key", at: "l12+1.0" }
+
+  - id: cta
+    at: l13
+    glow: lime
+    elements:
+      - use: cta
+        id: next
+        props: { next: "Double-entry Ledger", keyword: "ledger", prompt: "اكتب في الكومنتات" }
+        place: { x: 60, y: 160, w: 960, h: 600 }
+      - use: particles
+        id: conf
+        props: { kind: confetti, count: 80, at: "l13+1.6", colors: [lime, cyan, violet, amber] }

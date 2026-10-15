@@ -55,12 +55,20 @@ export function episodePaths(dir: string, root = projectRoot()): EpisodePaths {
 }
 
 /** Finds a named resource (`<name>.<kind>.yaml`) in the project, then in the installation. */
-export function findResource(kind: 'theme' | 'preset', name: string, root: string, episodeDir: string): string | undefined {
+export function findResource(
+  kind: 'theme' | 'preset',
+  name: string,
+  root: string,
+  episodeDir: string,
+): string | undefined {
   if (name.includes('/') || name.includes('\\') || name.endsWith('.yaml')) {
     const p = path.resolve(episodeDir, name);
     return existsSync(p) ? p : undefined;
   }
-  const dirs = kind === 'theme' ? [path.join(root, 'themes'), BUILTIN_THEMES] : [path.join(root, 'presets'), BUILTIN_PRESETS];
+  const dirs =
+    kind === 'theme'
+      ? [path.join(root, 'themes'), BUILTIN_THEMES]
+      : [path.join(root, 'presets'), BUILTIN_PRESETS];
   for (const d of dirs) {
     const p = path.join(d, `${name}.${kind}.yaml`);
     if (existsSync(p)) return p;
@@ -69,7 +77,10 @@ export function findResource(kind: 'theme' | 'preset', name: string, root: strin
 }
 
 export function listResources(kind: 'theme' | 'preset', root: string): string[] {
-  const dirs = kind === 'theme' ? [path.join(root, 'themes'), BUILTIN_THEMES] : [path.join(root, 'presets'), BUILTIN_PRESETS];
+  const dirs =
+    kind === 'theme'
+      ? [path.join(root, 'themes'), BUILTIN_THEMES]
+      : [path.join(root, 'presets'), BUILTIN_PRESETS];
   const names = new Set<string>();
   for (const d of dirs) {
     if (!isDir(d)) continue;

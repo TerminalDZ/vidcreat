@@ -5,7 +5,11 @@ import { css } from '../dom.js';
 export const ARABIC = /[؀-ۿ]/;
 export const isArabic = (s: string): boolean => ARABIC.test(s);
 
-export function fontFor(theme: Theme, text: string, kind: 'auto' | 'display' | 'arabic' | 'mono' = 'auto'): string {
+export function fontFor(
+  theme: Theme,
+  text: string,
+  kind: 'auto' | 'display' | 'arabic' | 'mono' = 'auto',
+): string {
   const f = theme.fonts;
   const q = (n: string) => `'${n}'`;
   if (kind === 'mono') return `${q(f.mono)}, ${q(f.arabic)}`;

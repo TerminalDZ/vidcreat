@@ -30,7 +30,10 @@ export interface ComponentDef {
 const SUCCESS = new Set(['lime', 'cyan', '#b8ff3c', '#55dcff']);
 
 /** Typing schedule shared with the runtime `code` component: [start, end) per line. */
-export function codeSchedule(props: { lines: (string | { text: string; at?: number })[]; cps: number }, enterEnd: number) {
+export function codeSchedule(
+  props: { lines: (string | { text: string; at?: number })[]; cps: number },
+  enterEnd: number,
+) {
   const out: { start: number; end: number; text: string }[] = [];
   let cursor = enterEnd;
   for (const raw of props.lines) {
@@ -141,7 +144,11 @@ export const COMPONENTS: Record<string, ComponentDef> = {
     size: { w: 960, h: 760 },
     events: (p) =>
       (p.lanes as { steps: { at: number; mark?: string }[] }[]).flatMap((l) =>
-        l.steps.map((s) => ({ t: s.at, sound: (s.mark === 'err' ? 'err' : 'tick') as SoundName, gain_db: s.mark === 'err' ? -4 : 0 })),
+        l.steps.map((s) => ({
+          t: s.at,
+          sound: (s.mark === 'err' ? 'err' : 'tick') as SoundName,
+          gain_db: s.mark === 'err' ? -4 : 0,
+        })),
       ),
   },
   checklist: {
@@ -189,7 +196,8 @@ export const COMPONENTS: Record<string, ComponentDef> = {
     schema: S.bucketProps,
     description: 'Token bucket whose tokens are consumed and refilled over time.',
     size: { w: 440, h: 560 },
-    events: (p) => (p.keyframes as { at: number }[]).map((k) => ({ t: k.at, sound: 'tick' as const, gain_db: -2 })),
+    events: (p) =>
+      (p.keyframes as { at: number }[]).map((k) => ({ t: k.at, sound: 'tick' as const, gain_db: -2 })),
   },
   phone: {
     name: 'phone',
@@ -197,7 +205,10 @@ export const COMPONENTS: Record<string, ComponentDef> = {
     description: 'Phone mock with a checkout screen, button taps and notifications.',
     size: { w: 440, h: 880 },
     events: (p, el) => {
-      const out: ComponentEvent[] = (p.taps as { at: number }[]).map((tp) => ({ t: tp.at, sound: 'tap' as const }));
+      const out: ComponentEvent[] = (p.taps as { at: number }[]).map((tp) => ({
+        t: tp.at,
+        sound: 'tap' as const,
+      }));
       for (const n of p.notifications as { at?: number }[]) {
         if (typeof n.at === 'number') out.push({ t: n.at, sound: 'ding', gain_db: -6 });
       }

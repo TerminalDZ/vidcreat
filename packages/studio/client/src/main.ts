@@ -60,7 +60,9 @@ function setMode(m: 'cue' | 'dev'): void {
   mode = m;
   document.body.dataset.mode = m;
   history.replaceState(null, '', `#${m}`);
-  document.querySelectorAll<HTMLButtonElement>('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.mode === m));
+  document
+    .querySelectorAll<HTMLButtonElement>('#tabs button')
+    .forEach((b) => b.classList.toggle('on', b.dataset.mode === m));
   requestAnimationFrame(layout);
 }
 
@@ -93,10 +95,11 @@ function applyState(s: StudioState): void {
     clock.setSource(vurl, s.voice?.duration ?? s.timeline?.duration ?? 1);
     audio = null;
     waves.setAudio(null);
-    if (vurl) void decodeAudio(vurl).then((a) => {
-      audio = a;
-      waves.setAudio(a);
-    });
+    if (vurl)
+      void decodeAudio(vurl).then((a) => {
+        audio = a;
+        waves.setAudio(a);
+      });
   }
   if (!clock.duration) clock.duration = s.voice?.duration ?? s.timeline?.duration ?? 1;
   waves.duration = s.voice?.duration ?? s.timeline?.duration ?? 1;
@@ -112,7 +115,10 @@ function applyState(s: StudioState): void {
       .map((i) => `${esc(loc(i))}  ${esc(i.message)}${i.hint ? `\n   → ${esc(i.hint)}` : ''}`)
       .join('\n\n')}`;
   } else box.hidden = true;
-  setStatus(saveStatus || `compiled in ${s.compileMs} ms · ${errors.length} error(s)`, errors.length ? 'err' : 'ok');
+  setStatus(
+    saveStatus || `compiled in ${s.compileMs} ms · ${errors.length} error(s)`,
+    errors.length ? 'err' : 'ok',
+  );
 }
 
 function setStatus(text: string, cls = ''): void {
@@ -167,10 +173,18 @@ function renderLines(force = false): void {
     if (showWords) {
       const ws = model.wordsOf(id);
       const ms = model.words[id] ?? [];
-      wordsEl.replaceChildren(...ws.map((w, i) => Object.assign(document.createElement('span'), { textContent: w, className: i < ms.length ? 'm' : '' })));
+      wordsEl.replaceChildren(
+        ...ws.map((w, i) =>
+          Object.assign(document.createElement('span'), {
+            textContent: w,
+            className: i < ms.length ? 'm' : '',
+          }),
+        ),
+      );
     } else wordsEl.replaceChildren();
   }
-  $('#cueStats').textContent = `${marked}/${model.script.length} marked${model.wordMode ? ' · WORD MODE' : ''}${bad.size ? ` · ${bad.size} out of order` : ''}`;
+  $('#cueStats').textContent =
+    `${marked}/${model.script.length} marked${model.wordMode ? ' · WORD MODE' : ''}${bad.size ? ` · ${bad.size} out of order` : ''}`;
   if (current) ol.querySelector(`[data-id="${CSS.escape(current)}"]`)?.scrollIntoView({ block: 'nearest' });
 }
 
@@ -210,9 +224,16 @@ function scheduleSave(): void {
 
 async function save(): Promise<void> {
   if (!state) return;
-  const body = model.toJson(state.voice?.url ? 'voice.wav' : 'voice.wav', state.voice?.duration ?? state.timeline?.duration ?? 0);
+  const body = model.toJson(
+    state.voice?.url ? 'voice.wav' : 'voice.wav',
+    state.voice?.duration ?? state.timeline?.duration ?? 0,
+  );
   try {
-    const res = await fetch('/cues', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    const res = await fetch('/cues', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
     const j = (await res.json()) as { ok?: boolean; error?: string };
     if (!res.ok) throw new Error(j.error ?? res.statusText);
     saveStatus = `saved ${new Date().toLocaleTimeString()}`;
@@ -227,7 +248,11 @@ async function save(): Promise<void> {
 // ---------------------------------------------------------------- lint panel
 function loc(i: Issue): string {
   const file = i.file ? i.file.split(/[\\/]/).pop() : '';
-  return file ? `${file}${i.line ? `:${i.line}:${i.col ?? 1}` : ''}` : i.time !== undefined ? `@${fmt(i.time)}` : '';
+  return file
+    ? `${file}${i.line ? `:${i.line}:${i.col ?? 1}` : ''}`
+    : i.time !== undefined
+      ? `@${fmt(i.time)}`
+      : '';
 }
 
 function renderIssues(issues: Issue[]): void {
@@ -243,7 +268,10 @@ function renderIssues(issues: Issue[]): void {
     ...issues.map((i) => {
       const li = document.createElement('li');
       li.className = i.level;
-      const link = i.file && i.line ? `<a href="vscode://file/${encodeURI(i.file)}:${i.line}:${i.col ?? 1}" title="Open in VS Code">${esc(loc(i))}</a>` : esc(loc(i));
+      const link =
+        i.file && i.line
+          ? `<a href="vscode://file/${encodeURI(i.file)}:${i.line}:${i.col ?? 1}" title="Open in VS Code">${esc(loc(i))}</a>`
+          : esc(loc(i));
       li.innerHTML = `<span class="rule">${esc(i.rule)}</span><span class="msg">${esc(i.message)}</span><span class="loc">${link}${i.time !== undefined ? ` · ${fmt(i.time)}` : ''}${i.hint ? ` · ${esc(i.hint)}` : ''}</span>`;
       li.addEventListener('click', (e) => {
         if ((e.target as HTMLElement).tagName === 'A') return;
@@ -260,7 +288,9 @@ function renderIssues(issues: Issue[]): void {
 
 // ---------------------------------------------------------------- overlays (FR-DEV-4)
 function syncToggles(): void {
-  document.querySelectorAll<HTMLInputElement>('#toggles input').forEach((i) => (i.checked = overlays[i.dataset.ov as keyof typeof overlays]));
+  document
+    .querySelectorAll<HTMLInputElement>('#toggles input')
+    .forEach((i) => (i.checked = overlays[i.dataset.ov as keyof typeof overlays]));
   renderNow();
 }
 document.querySelectorAll<HTMLInputElement>('#toggles input').forEach((i) =>
@@ -283,24 +313,84 @@ function drawOverlay(t: number): void {
   const nodes: SVGElement[] = [];
   if (tl && overlays.safe) {
     for (const z of tl.preset.safe) {
-      nodes.push(svg('rect', { x: z.x, y: z.y, width: z.w, height: z.h, fill: 'rgba(255,74,92,0.16)', stroke: '#ff4a5c', 'stroke-dasharray': '12 10', 'stroke-width': 3 }));
-      nodes.push(svg('text', { x: z.x + 14, y: z.y + 36, fill: '#ff4a5c', 'font-size': 26, 'font-family': 'monospace' }, `${tl.preset.label} UI · ${z.name}`));
+      nodes.push(
+        svg('rect', {
+          x: z.x,
+          y: z.y,
+          width: z.w,
+          height: z.h,
+          fill: 'rgba(255,74,92,0.16)',
+          stroke: '#ff4a5c',
+          'stroke-dasharray': '12 10',
+          'stroke-width': 3,
+        }),
+      );
+      nodes.push(
+        svg(
+          'text',
+          { x: z.x + 14, y: z.y + 36, fill: '#ff4a5c', 'font-size': 26, 'font-family': 'monospace' },
+          `${tl.preset.label} UI · ${z.name}`,
+        ),
+      );
     }
   }
   if (tl && overlays.stage) {
-    nodes.push(svg('rect', { x: 0, y: tl.preset.stage.y, width: tl.width, height: tl.preset.stage.h, fill: 'none', stroke: '#55dcff', 'stroke-width': 3, 'stroke-dasharray': '6 8' }));
-    nodes.push(svg('line', { x1: 0, x2: tl.width, y1: tl.preset.captionsY, y2: tl.preset.captionsY, stroke: '#b8ff3c', 'stroke-width': 2, 'stroke-dasharray': '4 8' }));
+    nodes.push(
+      svg('rect', {
+        x: 0,
+        y: tl.preset.stage.y,
+        width: tl.width,
+        height: tl.preset.stage.h,
+        fill: 'none',
+        stroke: '#55dcff',
+        'stroke-width': 3,
+        'stroke-dasharray': '6 8',
+      }),
+    );
+    nodes.push(
+      svg('line', {
+        x1: 0,
+        x2: tl.width,
+        y1: tl.preset.captionsY,
+        y2: tl.preset.captionsY,
+        stroke: '#b8ff3c',
+        'stroke-width': 2,
+        'stroke-dasharray': '4 8',
+      }),
+    );
   }
   if (runtime && overlays.boxes) {
     for (const b of runtime.boxes(t)) {
       if (!b.visible) continue;
-      nodes.push(svg('rect', { x: b.x, y: b.y, width: b.w, height: b.h, fill: 'none', stroke: '#c792ff', 'stroke-width': 3 }));
-      nodes.push(svg('text', { x: b.x + 6, y: b.y - 8, fill: '#c792ff', 'font-size': 24, 'font-family': 'monospace' }, `${b.id} (${b.component})`));
+      nodes.push(
+        svg('rect', {
+          x: b.x,
+          y: b.y,
+          width: b.w,
+          height: b.h,
+          fill: 'none',
+          stroke: '#c792ff',
+          'stroke-width': 3,
+        }),
+      );
+      nodes.push(
+        svg(
+          'text',
+          { x: b.x + 6, y: b.y - 8, fill: '#c792ff', 'font-size': 24, 'font-family': 'monospace' },
+          `${b.id} (${b.component})`,
+        ),
+      );
     }
   }
   if (overlays.time) {
     nodes.push(svg('rect', { x: 20, y: 1830, width: 330, height: 66, rx: 14, fill: 'rgba(0,0,0,0.7)' }));
-    nodes.push(svg('text', { x: 40, y: 1876, fill: '#eef1f7', 'font-size': 34, 'font-family': 'monospace' }, `${fmt(t)}  f${Math.round(t * (tl?.fps ?? 30))}`));
+    nodes.push(
+      svg(
+        'text',
+        { x: 40, y: 1876, fill: '#eef1f7', 'font-size': 34, 'font-family': 'monospace' },
+        `${fmt(t)}  f${Math.round(t * (tl?.fps ?? 30))}`,
+      ),
+    );
   }
   root.replaceChildren(...nodes);
 }
@@ -323,7 +413,9 @@ function renderNow(): void {
 
 function marks() {
   return {
-    cues: model.script.filter((l) => model.cues[l.id] !== undefined).map((l) => ({ id: l.id, t: model.cues[l.id], selected: l.id === model.selected })),
+    cues: model.script
+      .filter((l) => model.cues[l.id] !== undefined)
+      .map((l) => ({ id: l.id, t: model.cues[l.id], selected: l.id === model.selected })),
     words: model.selected ? (model.words[model.selected] ?? []) : [],
   };
 }
@@ -337,12 +429,15 @@ clock.onEnd = () => renderNow();
 
 function setSpeed(r: number): void {
   clock.setRate(r);
-  document.querySelectorAll<HTMLButtonElement>('#speed button').forEach((b) => b.classList.toggle('on', Number(b.dataset.speed) === r));
+  document
+    .querySelectorAll<HTMLButtonElement>('#speed button')
+    .forEach((b) => b.classList.toggle('on', Number(b.dataset.speed) === r));
 }
 
 // ---------------------------------------------------------------- keyboard (IR-3)
 window.addEventListener('keydown', (e) => {
-  if ((e.target as HTMLElement).tagName === 'INPUT' && (e.target as HTMLInputElement).type !== 'checkbox') return;
+  if ((e.target as HTMLElement).tagName === 'INPUT' && (e.target as HTMLInputElement).type !== 'checkbox')
+    return;
   const fps = loadedTimeline?.fps ?? 30;
   const k = e.key;
   const help = $('#help');
@@ -492,7 +587,10 @@ function fmt(t: number): string {
 }
 
 function esc(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+  return s.replace(
+    /[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!,
+  );
 }
 
 $('#play').addEventListener('click', () => {
@@ -503,9 +601,16 @@ $('#helpBtn').addEventListener('click', () => ($('#help').hidden = false));
 $('#help').addEventListener('click', (e) => {
   if (e.target === $('#help')) $('#help').hidden = true;
 });
-$<HTMLInputElement>('#autoSnap').addEventListener('change', (e) => (model.autoSnap = (e.target as HTMLInputElement).checked));
-document.querySelectorAll<HTMLButtonElement>('#tabs button').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode as 'cue' | 'dev')));
-document.querySelectorAll<HTMLButtonElement>('#speed button').forEach((b) => b.addEventListener('click', () => setSpeed(Number(b.dataset.speed))));
+$<HTMLInputElement>('#autoSnap').addEventListener(
+  'change',
+  (e) => (model.autoSnap = (e.target as HTMLInputElement).checked),
+);
+document
+  .querySelectorAll<HTMLButtonElement>('#tabs button')
+  .forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode as 'cue' | 'dev')));
+document
+  .querySelectorAll<HTMLButtonElement>('#speed button')
+  .forEach((b) => b.addEventListener('click', () => setSpeed(Number(b.dataset.speed))));
 
 setMode(mode);
 setSpeed(1);

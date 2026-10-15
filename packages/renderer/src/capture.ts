@@ -5,7 +5,10 @@ export interface Capturer {
   frame(t: number): Promise<Buffer>;
 }
 
-export async function createCapturer(page: Page, opts: { format: 'jpeg' | 'png'; quality: number }): Promise<Capturer> {
+export async function createCapturer(
+  page: Page,
+  opts: { format: 'jpeg' | 'png'; quality: number },
+): Promise<Capturer> {
   const cdp: CDPSession = await page.context().newCDPSession(page);
   return {
     async frame(t: number) {

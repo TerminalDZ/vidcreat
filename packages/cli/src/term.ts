@@ -4,7 +4,16 @@ import type { Issue } from '@reelforge/core';
 
 const useColor = () => !process.env.NO_COLOR && process.stderr.isTTY && process.env.TERM !== 'dumb';
 const wrap = (code: number) => (s: string) => (useColor() ? `\x1b[${code}m${s}\x1b[0m` : s);
-export const c = { red: wrap(31), green: wrap(32), yellow: wrap(33), blue: wrap(34), magenta: wrap(35), cyan: wrap(36), dim: wrap(2), bold: wrap(1) };
+export const c = {
+  red: wrap(31),
+  green: wrap(32),
+  yellow: wrap(33),
+  blue: wrap(34),
+  magenta: wrap(35),
+  cyan: wrap(36),
+  dim: wrap(2),
+  bold: wrap(1),
+};
 
 export function formatIssue(i: Issue, cwd = process.cwd()): string {
   const file = i.file ? path.relative(cwd, i.file) || i.file : '';

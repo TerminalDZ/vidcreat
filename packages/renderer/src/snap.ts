@@ -11,7 +11,12 @@ export interface SnapResult {
   sheet?: string;
 }
 
-export async function snapFrames(tl: Timeline, times: number[], outDir: string, opts: { assetsDir?: string; sheet?: boolean } = {}): Promise<SnapResult> {
+export async function snapFrames(
+  tl: Timeline,
+  times: number[],
+  outDir: string,
+  opts: { assetsDir?: string; sheet?: boolean } = {},
+): Promise<SnapResult> {
   mkdirSync(outDir, { recursive: true });
   const browser = await launchBrowser();
   const frames: string[] = [];
@@ -37,9 +42,28 @@ export async function snapFrames(tl: Timeline, times: number[], outDir: string, 
     const pads = Array.from({ length: cols * rows - frames.length }, () => 'color=c=0x07080c:s=360x640:d=1');
     const padInputs = pads.flatMap((p) => ['-f', 'lavfi', '-i', p]);
     const n = frames.length + pads.length;
-    const scaled = Array.from({ length: n }, (_, i) => `[${i}:v]scale=360:640:flags=lanczos,setsar=1[s${i}]`).join(';');
+    const scaled = Array.from(
+      { length: n },
+      (_, i) => `[${i}:v]scale=360:640:flags=lanczos,setsar=1[s${i}]`,
+    ).join(';');
     const graph = `${scaled};${Array.from({ length: n }, (_, i) => `[s${i}]`).join('')}xstack=inputs=${n}:layout=${layout(cols, rows)}:fill=0x07080c[o]`;
-    await run(['-hide_banner', '-loglevel', 'error', '-y', ...inputs, ...padInputs, '-filter_complex', graph, '-map', '[o]', '-frames:v', '1', '-q:v', '3', sheet]);
+    await run([
+      '-hide_banner',
+      '-loglevel',
+      'error',
+      '-y',
+      ...inputs,
+      ...padInputs,
+      '-filter_complex',
+      graph,
+      '-map',
+      '[o]',
+      '-frames:v',
+      '1',
+      '-q:v',
+      '3',
+      sheet,
+    ]);
   }
   return { frames, sheet };
 }

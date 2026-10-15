@@ -22,7 +22,8 @@ export const easeOutExpo = (x: number): number => (x >= 1 ? 1 : 1 - 2 ** (-10 * 
 export const EASINGS = { linear, easeOutCubic, easeInOutCubic, easeInCubic, easeOutExpo } as const;
 
 /** Linear progress of `t` through [t0, t0 + dur]. */
-export const progress = (t: number, t0: number, dur: number): number => (dur <= 0 ? (t >= t0 ? 1 : 0) : clamp((t - t0) / dur));
+export const progress = (t: number, t0: number, dur: number): number =>
+  dur <= 0 ? (t >= t0 ? 1 : 0) : clamp((t - t0) / dur);
 
 /** Seeded jitter in [-1, 1] that changes `rate` times per second (deterministic). */
 export function jitter(seed: number, t: number, rate = 30): number {
@@ -41,7 +42,17 @@ export interface Transform {
   clip: number; // 0..1 reveal from the inline-start side (1 = fully visible)
 }
 
-export const identity = (): Transform => ({ tx: 0, ty: 0, scale: 1, rot: 0, rotX: 0, opacity: 1, blur: 0, glitch: 0, clip: 1 });
+export const identity = (): Transform => ({
+  tx: 0,
+  ty: 0,
+  scale: 1,
+  rot: 0,
+  rotX: 0,
+  opacity: 1,
+  blur: 0,
+  glitch: 0,
+  clip: 1,
+});
 
 export function transformCss(tr: Transform): string {
   const parts: string[] = [];
@@ -56,7 +67,8 @@ export function transformCss(tr: Transform): string {
 export function formatNumber(v: number, decimals: number, separator: boolean): string {
   const neg = v < 0;
   const fixed = Math.abs(v).toFixed(decimals);
-  let [int, frac] = fixed.split('.');
+  const [intPart, frac] = fixed.split('.');
+  let int = intPart;
   if (separator) int = int.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   return `${neg ? '-' : ''}${int}${frac ? `.${frac}` : ''}`;
 }

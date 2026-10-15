@@ -19,9 +19,14 @@ export function h<K extends keyof HTMLElementTagNameMap>(
 }
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
-export function s<K extends keyof SVGElementTagNameMap>(tag: K, attrs: Attrs = {}, ...children: Node[]): SVGElementTagNameMap[K] {
+export function s<K extends keyof SVGElementTagNameMap>(
+  tag: K,
+  attrs: Attrs = {},
+  ...children: Node[]
+): SVGElementTagNameMap[K] {
   const el = document.createElementNS(SVG_NS, tag);
-  for (const [k, v] of Object.entries(attrs)) if (v !== undefined && v !== false) el.setAttribute(k, String(v));
+  for (const [k, v] of Object.entries(attrs))
+    if (v !== undefined && v !== false) el.setAttribute(k, String(v));
   for (const c of children) el.append(c);
   return el;
 }

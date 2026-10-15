@@ -14,7 +14,11 @@ const partialTheme = z
     name: z.string(),
     extends: z.string().optional(),
     colors: z.record(z.string()).optional(),
-    fonts: z.object({ display: z.string(), mono: z.string(), arabic: z.string() }).partial().strict().optional(),
+    fonts: z
+      .object({ display: z.string(), mono: z.string(), arabic: z.string() })
+      .partial()
+      .strict()
+      .optional(),
     type: z
       .object({ caption: z.number(), title: z.number(), h2: z.number(), body: z.number(), label: z.number() })
       .partial()
@@ -71,7 +75,14 @@ export const FALLBACK_THEME: Theme = {
   type: { caption: 66, title: 120, h2: 84, body: 32, label: 24 },
   chrome: { header: true, progress: true, waveform: true, grain: 0.07, vignette: 0.75, grid: true },
   motion: { pop_overshoot: 1.9, default_dur: 0.45, crossfade: 0.3 },
-  captions: { active: 'lime', english: 'cyan', future_opacity: 0.32, max_lines: 2, max_chars: 34, scrim: 0.78 },
+  captions: {
+    active: 'lime',
+    english: 'cyan',
+    future_opacity: 0.32,
+    max_lines: 2,
+    max_chars: 34,
+    scrim: 0.78,
+  },
 };
 
 export interface LoadedTheme {
@@ -110,7 +121,13 @@ export function loadTheme(name: string, root: string, episodeDir: string, seen: 
     };
   }
   if (seen.includes(file)) {
-    return { theme: FALLBACK_THEME, files: seen, issues: [{ rule: 'V-1', level: 'error', message: `Theme "extends" cycle: ${[...seen, file].join(' → ')}` }] };
+    return {
+      theme: FALLBACK_THEME,
+      files: seen,
+      issues: [
+        { rule: 'V-1', level: 'error', message: `Theme "extends" cycle: ${[...seen, file].join(' → ')}` },
+      ],
+    };
   }
   const src = parseYaml(readFileSync(file, 'utf8'), file);
   if (src.errors.length) return { theme: FALLBACK_THEME, files: [...seen, file], issues: src.errors };
@@ -146,7 +163,12 @@ export function loadTheme(name: string, root: string, episodeDir: string, seen: 
   }
   for (const k of ['active', 'english'] as const) {
     if (!isColor(theme, theme.captions[k])) {
-      issues.push({ rule: 'V-1', level: 'error', message: `captions.${k}: "${theme.captions[k]}" is not a theme color or CSS color`, file });
+      issues.push({
+        rule: 'V-1',
+        level: 'error',
+        message: `captions.${k}: "${theme.captions[k]}" is not a theme color or CSS color`,
+        file,
+      });
     }
   }
   return { theme, files: [...base.files, file], issues };

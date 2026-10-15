@@ -24,7 +24,16 @@ export function chunkDom(chunk: CaptionChunk): { el: HTMLElement; toks: HTMLElem
     line.append(span);
     toks.push(span);
   });
-  const el = h('div', { class: 'rf-chunk', dir: chunk.dir, lang: chunk.dir === 'rtl' ? 'ar' : 'en', style: `direction:${chunk.dir}` }, line);
+  const el = h(
+    'div',
+    {
+      class: 'rf-chunk',
+      dir: chunk.dir,
+      lang: chunk.dir === 'rtl' ? 'ar' : 'en',
+      style: `direction:${chunk.dir}`,
+    },
+    line,
+  );
   return { el, toks };
 }
 
@@ -95,7 +104,9 @@ export class Captions {
         const past = j < activeTok;
         css(el, 'color', isActive ? this.active : tok.english ? this.english : this.ink);
         css(el, 'opacity', isActive || past ? '1' : String(this.future));
-        const pulse = isActive ? 1 + 0.08 * (1 - clamp(easeOutCubic(progress(t, tok.start, ACTIVE_PULSE)))) : 1;
+        const pulse = isActive
+          ? 1 + 0.08 * (1 - clamp(easeOutCubic(progress(t, tok.start, ACTIVE_PULSE))))
+          : 1;
         css(el, 'transform', pulse === 1 ? 'none' : `scale(${pulse.toFixed(4)})`);
         cls(el, 'is-active', isActive);
       });
@@ -107,10 +118,14 @@ export class Captions {
     return this.views.map((v) => {
       const prev = v.el.style.display;
       v.el.style.display = 'block';
-      const tops = new Set<number>();
-      for (const tk of v.toks) tops.add(Math.round(tk.getBoundingClientRect().top / 8));
+      // Layout positions (offsetTop ignores transforms); a new line starts when a token sits
+      // more than half a font size below the previous line.
+      const size = parseFloat(getComputedStyle(this.el).fontSize) || 66;
+      const tops = v.toks.map((tk) => tk.offsetTop).sort((a, b) => a - b);
+      let lines = tops.length ? 1 : 0;
+      for (let i = 1; i < tops.length; i++) if (tops[i] - tops[i - 1] > size * 0.5) lines++;
       v.el.style.display = prev;
-      return { lineId: v.chunk.lineId, start: v.chunk.start, lines: tops.size, text: v.chunk.text };
+      return { lineId: v.chunk.lineId, start: v.chunk.start, lines, text: v.chunk.text };
     });
   }
 }

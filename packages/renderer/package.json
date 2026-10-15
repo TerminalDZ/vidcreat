@@ -6,9 +6,21 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
-  "files": ["dist"],
-  "scripts": { "build": "tsc -b" },
-  "dependencies": { "@reelforge/audio": "workspace:*", "@reelforge/core": "workspace:*", "@reelforge/runtime": "workspace:*", "playwright": "1.56.1" }
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@reelforge/audio": "workspace:*",
+    "@reelforge/core": "workspace:*",
+    "@reelforge/runtime": "workspace:*",
+    "playwright": "1.56.1"
+  }
 }

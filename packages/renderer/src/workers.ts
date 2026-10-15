@@ -13,7 +13,12 @@ export interface FrameRange {
   file: string;
 }
 
-export function splitRanges(from: number, to: number, workers: number, file: (i: number) => string): FrameRange[] {
+export function splitRanges(
+  from: number,
+  to: number,
+  workers: number,
+  file: (i: number) => string,
+): FrameRange[] {
   const n = Math.max(1, Math.min(workers, to - from));
   const size = Math.ceil((to - from) / n);
   const out: FrameRange[] = [];
@@ -66,7 +71,13 @@ export async function renderRange(range: FrameRange, o: WorkerOptions): Promise<
   ff.stderr?.setEncoding('utf8').on('data', (d: string) => (stderr += d));
   const done = new Promise<void>((resolve, reject) => {
     ff.on('error', (e) => reject(new Error(`Cannot start ffmpeg: ${e.message}`)));
-    ff.on('close', (code) => (code === 0 ? resolve() : reject(new Error(`ffmpeg (segment ${range.index}) exited with ${code}: ${stderr.trim().slice(-400)}`))));
+    ff.on('close', (code) =>
+      code === 0
+        ? resolve()
+        : reject(
+            new Error(`ffmpeg (segment ${range.index}) exited with ${code}: ${stderr.trim().slice(-400)}`),
+          ),
+    );
   });
   done.catch(() => undefined);
   const write = (buf: Buffer) =>
@@ -84,7 +95,8 @@ export async function renderRange(range: FrameRange, o: WorkerOptions): Promise<
       await write(buf);
       o.onFrame();
     }
-    if (rp.blocked.length) throw new Error(`Network access attempted (NFR-8): ${rp.blocked.slice(0, 3).join(', ')}`);
+    if (rp.blocked.length)
+      throw new Error(`Network access attempted (NFR-8): ${rp.blocked.slice(0, 3).join(', ')}`);
     ff.stdin?.end();
     await done;
   } catch (e) {
@@ -98,7 +110,10 @@ export async function renderRange(range: FrameRange, o: WorkerOptions): Promise<
 }
 
 /** Runs all ranges in parallel; a crashed range is retried once (NFR-5). */
-export async function renderAll(ranges: FrameRange[], o: WorkerOptions & { onRetry?: (r: FrameRange, e: Error) => void }): Promise<void> {
+export async function renderAll(
+  ranges: FrameRange[],
+  o: WorkerOptions & { onRetry?: (r: FrameRange, e: Error) => void },
+): Promise<void> {
   await Promise.all(
     ranges.map(async (r) => {
       let counted = 0;

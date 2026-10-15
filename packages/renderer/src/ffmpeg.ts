@@ -14,7 +14,10 @@ export interface FfmpegInfo {
 }
 
 export function probeFfmpeg(): FfmpegInfo {
-  const empty = { encoders: { libx264: false, aac: false, mjpeg: false }, filters: { loudnorm: false, sidechaincompress: false, alimiter: false } };
+  const empty = {
+    encoders: { libx264: false, aac: false, mjpeg: false },
+    filters: { loudnorm: false, sidechaincompress: false, alimiter: false },
+  };
   const v = spawnSync(ffmpegBin(), ['-hide_banner', '-version'], { encoding: 'utf8' });
   if (v.error || v.status !== 0) return { ok: false, ...empty, error: v.error?.message ?? v.stderr };
   const m = v.stdout.match(/ffmpeg version (?:n)?(\d+)(?:\.(\d+))?[^\s]*/);
@@ -28,7 +31,11 @@ export function probeFfmpeg(): FfmpegInfo {
     version,
     major,
     encoders: { libx264: has(enc, 'libx264'), aac: has(enc, 'aac'), mjpeg: has(enc, 'mjpeg') },
-    filters: { loudnorm: has(fil, 'loudnorm'), sidechaincompress: has(fil, 'sidechaincompress'), alimiter: has(fil, 'alimiter') },
+    filters: {
+      loudnorm: has(fil, 'loudnorm'),
+      sidechaincompress: has(fil, 'sidechaincompress'),
+      alimiter: has(fil, 'alimiter'),
+    },
   };
 }
 
@@ -104,13 +111,27 @@ export function spawnPipe(args: string[]): ChildProcess {
 }
 
 export async function ffprobeJson(file: string): Promise<any> {
-  const { stdout } = await run(['-v', 'error', '-print_format', 'json', '-show_format', '-show_streams', file], { bin: ffprobeBin() });
+  const { stdout } = await run(
+    ['-v', 'error', '-print_format', 'json', '-show_format', '-show_streams', file],
+    { bin: ffprobeBin() },
+  );
   return JSON.parse(stdout);
 }
 
 export async function countFrames(file: string): Promise<number> {
   const { stdout } = await run(
-    ['-v', 'error', '-select_streams', 'v:0', '-count_packets', '-show_entries', 'stream=nb_read_packets', '-of', 'csv=p=0', file],
+    [
+      '-v',
+      'error',
+      '-select_streams',
+      'v:0',
+      '-count_packets',
+      '-show_entries',
+      'stream=nb_read_packets',
+      '-of',
+      'csv=p=0',
+      file,
+    ],
     { bin: ffprobeBin() },
   );
   return Number(stdout.trim().split(/[\s,]+/)[0]);

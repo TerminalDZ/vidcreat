@@ -20,14 +20,34 @@ export const table: RuntimeComponent = {
     const rowH = Math.min(Math.round(p.fontSize * 3), Math.floor((ctx.box.h - headH - 4) / n));
     const cellEl = (c: Cell, i: number, cls: string) => {
       const txt = typeof c === 'object' ? String(c.text) : String(c);
-      const el = h('div', { class: `td ${cls}`, dir: 'auto', 'data-fit': true, style: `width:${((weights[i] ?? 1) / sum) * 100}%;font-family:${fontFor(theme, txt, 'mono')}` }, txt);
+      const el = h(
+        'div',
+        {
+          class: `td ${cls}`,
+          dir: 'auto',
+          'data-fit': true,
+          style: `width:${((weights[i] ?? 1) / sum) * 100}%;font-family:${fontFor(theme, txt, 'mono')}`,
+        },
+        txt,
+      );
       if (typeof c === 'object') el.style.color = resolve(c.color);
       return el;
     };
-    const head = h('div', { class: 'tr th', style: `height:${headH}px;font-size:${Math.round(p.fontSize * 0.8)}px` });
+    const head = h('div', {
+      class: 'tr th',
+      style: `height:${headH}px;font-size:${Math.round(p.fontSize * 0.8)}px`,
+    });
     cols.forEach((c, i) => head.append(cellEl(c, i, '')));
     root.append(head);
-    const rows = (p.rows as { cells: Cell[]; at?: number; highlight?: boolean | number; color?: string; strike?: boolean | number }[]).map((r) => {
+    const rows = (
+      p.rows as {
+        cells: Cell[];
+        at?: number;
+        highlight?: boolean | number;
+        color?: string;
+        strike?: boolean | number;
+      }[]
+    ).map((r) => {
       const bg = h('i', { class: 'rowbg' });
       const tr = h('div', { class: 'tr', style: `height:${rowH}px;font-size:${p.fontSize}px` }, bg);
       if (r.color) tr.style.color = resolve(r.color);
@@ -64,13 +84,23 @@ export const table: RuntimeComponent = {
   },
 };
 
-const MARK_ICON: Record<string, [string, string]> = { ok: ['check', 'lime'], err: ['x', 'red'], warn: ['warn', 'amber'] };
+const MARK_ICON: Record<string, [string, string]> = {
+  ok: ['check', 'lime'],
+  err: ['x', 'red'],
+  warn: ['warn', 'amber'],
+};
 
 export const lanes: RuntimeComponent = {
   name: 'lanes',
   mount(root, p, theme, ctx) {
-    const lanes = p.lanes as { title: string; color: string; steps: { text: string; at: number; color?: string; mark?: string }[] }[];
-    const all = lanes.flatMap((l, li) => l.steps.map((st, si) => ({ li, si, at: st.at }))).sort((a, b) => a.at - b.at || a.li - b.li);
+    const lanes = p.lanes as {
+      title: string;
+      color: string;
+      steps: { text: string; at: number; color?: string; mark?: string }[];
+    }[];
+    const all = lanes
+      .flatMap((l, li) => l.steps.map((st, si) => ({ li, si, at: st.at })))
+      .sort((a, b) => a.at - b.at || a.li - b.li);
     const rank = new Map(all.map((x, i) => [`${x.li}:${x.si}`, i]));
     const rowsN = p.interleave ? Math.max(1, all.length) : Math.max(1, ...lanes.map((l) => l.steps.length));
     const bodyH = ctx.box.h - 74;
@@ -78,8 +108,19 @@ export const lanes: RuntimeComponent = {
     const stepH = Math.max(40, rowH - 14);
     const views = lanes.map((l, li) => {
       const c = resolve(l.color);
-      const lh = h('div', { class: 'lh', dir: 'auto', style: `border-color:${rgba(c, 0.7)};color:${c};background:${rgba(c, 0.12)};font-family:${fontFor(theme, l.title, 'mono')}` }, l.title);
-      const lb = h('div', { class: 'lb', style: `border-color:${rgba(c, 0.35)};background:${rgba(c, 0.03)}` });
+      const lh = h(
+        'div',
+        {
+          class: 'lh',
+          dir: 'auto',
+          style: `border-color:${rgba(c, 0.7)};color:${c};background:${rgba(c, 0.12)};font-family:${fontFor(theme, l.title, 'mono')}`,
+        },
+        l.title,
+      );
+      const lb = h('div', {
+        class: 'lb',
+        style: `border-color:${rgba(c, 0.35)};background:${rgba(c, 0.03)}`,
+      });
       const lane = h('div', { class: 'lane' }, lh, lb);
       root.append(lane);
       const steps = l.steps.map((st, si) => {
@@ -114,7 +155,11 @@ export const lanes: RuntimeComponent = {
             css(el, 'transform', k < 1 ? `translateY(${((1 - k) * -22).toFixed(2)}px)` : 'none');
             const mc = st.mark ? theme.colors[MARK_ICON[st.mark][1]] : c;
             css(el, 'border-color', mix(theme.colors.line, mc, 0.35 + 0.65 * flash));
-            css(el, 'box-shadow', flash > 0 ? `0 0 ${(30 * flash).toFixed(0)}px ${rgba(mc, 0.5 * flash)}` : 'none');
+            css(
+              el,
+              'box-shadow',
+              flash > 0 ? `0 0 ${(30 * flash).toFixed(0)}px ${rgba(mc, 0.5 * flash)}` : 'none',
+            );
           }
         }
       },
@@ -133,10 +178,27 @@ export const checklist: RuntimeComponent = {
       const bx = h('div', { class: 'bx', style: `width:${size}px;height:${size}px` });
       const svg = s('svg', { viewBox: '0 0 24 24', width: size + 8, height: size + 8 });
       const d = it.ok ? 'M5 12.5 10 17.5 19.5 6.5' : 'M6.5 6.5l11 11M17.5 6.5l-11 11';
-      const path = s('path', { d, fill: 'none', 'stroke-width': 3.4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', pathLength: 1, 'stroke-dasharray': '1 1' });
+      const path = s('path', {
+        d,
+        fill: 'none',
+        'stroke-width': 3.4,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+        pathLength: 1,
+        'stroke-dasharray': '1 1',
+      });
       svg.append(path);
       bx.append(svg);
-      const tx = h('div', { class: 'tx', dir: 'auto', 'data-fit': true, style: `font-size:${p.fontSize}px;font-family:${fontFor(theme, it.text)}` }, it.text);
+      const tx = h(
+        'div',
+        {
+          class: 'tx',
+          dir: 'auto',
+          'data-fit': true,
+          style: `font-size:${p.fontSize}px;font-family:${fontFor(theme, it.text)}`,
+        },
+        it.text,
+      );
       const row = h('div', { class: 'it' }, bx, tx);
       root.append(row);
       return { it, at, row, bx, path, tx };
@@ -177,9 +239,16 @@ export const meter: RuntimeComponent = {
     const innerW = ctx.box.w - 8;
     fill.style.width = `${innerW}px`;
     if (p.threshold !== undefined) {
+      root.style.paddingBottom = '34px'; // room for the threshold label under the track
       const pos = clamp(p.threshold / p.max) * 100;
       track.append(h('i', { class: 'thr', style: `left:${pos}%;background:${resolve(p.danger)}` }));
-      track.append(h('span', { class: 'thl', style: `left:${pos}%;color:${resolve(p.danger)}` }, `LIMIT ${formatNumber(p.threshold, 0, true)}${p.unit}`));
+      track.append(
+        h(
+          'span',
+          { class: 'thl', style: `left:${pos}%;color:${resolve(p.danger)}` },
+          `LIMIT ${formatNumber(p.threshold, 0, true)}${p.unit}`,
+        ),
+      );
     }
     const base = resolve(p.color);
     const danger = resolve(p.danger);
@@ -206,20 +275,37 @@ export const timeline: RuntimeComponent = {
     const W = ctx.box.w;
     const axisY = Math.round(ctx.box.h * 0.32);
     const c = resolve(p.color);
-    const axis = h('i', { class: 'axis', style: `top:${axisY}px;background:linear-gradient(90deg, ${rgba(c, 0.3)}, ${c})` });
+    const axis = h('i', {
+      class: 'axis',
+      style: `top:${axisY}px;background:linear-gradient(90deg, ${rgba(c, 0.3)}, ${c})`,
+    });
     root.append(axis);
     if (p.start) root.append(h('span', { class: 'end', style: `left:0;top:${axisY - 44}px` }, p.start));
     if (p.end) root.append(h('span', { class: 'end', style: `right:0;top:${axisY - 44}px` }, p.end));
     const enterEnd = ctx.el.enter.t + ctx.el.enter.dur;
-    const markers = (p.markers as { pos: number; label: string; sub?: string; at?: number; color?: string }[]).map((m, i) => {
+    const markers = (
+      p.markers as { pos: number; label: string; sub?: string; at?: number; color?: string }[]
+    ).map((m, i) => {
       const mc = resolve(m.color ?? p.color);
       const pin = h('i', { class: 'pin', style: `border-color:${mc};box-shadow:0 0 22px ${rgba(mc, 0.6)}` });
-      const el = h('div', { class: 'mk', style: `left:${m.pos * W}px;top:${axisY - 13}px` }, pin, h('span', { class: 'lab', dir: 'auto', style: `color:${mc};font-family:${fontFor(theme, m.label, 'mono')}` }, m.label));
+      const el = h(
+        'div',
+        { class: 'mk', style: `left:${m.pos * W}px;top:${axisY - 13}px` },
+        pin,
+        h(
+          'span',
+          { class: 'lab', dir: 'auto', style: `color:${mc};font-family:${fontFor(theme, m.label, 'mono')}` },
+          m.label,
+        ),
+      );
       if (m.sub) el.append(h('span', { class: 'sub', dir: 'auto' }, m.sub));
       root.append(el);
       return { el, pin, at: m.at ?? enterEnd + i * 0.4 };
     });
-    const cur = h('i', { class: 'cur', style: `top:${axisY - 40}px;height:80px;background:${theme.colors.ink};display:none` });
+    const cur = h('i', {
+      class: 'cur',
+      style: `top:${axisY - 40}px;height:80px;background:${theme.colors.ink};display:none`,
+    });
     root.append(cur);
     return {
       update(t, local) {
@@ -233,7 +319,11 @@ export const timeline: RuntimeComponent = {
           css(m.el, 'transform', `translateX(-50%) translateY(${((1 - clamp(k)) * -30).toFixed(2)}px)`);
           css(m.pin, 'transform', `scale(${(0.4 + 0.6 * k).toFixed(4)})`);
         }
-        const kfs = (p.cursor as { at: number; pos: number; dur?: number }[]).map((x) => ({ at: x.at, value: x.pos, dur: x.dur }));
+        const kfs = (p.cursor as { at: number; pos: number; dur?: number }[]).map((x) => ({
+          at: x.at,
+          value: x.pos,
+          dur: x.dur,
+        }));
         if (kfs.length && t >= kfs[0].at) {
           const pos = keyframeValue(kfs, t, kfs[0].value, easeOutCubic, 0.6);
           css(cur, 'display', 'block');
@@ -262,7 +352,10 @@ export const grid: RuntimeComponent = {
   mount(root, p, theme, ctx) {
     const n = p.cols * p.rows;
     if (p.label) root.append(h('div', { class: 'gl', dir: 'auto' }, p.label));
-    const gg = h('div', { class: 'gg', style: `grid-template-columns:repeat(${p.cols},1fr);grid-template-rows:repeat(${p.rows},1fr);gap:${p.gap}px` });
+    const gg = h('div', {
+      class: 'gg',
+      style: `grid-template-columns:repeat(${p.cols},1fr);grid-template-rows:repeat(${p.rows},1fr);gap:${p.gap}px`,
+    });
     root.append(gg);
     const tiles = Array.from({ length: n }, (_, i) => {
       const spec = p.tiles[i];
@@ -272,7 +365,10 @@ export const grid: RuntimeComponent = {
       gg.append(el);
       return { el, state };
     });
-    const steps = (p.steps as { at: number; set: Record<string, string> }[]).map((st) => ({ at: st.at, map: expandTiles(st.set, n) }));
+    const steps = (p.steps as { at: number; set: Record<string, string> }[]).map((st) => ({
+      at: st.at,
+      map: expandTiles(st.set, n),
+    }));
     const enterT = ctx.el.enter.t;
     return {
       update(t, _l, st) {
@@ -297,11 +393,23 @@ export const grid: RuntimeComponent = {
           const bump = 1 - clamp((t - since[i]) / 0.5);
           const appear = easeOutBack(2)(progress(t, enterT + i * 0.025, 0.35));
           css(x.el, 'border-color', s0 === 'idle' ? theme.colors.line : c);
-          css(x.el, 'background', s0 === 'idle' ? rgba(theme.colors.card, 0.9) : rgba(c, s0 === 'off' ? 0.05 : 0.18 + 0.25 * bump));
+          css(
+            x.el,
+            'background',
+            s0 === 'idle' ? rgba(theme.colors.card, 0.9) : rgba(c, s0 === 'off' ? 0.05 : 0.18 + 0.25 * bump),
+          );
           css(x.el, 'color', s0 === 'idle' ? theme.colors.dim : c);
           css(x.el, 'opacity', s0 === 'off' ? '0.35' : clamp(appear * 1.5).toFixed(3));
-          css(x.el, 'transform', `scale(${((0.6 + 0.4 * appear) * (1 + 0.08 * Math.sin(Math.PI * bump))).toFixed(4)})`);
-          css(x.el, 'box-shadow', s0 !== 'idle' && s0 !== 'off' ? `0 0 ${(18 + 30 * bump).toFixed(0)}px ${rgba(c, 0.35)}` : 'none');
+          css(
+            x.el,
+            'transform',
+            `scale(${((0.6 + 0.4 * appear) * (1 + 0.08 * Math.sin(Math.PI * bump))).toFixed(4)})`,
+          );
+          css(
+            x.el,
+            'box-shadow',
+            s0 !== 'idle' && s0 !== 'off' ? `0 0 ${(18 + 30 * bump).toFixed(0)}px ${rgba(c, 0.35)}` : 'none',
+          );
         });
       },
     };
@@ -343,10 +451,31 @@ export const bucket: RuntimeComponent = {
       return g;
     });
     root.append(svg);
-    const count = h('div', { class: 'bl', style: `top:${H - 50}px;font-size:34px;font-weight:700;color:${c}` });
+    const count = h('div', {
+      class: 'bl',
+      style: `top:${H - 50}px;font-size:34px;font-weight:700;color:${c}`,
+    });
     root.append(count);
-    if (p.label) root.append(h('div', { class: 'bl', dir: 'auto', style: `top:0;font-size:28px;color:${theme.colors.ink};font-weight:700;letter-spacing:.1em;text-transform:uppercase` }, p.label));
-    if (p.rate) root.append(h('div', { class: 'bl', dir: 'auto', style: `top:40px;font-size:22px;color:${theme.colors.dim}` }, p.rate));
+    if (p.label)
+      root.append(
+        h(
+          'div',
+          {
+            class: 'bl',
+            dir: 'auto',
+            style: `top:0;font-size:28px;color:${theme.colors.ink};font-weight:700;letter-spacing:.1em;text-transform:uppercase`,
+          },
+          p.label,
+        ),
+      );
+    if (p.rate)
+      root.append(
+        h(
+          'div',
+          { class: 'bl', dir: 'auto', style: `top:40px;font-size:22px;color:${theme.colors.dim}` },
+          p.rate,
+        ),
+      );
     const kfs = p.keyframes as { at: number; tokens: number }[];
     return {
       update(t) {
@@ -374,7 +503,11 @@ export const bucket: RuntimeComponent = {
             dy = -120 * (1 - k);
           }
           attr(g, 'opacity', op.toFixed(3));
-          attr(g, 'transform', `translate(0 ${dy.toFixed(1)}) translate(${sl.x} ${sl.y}) scale(${sc.toFixed(3)}) translate(${-sl.x} ${-sl.y})`);
+          attr(
+            g,
+            'transform',
+            `translate(0 ${dy.toFixed(1)}) translate(${sl.x} ${sl.y}) scale(${sc.toFixed(3)}) translate(${-sl.x} ${-sl.y})`,
+          );
           attr(g, 'fill', cur === 0 ? theme.colors.red : c);
         });
         text(count, `${cur}/${p.capacity}`);

@@ -100,7 +100,11 @@ export class Background {
     const ctx = this.ctx;
     const { width: w, height: hh } = this.tl;
     if (!ctx) {
-      css(this.el, 'background', `radial-gradient(ellipse 60% 36% at 50% 28%, ${rgba(c, 0.34)}, transparent 75%)`);
+      css(
+        this.el,
+        'background',
+        `radial-gradient(ellipse 60% 36% at 50% 28%, ${rgba(c, 0.34)}, transparent 75%)`,
+      );
       return;
     }
     ctx.clearRect(0, 0, w, hh);
@@ -132,7 +136,12 @@ export class Background {
       this.paint(c);
     }
     // Slow, seamless float of the grid (no wrap-around jump).
-    if (this.grid) css(this.grid, 'transform', `translateY(${(-GRID + 30 * Math.sin((t * 2 * Math.PI) / 9)).toFixed(2)}px)`);
+    if (this.grid)
+      css(
+        this.grid,
+        'transform',
+        `translateY(${(-GRID + 30 * Math.sin((t * 2 * Math.PI) / 9)).toFixed(2)}px)`,
+      );
   }
 }
 
@@ -151,14 +160,21 @@ export class Header {
       bar.append(this.fill);
       for (const ch of tl.chapters) {
         if (ch.t <= 0.05) continue;
-        bar.append(h('i', { class: 'rf-progress-tick', style: `left:${((ch.t / tl.duration) * 100).toFixed(3)}%` }));
+        bar.append(
+          h('i', { class: 'rf-progress-tick', style: `left:${((ch.t / tl.duration) * 100).toFixed(3)}%` }),
+        );
       }
       this.el.append(bar);
     }
     if (tl.theme.chrome.header) {
       const ep = `EP.${String(tl.meta.episode).padStart(2, '0')}`;
       this.el.append(
-        h('div', { class: 'rf-hrow' }, h('span', { class: 'rf-series' }, tl.meta.series || tl.meta.title), h('span', { class: 'rf-ep' }, ep)),
+        h(
+          'div',
+          { class: 'rf-hrow' },
+          h('span', { class: 'rf-series' }, tl.meta.series || tl.meta.title),
+          h('span', { class: 'rf-ep' }, ep),
+        ),
       );
     }
     this.chA = h('span');
@@ -231,7 +247,10 @@ export class Overlays {
     this.el = h('div', { class: 'rf-layer' });
     if (vignette > 0) {
       this.el.append(
-        h('div', { class: 'rf-vignette', style: `background: radial-gradient(ellipse 80% 70% at 50% 45%, transparent 52%, rgba(0,0,0,${vignette}) 100%)` }),
+        h('div', {
+          class: 'rf-vignette',
+          style: `background: radial-gradient(ellipse 80% 70% at 50% 45%, transparent 52%, rgba(0,0,0,${vignette}) 100%)`,
+        }),
       );
     }
     if (grain > 0) {

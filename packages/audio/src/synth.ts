@@ -56,7 +56,9 @@ const ding: Synth = () => {
     const t = i / SFX_RATE;
     const attack = Math.min(1, t / 0.004);
     out[i] =
-      attack * (Math.sin(TAU * 1320 * t) * Math.exp(-t * 6) * 0.6 + Math.sin(TAU * 1980 * t) * Math.exp(-t * 9) * 0.35);
+      attack *
+      (Math.sin(TAU * 1320 * t) * Math.exp(-t * 6) * 0.6 +
+        Math.sin(TAU * 1980 * t) * Math.exp(-t * 9) * 0.35);
   }
   return out;
 };
@@ -120,7 +122,9 @@ const tap: Synth = (rand) => {
   const out = new Float32Array(n);
   for (let i = 0; i < n; i++) {
     const t = i / SFX_RATE;
-    out[i] = Math.sin(TAU * 220 * t * (1 - t * 3)) * Math.exp(-t * 55) * 0.8 + (t < 0.004 ? (rand() * 2 - 1) * 0.5 : 0);
+    out[i] =
+      Math.sin(TAU * 220 * t * (1 - t * 3)) * Math.exp(-t * 55) * 0.8 +
+      (t < 0.004 ? (rand() * 2 - 1) * 0.5 : 0);
   }
   return out;
 };

@@ -18,5 +18,7 @@ export interface RuntimeApi {
   ready: Promise<void>;
   render(t: number): void;
   load(tl: Timeline): Promise<void>;
-  boxes(t: number): { id: string; component: string; x: number; y: number; w: number; h: number; visible: boolean }[];
+  boxes(
+    t: number,
+  ): { id: string; component: string; x: number; y: number; w: number; h: number; visible: boolean }[];
 }

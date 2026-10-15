@@ -29,7 +29,12 @@ export const visibleUntil = (el: TElement, scene: TScene) => el.exit?.t ?? scene
 
 export function lintTimeline(tl: Timeline, opts: { file?: string } = {}): Issue[] {
   const issues: Issue[] = [];
-  const at = (el: TElement) => ({ file: opts.file, line: el.source?.line, col: el.source?.col, elementId: el.id });
+  const at = (el: TElement) => ({
+    file: opts.file,
+    line: el.source?.line,
+    col: el.source?.col,
+    elementId: el.id,
+  });
   for (const scene of tl.scenes) {
     const area = scene.origin;
     const els = scene.elements.filter((e) => !FILL.has(e.component));

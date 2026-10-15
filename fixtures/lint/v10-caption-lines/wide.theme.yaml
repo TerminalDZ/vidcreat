@@ -1,0 +1,4 @@
+# Seeded bug: max_chars far too high, so one caption chunk wraps over more than max_lines lines.
+name: wide
+extends: default
+captions: { max_chars: 200 }

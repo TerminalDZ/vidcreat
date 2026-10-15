@@ -113,12 +113,12 @@ body { -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; 
   background: var(--card); font-family: var(--f-mono); white-space: nowrap; overflow: hidden; }
 .c-lanes .step .mk { margin-left: auto; font-weight: 800; }
 
-.c-check { display: flex; flex-direction: column; justify-content: center; gap: 22px; height: 100%; }
-.c-check .ct { font-family: var(--f-mono); font-size: 26px; letter-spacing: .16em; color: var(--dim); text-transform: uppercase; margin-bottom: 6px; }
-.c-check .it { display: flex; align-items: center; gap: 26px; }
-.c-check .bx { position: relative; flex: none; border: 4px solid var(--line); border-radius: 12px; }
-.c-check .bx svg { position: absolute; inset: -4px; overflow: visible; }
-.c-check .tx { font-weight: 600; white-space: nowrap; }
+.c-checklist { display: flex; flex-direction: column; justify-content: center; gap: 22px; height: 100%; }
+.c-checklist .ct { font-family: var(--f-mono); font-size: 26px; letter-spacing: .16em; color: var(--dim); text-transform: uppercase; margin-bottom: 6px; }
+.c-checklist .it { display: flex; align-items: center; gap: 26px; }
+.c-checklist .bx { position: relative; flex: none; border: 4px solid var(--line); border-radius: 12px; }
+.c-checklist .bx svg { position: absolute; inset: -4px; overflow: visible; }
+.c-checklist .tx { font-weight: 600; white-space: nowrap; }
 
 .c-counter { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
 .c-counter .v { font-weight: 800; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; white-space: nowrap; direction: ltr; }
@@ -131,16 +131,16 @@ body { -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; 
 .c-meter .track { position: relative; height: 44px; border-radius: 14px; background: var(--card); border: 2px solid var(--line); overflow: visible; }
 .c-meter .fill { position: absolute; left: 4px; top: 4px; bottom: 4px; border-radius: 10px; transform-origin: 0 50%; }
 .c-meter .thr { position: absolute; top: -14px; bottom: -14px; width: 4px; margin-left: -2px; border-radius: 2px; }
-.c-meter .thl { position: absolute; top: -48px; transform: translateX(-50%); font-family: var(--f-mono); font-size: 20px; white-space: nowrap; }
+.c-meter .thl { position: absolute; top: 50px; transform: translateX(-50%); font-family: var(--f-mono); font-size: 20px; white-space: nowrap; }
 
-.c-tl { position: relative; height: 100%; }
-.c-tl .axis { position: absolute; left: 0; right: 0; height: 4px; border-radius: 2px; transform-origin: 0 50%; }
-.c-tl .mk { position: absolute; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
-.c-tl .mk .pin { width: 26px; height: 26px; border-radius: 50%; border: 5px solid; background: var(--bg); }
-.c-tl .mk .lab { margin-top: 14px; font-family: var(--f-mono); font-size: 26px; font-weight: 700; white-space: nowrap; }
-.c-tl .mk .sub { margin-top: 4px; font-family: var(--f-mono); font-size: 20px; color: var(--dim); white-space: nowrap; }
-.c-tl .end { position: absolute; font-family: var(--f-mono); font-size: 22px; color: var(--dim); }
-.c-tl .cur { position: absolute; width: 4px; margin-left: -2px; border-radius: 2px; }
+.c-timeline { position: relative; height: 100%; }
+.c-timeline .axis { position: absolute; left: 0; right: 0; height: 4px; border-radius: 2px; transform-origin: 0 50%; }
+.c-timeline .mk { position: absolute; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
+.c-timeline .mk .pin { width: 26px; height: 26px; border-radius: 50%; border: 5px solid; background: var(--bg); }
+.c-timeline .mk .lab { margin-top: 14px; font-family: var(--f-mono); font-size: 26px; font-weight: 700; white-space: nowrap; }
+.c-timeline .mk .sub { margin-top: 4px; font-family: var(--f-mono); font-size: 20px; color: var(--dim); white-space: nowrap; }
+.c-timeline .end { position: absolute; font-family: var(--f-mono); font-size: 22px; color: var(--dim); }
+.c-timeline .cur { position: absolute; width: 4px; margin-left: -2px; border-radius: 2px; }
 
 .c-grid { display: flex; flex-direction: column; height: 100%; }
 .c-grid .gl { font-family: var(--f-mono); font-size: 26px; color: var(--dim); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 18px; text-align: center; }

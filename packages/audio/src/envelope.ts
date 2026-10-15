@@ -19,7 +19,12 @@ const DB_CEIL = -8;
  * Per-video-frame RMS envelope mapped to [0, 1] on a dB scale, rounded to 3 decimals.
  * Feeds the audio-reactive waveform (FR-RT-5).
  */
-export function frameEnvelope(mono: Float32Array, sampleRate: number, fps: number, frames?: number): number[] {
+export function frameEnvelope(
+  mono: Float32Array,
+  sampleRate: number,
+  fps: number,
+  frames?: number,
+): number[] {
   const n = frames ?? Math.ceil((mono.length / sampleRate) * fps);
   const hop = sampleRate / fps;
   const out = new Array<number>(n);

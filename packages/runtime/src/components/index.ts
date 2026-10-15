@@ -7,7 +7,27 @@ import { counter, cta, label, quote, stamp, title } from './text.js';
 
 /** Runtime implementations, keyed by the component names of @reelforge/core. */
 export const COMPONENT_REGISTRY: Record<string, RuntimeComponent> = Object.fromEntries(
-  [title, label, code, node, arrow, chip, stamp, table, lanes, checklist, counter, meter, timeline, grid, bucket, phone, quote, particles, trap, cta, iconC].map(
-    (c) => [c.name, c],
-  ),
+  [
+    title,
+    label,
+    code,
+    node,
+    arrow,
+    chip,
+    stamp,
+    table,
+    lanes,
+    checklist,
+    counter,
+    meter,
+    timeline,
+    grid,
+    bucket,
+    phone,
+    quote,
+    particles,
+    trap,
+    cta,
+    iconC,
+  ].map((c) => [c.name, c]),
 );

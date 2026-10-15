@@ -40,7 +40,9 @@ export function buildLineTimings(
     const words = splitWords(line.text);
     const manual = manualWords[line.id];
     const starts =
-      manual && manual.length === words.length ? manual.map(round3) : estimateWordStarts(words, start, Math.max(start, next));
+      manual && manual.length === words.length
+        ? manual.map(round3)
+        : estimateWordStarts(words, start, Math.max(start, next));
     map.set(line.id, {
       id: line.id,
       start,

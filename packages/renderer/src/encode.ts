@@ -15,7 +15,22 @@ export function shareVideoKbps(shareMb: number, duration: number, audioKbps = AU
   return Math.floor((shareMb * 8192 * 0.97) / duration) - audioKbps;
 }
 
-const H264 = ['-c:v', 'libx264', '-profile:v', 'high', '-pix_fmt', 'yuv420p', '-fps_mode', 'cfr', '-g', '60', '-bf', '2', '-tag:v', 'avc1'];
+const H264 = [
+  '-c:v',
+  'libx264',
+  '-profile:v',
+  'high',
+  '-pix_fmt',
+  'yuv420p',
+  '-fps_mode',
+  'cfr',
+  '-g',
+  '60',
+  '-bf',
+  '2',
+  '-tag:v',
+  'avc1',
+];
 
 export interface EncodeInput {
   video: string;
@@ -75,17 +90,44 @@ export async function encodeMaster(o: EncodeInput & { fast?: boolean }): Promise
   );
 }
 
-export async function encodeShare(o: EncodeInput & { shareMb: number; tmpDir: string; fast?: boolean }): Promise<{ kbps: number }> {
+export async function encodeShare(
+  o: EncodeInput & { shareMb: number; tmpDir: string; fast?: boolean },
+): Promise<{ kbps: number }> {
   let kbps = shareVideoKbps(o.shareMb, o.duration);
   if (kbps < MIN_SHARE_VIDEO_KBPS) {
-    throw new Error(`Share size ${o.shareMb} MB is too small for ${o.duration.toFixed(1)} s (needs ≥ ${MIN_SHARE_VIDEO_KBPS} kb/s video). Raise --share-size.`);
+    throw new Error(
+      `Share size ${o.shareMb} MB is too small for ${o.duration.toFixed(1)} s (needs ≥ ${MIN_SHARE_VIDEO_KBPS} kb/s video). Raise --share-size.`,
+    );
   }
   kbps = Math.min(kbps, MAX_SHARE_VIDEO_KBPS);
   const passlog = path.join(o.tmpDir, 'x264pass');
   const rate = ['-b:v', `${kbps}k`, '-maxrate', `${Math.round(kbps * 1.5)}k`, '-bufsize', `${kbps * 3}k`];
   const preset = ['-preset', o.fast ? 'medium' : 'slow'];
   await run(
-    ['-hide_banner', '-nostats', '-y', '-i', o.video, '-map', '0:v:0', '-r', String(o.fps), ...H264, ...preset, ...rate, '-pass', '1', '-passlogfile', passlog, '-an', '-t', o.duration.toFixed(3), '-f', 'mp4', os.devNull],
+    [
+      '-hide_banner',
+      '-nostats',
+      '-y',
+      '-i',
+      o.video,
+      '-map',
+      '0:v:0',
+      '-r',
+      String(o.fps),
+      ...H264,
+      ...preset,
+      ...rate,
+      '-pass',
+      '1',
+      '-passlogfile',
+      passlog,
+      '-an',
+      '-t',
+      o.duration.toFixed(3),
+      '-f',
+      'mp4',
+      os.devNull,
+    ],
     { signal: o.signal },
   );
   await run(
@@ -144,11 +186,23 @@ export function mp4Atoms(file: string): string[] {
 export interface Compliance {
   ok: boolean;
   problems: string[];
-  info: { codec?: string; profile?: string; pixFmt?: string; fps?: string; audio?: string; sampleRate?: number; size: number; duration: number };
+  info: {
+    codec?: string;
+    profile?: string;
+    pixFmt?: string;
+    fps?: string;
+    audio?: string;
+    sampleRate?: number;
+    size: number;
+    duration: number;
+  };
 }
 
 /** NFR-13: h264 High, yuv420p, 30/1, AAC 48 kHz, moov before mdat, size ≤ target. */
-export async function checkCompliance(file: string, opts: { fps: number; maxBytes?: number }): Promise<Compliance> {
+export async function checkCompliance(
+  file: string,
+  opts: { fps: number; maxBytes?: number },
+): Promise<Compliance> {
   const j = await ffprobeJson(file);
   const v = j.streams.find((s: any) => s.codec_type === 'video');
   const a = j.streams.find((s: any) => s.codec_type === 'audio');
@@ -157,12 +211,17 @@ export async function checkCompliance(file: string, opts: { fps: number; maxByte
   if (v?.codec_name !== 'h264') problems.push(`video codec ${v?.codec_name} (expected h264)`);
   if (v?.profile !== 'High') problems.push(`H.264 profile ${v?.profile} (expected High)`);
   if (v?.pix_fmt !== 'yuv420p') problems.push(`pixel format ${v?.pix_fmt} (expected yuv420p)`);
-  if (v?.r_frame_rate !== `${opts.fps}/1`) problems.push(`frame rate ${v?.r_frame_rate} (expected ${opts.fps}/1)`);
+  if (v?.r_frame_rate !== `${opts.fps}/1`)
+    problems.push(`frame rate ${v?.r_frame_rate} (expected ${opts.fps}/1)`);
   if (a?.codec_name !== 'aac') problems.push(`audio codec ${a?.codec_name} (expected aac)`);
   if (Number(a?.sample_rate) !== 48000) problems.push(`audio sample rate ${a?.sample_rate} (expected 48000)`);
   const atoms = mp4Atoms(file);
-  if (atoms.indexOf('moov') < 0 || atoms.indexOf('moov') > atoms.indexOf('mdat')) problems.push('moov atom is not before mdat (no faststart)');
-  if (opts.maxBytes && size > opts.maxBytes) problems.push(`size ${(size / 1048576).toFixed(2)} MB exceeds ${(opts.maxBytes / 1048576).toFixed(2)} MB`);
+  if (atoms.indexOf('moov') < 0 || atoms.indexOf('moov') > atoms.indexOf('mdat'))
+    problems.push('moov atom is not before mdat (no faststart)');
+  if (opts.maxBytes && size > opts.maxBytes)
+    problems.push(
+      `size ${(size / 1048576).toFixed(2)} MB exceeds ${(opts.maxBytes / 1048576).toFixed(2)} MB`,
+    );
   return {
     ok: problems.length === 0,
     problems,
@@ -180,11 +239,31 @@ export async function checkCompliance(file: string, opts: { fps: number; maxByte
 }
 
 /** 12 evenly spaced frames tiled 4×3 into a JPEG contact sheet (FR-REN-7). */
-export async function contactSheet(video: string, out: string, frames: number, signal?: AbortSignal): Promise<void> {
-  const picks = Array.from({ length: 12 }, (_, i) => Math.min(frames - 1, Math.floor(((i + 0.5) * frames) / 12)));
+export async function contactSheet(
+  video: string,
+  out: string,
+  frames: number,
+  signal?: AbortSignal,
+): Promise<void> {
+  const picks = Array.from({ length: 12 }, (_, i) =>
+    Math.min(frames - 1, Math.floor(((i + 0.5) * frames) / 12)),
+  );
   const select = picks.map((n) => `eq(n\\,${n})`).join('+');
   await run(
-    ['-hide_banner', '-nostats', '-y', '-i', video, '-vf', `select='${select}',scale=360:640:flags=lanczos,tile=4x3:padding=8:margin=8:color=0x07080c`, '-frames:v', '1', '-q:v', '3', out],
+    [
+      '-hide_banner',
+      '-nostats',
+      '-y',
+      '-i',
+      video,
+      '-vf',
+      `select='${select}',scale=360:640:flags=lanczos,tile=4x3:padding=8:margin=8:color=0x07080c`,
+      '-frames:v',
+      '1',
+      '-q:v',
+      '3',
+      out,
+    ],
     { signal },
   );
 }

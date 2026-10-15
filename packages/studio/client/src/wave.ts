@@ -26,7 +26,14 @@ export async function decodeAudio(url: string): Promise<DecodedAudio | null> {
   }
 }
 
-const COLORS = { line: '#222735', dim: '#7d8496', ink: '#eef1f7', lime: '#b8ff3c', cyan: '#55dcff', red: '#ff4a5c' };
+const COLORS = {
+  line: '#222735',
+  dim: '#7d8496',
+  ink: '#eef1f7',
+  lime: '#b8ff3c',
+  cyan: '#55dcff',
+  red: '#ff4a5c',
+};
 
 function fit(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
   const dpr = window.devicePixelRatio || 1;
@@ -159,7 +166,8 @@ export class Waves {
       for (let x = 0; x < W; x++) {
         const i0 = Math.floor((a + (x / W) * span) * au.sampleRate);
         let m = 0;
-        for (let i = Math.max(0, i0); i < Math.min(au.mono.length, i0 + spp); i++) m = Math.max(m, Math.abs(au.mono[i]));
+        for (let i = Math.max(0, i0); i < Math.min(au.mono.length, i0 + spp); i++)
+          m = Math.max(m, Math.abs(au.mono[i]));
         const hgt = m * (H - 20) * 0.5;
         ctx.fillRect(x, mid - hgt, 1, hgt * 2 || 1);
       }

@@ -9,7 +9,8 @@ let palette: Record<string, string> = {};
 export function setPalette(p: Record<string, string>): void {
   palette = p;
 }
-export const resolve = (c: string | undefined, fallback = '#ffffff'): string => (c ? (palette[c] ?? c) : fallback);
+export const resolve = (c: string | undefined, fallback = '#ffffff'): string =>
+  c ? (palette[c] ?? c) : fallback;
 
 export function parse(c: string): Rgb {
   const v = resolve(c).trim();
@@ -20,7 +21,11 @@ export function parse(c: string): Rgb {
   }
   m = v.match(/^#([0-9a-f]{6})([0-9a-f]{2})?$/i);
   if (m) {
-    return { r: parseInt(m[1].slice(0, 2), 16), g: parseInt(m[1].slice(2, 4), 16), b: parseInt(m[1].slice(4, 6), 16) };
+    return {
+      r: parseInt(m[1].slice(0, 2), 16),
+      g: parseInt(m[1].slice(2, 4), 16),
+      b: parseInt(m[1].slice(4, 6), 16),
+    };
   }
   m = v.match(/^rgba?\(\s*(\d+)[ ,]+(\d+)[ ,]+(\d+)/i);
   if (m) return { r: +m[1], g: +m[2], b: +m[3] };

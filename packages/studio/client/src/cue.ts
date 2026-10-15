@@ -2,7 +2,9 @@
 import { snapToOnset } from '@reelforge/audio';
 import type { DecodedAudio } from './wave.js';
 
-type Op = { kind: 'cue'; id: string; prev: number | undefined } | { kind: 'word'; id: string; prev: number[] | undefined };
+type Op =
+  | { kind: 'cue'; id: string; prev: number | undefined }
+  | { kind: 'word'; id: string; prev: number[] | undefined };
 
 export class CueModel {
   cues: Record<string, number> = {};
@@ -36,7 +38,9 @@ export class CueModel {
   }
 
   private snap(t: number, audio: DecodedAudio | null): number {
-    return this.autoSnap && audio ? snapToOnset(audio.mono, audio.sampleRate, t) : Math.round(t * 1000) / 1000;
+    return this.autoSnap && audio
+      ? snapToOnset(audio.mono, audio.sampleRate, t)
+      : Math.round(t * 1000) / 1000;
   }
 
   /** Space: mark the selected line (re-mark), the next word (word mode) or the next unmarked line. */
@@ -127,7 +131,9 @@ export class CueModel {
     return {
       version: 1 as const,
       audio: { file: audioFile, duration: Math.round(duration * 1000) / 1000 },
-      cues: Object.fromEntries(this.script.filter((l) => this.cues[l.id] !== undefined).map((l) => [l.id, this.cues[l.id]])),
+      cues: Object.fromEntries(
+        this.script.filter((l) => this.cues[l.id] !== undefined).map((l) => [l.id, this.cues[l.id]]),
+      ),
       words,
     };
   }

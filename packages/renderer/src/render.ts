@@ -68,7 +68,8 @@ export class RenderError extends Error {
   }
 }
 
-export const defaultWorkers = (): number => Math.max(1, (os.availableParallelism?.() ?? os.cpus().length) - 1);
+export const defaultWorkers = (): number =>
+  Math.max(1, (os.availableParallelism?.() ?? os.cpus().length) - 1);
 
 export async function renderEpisode(paths: EpisodePaths, opts: RenderOptions = {}): Promise<RenderResult> {
   const t0 = Date.now();
@@ -79,15 +80,23 @@ export async function renderEpisode(paths: EpisodePaths, opts: RenderOptions = {
   // ---- validate (also runs before render: F14)
   progress({ phase: 'validate', done: 0, total: 1 });
   const ff = probeFfmpeg();
-  if (!ff.ok) throw new RenderError(`ffmpeg not found (${ff.error ?? 'unknown error'}). Run \`reelforge doctor\` for install steps.`);
-  if (!ff.encoders.libx264 || !ff.encoders.aac) throw new RenderError('ffmpeg lacks libx264 or aac encoders. Run `reelforge doctor`.');
+  if (!ff.ok)
+    throw new RenderError(
+      `ffmpeg not found (${ff.error ?? 'unknown error'}). Run \`reelforge doctor\` for install steps.`,
+    );
+  if (!ff.encoders.libx264 || !ff.encoders.aac)
+    throw new RenderError('ffmpeg lacks libx264 or aac encoders. Run `reelforge doctor`.');
   const res = compileEpisode(paths, { ...opts.compile, preset: opts.preset });
   const issues = [...res.issues];
-  if (!res.timeline || !res.ok) throw new RenderError('Validation failed; fix the errors before rendering', issues);
+  if (!res.timeline || !res.ok)
+    throw new RenderError('Validation failed; fix the errors before rendering', issues);
   const tl: Timeline = res.timeline;
   const voiceFile = res.voice?.file;
   if (!voiceFile && !opts.silent) {
-    throw new RenderError(`No voice recording found for ${paths.id}. Record ${res.spec?.audio.voice ?? 'voice.wav'}, or pass --silent.`, issues);
+    throw new RenderError(
+      `No voice recording found for ${paths.id}. Record ${res.spec?.audio.voice ?? 'voice.wav'}, or pass --silent.`,
+      issues,
+    );
   }
   const cacheDir = path.join(paths.out, '.cache');
   if (opts.measure !== false) {
@@ -107,7 +116,10 @@ export async function renderEpisode(paths: EpisodePaths, opts: RenderOptions = {
   const f0 = Math.floor(fromT * tl.fps + 1e-6);
   const f1 = partial ? Math.ceil(toT * tl.fps - 1e-6) : tl.frames;
   const total = f1 - f0;
-  const workers = Math.max(1, Math.floor(opts.workers ?? Number(process.env.REELFORGE_WORKERS ?? defaultWorkers())));
+  const workers = Math.max(
+    1,
+    Math.floor(opts.workers ?? Number(process.env.REELFORGE_WORKERS ?? defaultWorkers())),
+  );
 
   mkdirSync(paths.out, { recursive: true });
   const runId = `${new Date().toISOString().replace(/[:.]/g, '-')}-${randomBytes(3).toString('hex')}`;
@@ -122,7 +134,9 @@ export async function renderEpisode(paths: EpisodePaths, opts: RenderOptions = {
   signal?.addEventListener('abort', onAbort, { once: true });
   try {
     // ---- frames
-    const ranges = splitRanges(f0, f1, workers, (i) => path.join(tmp, `seg_${String(i).padStart(3, '0')}.mp4`));
+    const ranges = splitRanges(f0, f1, workers, (i) =>
+      path.join(tmp, `seg_${String(i).padStart(3, '0')}.mp4`),
+    );
     log(`rendering ${total} frames (${(total / tl.fps).toFixed(1)} s) with ${ranges.length} worker(s)`);
     let done = 0;
     const tStart = Date.now();
@@ -144,7 +158,8 @@ export async function renderEpisode(paths: EpisodePaths, opts: RenderOptions = {
           progress({ phase: 'frames', done, total, fps, eta: (total - done) / Math.max(fps, 1e-3) });
         }
       },
-      onRetry: (r, e) => log(`worker ${r.index} crashed (${e.message.split('\n')[0]}); retrying frames ${r.from}–${r.to - 1}`),
+      onRetry: (r, e) =>
+        log(`worker ${r.index} crashed (${e.message.split('\n')[0]}); retrying frames ${r.from}–${r.to - 1}`),
     });
     if (signal?.aborted) throw new RenderError('Aborted');
 
@@ -153,7 +168,24 @@ export async function renderEpisode(paths: EpisodePaths, opts: RenderOptions = {
     const list = path.join(tmp, 'segments.txt');
     writeFileSync(list, ranges.map((r) => `file '${path.basename(r.file)}'`).join('\n') + '\n');
     const video = path.join(tmp, 'video.mp4');
-    await run(['-hide_banner', '-loglevel', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', list, '-c', 'copy', video], { signal });
+    await run(
+      [
+        '-hide_banner',
+        '-loglevel',
+        'error',
+        '-y',
+        '-f',
+        'concat',
+        '-safe',
+        '0',
+        '-i',
+        list,
+        '-c',
+        'copy',
+        video,
+      ],
+      { signal },
+    );
     const counted = await countFrames(video);
     if (counted !== total) throw new RenderError(`Frame count mismatch: expected ${total}, got ${counted}`);
     progress({ phase: 'concat', done: 1, total: 1 });
@@ -177,13 +209,24 @@ export async function renderEpisode(paths: EpisodePaths, opts: RenderOptions = {
 
     const compliance: RenderResult['compliance'] = {};
     const segDur = total / tl.fps;
-    const timeProgress = (phase: Phase) => (sec: number) => progress({ phase, done: Math.min(sec, segDur), total: segDur });
+    const timeProgress = (phase: Phase) => (sec: number) =>
+      progress({ phase, done: Math.min(sec, segDur), total: segDur });
 
     if (partial) {
       const part = path.join(paths.out, `${id}.part.mp4`);
       written.push(part);
       progress({ phase: 'master', done: 0, total: segDur });
-      await encodeMaster({ video, audio: mix, out: part, fps: tl.fps, duration: segDur, audioOffset: f0 / tl.fps, fast: true, signal, onTime: timeProgress('master') });
+      await encodeMaster({
+        video,
+        audio: mix,
+        out: part,
+        fps: tl.fps,
+        duration: segDur,
+        audioOffset: f0 / tl.fps,
+        fast: true,
+        signal,
+        onTime: timeProgress('master'),
+      });
       outputs.part = part;
       compliance.part = await checkCompliance(part, { fps: tl.fps });
     } else {
@@ -191,7 +234,16 @@ export async function renderEpisode(paths: EpisodePaths, opts: RenderOptions = {
       const master = path.join(paths.out, `${id}.master.mp4`);
       written.push(master);
       progress({ phase: 'master', done: 0, total: segDur });
-      await encodeMaster({ video, audio: mix, out: master, fps: tl.fps, duration: tl.duration, fast: opts.fast, signal, onTime: timeProgress('master') });
+      await encodeMaster({
+        video,
+        audio: mix,
+        out: master,
+        fps: tl.fps,
+        duration: tl.duration,
+        fast: opts.fast,
+        signal,
+        onTime: timeProgress('master'),
+      });
       outputs.master = master;
       compliance.master = await checkCompliance(master, { fps: tl.fps });
 
@@ -202,11 +254,32 @@ export async function renderEpisode(paths: EpisodePaths, opts: RenderOptions = {
         written.push(share);
         const shareMb = opts.shareMb ?? Number(process.env.REELFORGE_SHARE_SIZE ?? tl.preset.shareMb);
         progress({ phase: 'share', done: 0, total: segDur });
-        let r = await encodeShare({ video, audio: mix, out: share, fps: tl.fps, duration: tl.duration, shareMb, tmpDir: tmp, fast: opts.fast, signal, onTime: timeProgress('share') });
+        let r = await encodeShare({
+          video,
+          audio: mix,
+          out: share,
+          fps: tl.fps,
+          duration: tl.duration,
+          shareMb,
+          tmpDir: tmp,
+          fast: opts.fast,
+          signal,
+          onTime: timeProgress('share'),
+        });
         let c = await checkCompliance(share, { fps: tl.fps, maxBytes: shareMb * 1048576 });
         if (!c.ok && c.problems.some((p) => p.startsWith('size'))) {
           log(`share file over target; re-encoding at 90% bitrate`);
-          r = await encodeShare({ video, audio: mix, out: share, fps: tl.fps, duration: tl.duration, shareMb: shareMb * 0.9, tmpDir: tmp, fast: opts.fast, signal });
+          r = await encodeShare({
+            video,
+            audio: mix,
+            out: share,
+            fps: tl.fps,
+            duration: tl.duration,
+            shareMb: shareMb * 0.9,
+            tmpDir: tmp,
+            fast: opts.fast,
+            signal,
+          });
           c = await checkCompliance(share, { fps: tl.fps, maxBytes: shareMb * 1048576 });
         }
         shareKbps = r.kbps;
@@ -243,7 +316,15 @@ export async function renderEpisode(paths: EpisodePaths, opts: RenderOptions = {
 
     function finish(compliance: RenderResult['compliance'], shareKbps?: number): RenderResult {
       const bad = Object.values(compliance).some((c) => c && !c.ok);
-      return { ok: !bad, issues, outputs, compliance, frames: total, seconds: (Date.now() - t0) / 1000, shareKbps };
+      return {
+        ok: !bad,
+        issues,
+        outputs,
+        compliance,
+        frames: total,
+        seconds: (Date.now() - t0) / 1000,
+        shareKbps,
+      };
     }
   } catch (e) {
     if (signal?.aborted) {

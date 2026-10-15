@@ -29,7 +29,15 @@ export interface MeasureOptions {
 }
 
 export async function measureTimeline(tl: Timeline, opts: MeasureOptions = {}): Promise<Issue[]> {
-  const key = sha1(JSON.stringify({ r: runtimeVersion(), s: tl.scenes.map((s) => s.hash), c: tl.captions, th: tl.theme, p: tl.preset })).slice(0, 20);
+  const key = sha1(
+    JSON.stringify({
+      r: runtimeVersion(),
+      s: tl.scenes.map((s) => s.hash),
+      c: tl.captions,
+      th: tl.theme,
+      p: tl.preset,
+    }),
+  ).slice(0, 20);
   const cacheFile = opts.cacheDir ? path.join(opts.cacheDir, 'measure.json') : undefined;
   let data: MeasureCache | undefined;
   if (cacheFile && existsSync(cacheFile)) {
