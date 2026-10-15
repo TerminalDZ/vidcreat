@@ -22,7 +22,7 @@
     "@reelforge/core": "workspace:*",
     "@reelforge/renderer": "workspace:*",
     "@reelforge/runtime": "workspace:*",
-    "ws": "8.18.3"
+    "ws": "8.21.0"
   },
   "devDependencies": {
     "@types/ws": "8.18.1",
