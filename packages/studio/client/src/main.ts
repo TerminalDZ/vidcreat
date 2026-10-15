@@ -15,6 +15,8 @@ let loadedTimeline: Timeline | null = null;
 let audio: DecodedAudio | null = null;
 let voiceUrl: string | null = null;
 let dirty = false;
+/** Incremented on every local cue edit; a save only clears `dirty` if no newer edit happened meanwhile. */
+let edits = 0;
 let saveTimer: number | undefined;
 let saveStatus = '';
 const overlays = { safe: true, stage: false, boxes: false, time: true };
@@ -115,10 +117,8 @@ function applyState(s: StudioState): void {
       .map((i) => `${esc(loc(i))}  ${esc(i.message)}${i.hint ? `\n   → ${esc(i.hint)}` : ''}`)
       .join('\n\n')}`;
   } else box.hidden = true;
-  setStatus(
-    saveStatus || `compiled in ${s.compileMs} ms · ${errors.length} error(s)`,
-    errors.length ? 'err' : 'ok',
-  );
+  if (errors.length) setStatus(`${errors.length} error(s) — see the lint panel`, 'err');
+  else setStatus(saveStatus || `compiled in ${s.compileMs} ms · no errors`, 'ok');
 }
 
 function setStatus(text: string, cls = ''): void {
@@ -218,16 +218,16 @@ function changed(id: string | null): void {
 
 function scheduleSave(): void {
   dirty = true;
+  edits++;
   clearTimeout(saveTimer);
   saveTimer = window.setTimeout(save, 150);
 }
 
 async function save(): Promise<void> {
   if (!state) return;
-  const body = model.toJson(
-    state.voice?.url ? 'voice.wav' : 'voice.wav',
-    state.voice?.duration ?? state.timeline?.duration ?? 0,
-  );
+  const rev = edits;
+  // The server fills in the real voice file name, duration and hash.
+  const body = model.toJson('voice.wav', state.voice?.duration ?? state.timeline?.duration ?? 0);
   try {
     const res = await fetch('/cues', {
       method: 'PUT',
@@ -237,7 +237,7 @@ async function save(): Promise<void> {
     const j = (await res.json()) as { ok?: boolean; error?: string };
     if (!res.ok) throw new Error(j.error ?? res.statusText);
     saveStatus = `saved ${new Date().toLocaleTimeString()}`;
-    dirty = false;
+    if (edits === rev) dirty = false;
     setStatus(saveStatus, 'ok');
   } catch (e) {
     saveStatus = '';

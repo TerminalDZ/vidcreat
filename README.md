@@ -22,6 +22,13 @@ platform-ready encoding.
 | `reelforge doctor [--fix]`                 | check Node, ffmpeg, Chromium and fonts                                                                          |
 | `reelforge schema`                         | write the JSON Schema for editor autocompletion                                                                 |
 
+## Screenshots
+
+![Studio preview](docs/screenshots/03-studio-preview-safe-zones.jpg)
+
+More in [docs/screenshots](docs/screenshots/README.md): cue marker, word mode, lint panel, error overlay,
+every Season 1 episode, the component gallery and the CLI.
+
 ## Install
 
 Requirements: **Node.js 22+**, **pnpm 10** (`corepack enable`), **ffmpeg 6+** with libx264 and aac.

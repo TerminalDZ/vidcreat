@@ -120,18 +120,15 @@ describe('studio UI', () => {
     expect(saved.cues.l2).toBeCloseTo(3, 1);
     // nudge + undo
     await page.locator('#lines li[data-id="l2"]').click();
+    const l2 = () => JSON.parse(readFileSync(path.join(dir, 'cues.json'), 'utf8')).cues.l2 as number;
+    const until = async (want: number) => {
+      for (let i = 0; i < 60 && Math.abs(l2() - want) > 0.0005; i++) await page.waitForTimeout(50);
+      expect(l2()).toBeCloseTo(want, 3);
+    };
     await page.keyboard.press('ArrowRight');
-    await page.waitForTimeout(400);
-    expect(JSON.parse(readFileSync(path.join(dir, 'cues.json'), 'utf8')).cues.l2).toBeCloseTo(
-      saved.cues.l2 + 0.05,
-      3,
-    );
+    await until(saved.cues.l2 + 0.05);
     await page.keyboard.press('Backspace');
-    await page.waitForTimeout(400);
-    expect(JSON.parse(readFileSync(path.join(dir, 'cues.json'), 'utf8')).cues.l2).toBeCloseTo(
-      saved.cues.l2,
-      3,
-    );
+    await until(saved.cues.l2);
     // preview mode + lint panel
     await page.keyboard.press('v');
     await page.waitForFunction(() => document.body.dataset.mode === 'dev');
@@ -152,6 +149,8 @@ describe('studio UI', () => {
     writeFileSync(yamlFile, original.replace('scenes:', 'scenes:\n  - bogus: [\n'));
     await waitFor(() => studio.state().error);
     expect(studio.state().timeline).not.toBeNull();
+    expect(studio.state().title).toBe('Hot'); // last good values are kept while the YAML is broken
+    expect(studio.state().voice?.url).toMatch(/voice\.wav$/);
     writeFileSync(yamlFile, original);
     await waitFor(() => !studio.state().error);
   });

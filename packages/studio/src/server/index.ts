@@ -156,13 +156,15 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
     state = {
       mode: opts.mode,
       id: paths.id,
-      title: result.spec?.meta.title ?? paths.id,
+      title: result.spec?.meta.title ?? state?.title ?? paths.id,
       script: result.script,
       cues: cuesFile ? { cues: cuesFile.cues, words: cuesFile.words ?? {} } : null,
       timeline: result.ok || !lastGood ? (result.timeline ?? lastGood) : (result.timeline ?? lastGood),
       issues: result.issues,
       error: result.issues.some((i) => i.level === 'error' && (i.rule === 'V-1' || i.rule === 'V-13')),
-      voice: voiceInfo(),
+      // A broken YAML stops compilation before the voice is loaded: keep the last one so the
+      // studio does not reload the audio and lose the playhead (FR-DEV-3).
+      voice: voiceInfo() ?? state?.voice ?? null,
       compiledAt: Date.now(),
       compileMs: Math.round(performance.now() - t0),
     };

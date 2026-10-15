@@ -375,7 +375,7 @@ scenes:
     elements:
       - use: label
         id: finale
-        props: { text: 'season finale', dot: true, color: amber }
+        props: { text: 'next: season finale', dot: true, color: amber }
         place: { x: 60, y: 40, w: 600, h: 60 }
         enter: { at: "l24:'آخر'", anim: fade }
       - use: cta

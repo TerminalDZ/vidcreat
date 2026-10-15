@@ -65,7 +65,7 @@ body[data-mode="cue"] #cuePanel, body[data-mode="dev"] #devPanel { display: flex
 #issues .msg { font-size: 13px; }
 #issues .loc { grid-column: 2; font: 11px ui-monospace, monospace; color: var(--dim); }
 #issues .loc a { color: var(--dim); }
-#issues .empty { color: var(--lime); cursor: default; }
+#issues .empty { display: block; color: var(--lime); cursor: default; }
 #bottom { border-top: 1px solid var(--line); background: var(--panel); padding: 8px 14px 12px; display: grid; grid-template-columns: 120px minmax(0, 1fr); grid-template-rows: auto auto; gap: 6px 12px; }
 #transport { grid-row: 1 / 3; display: flex; flex-direction: column; gap: 8px; justify-content: center; }
 #zoom { height: 120px; }
