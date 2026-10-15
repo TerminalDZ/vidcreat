@@ -1,0 +1,12 @@
+# TikTok 9:16 layout (SRS §7.1). Edit freely: no code change is needed.
+name: tiktok
+label: TikTok
+canvas: { width: 1080, height: 1920, fps: 30 }
+header_top: 150
+stage: { y: 270, h: 1000 }
+captions_y: 1300
+safe:
+  - { name: right-rail, x: 940, y: 900, w: 140, h: 1020 }
+  - { name: bottom, x: 0, y: 1540, w: 1080, h: 380 }
+share_mb: 28
+max_duration: 600

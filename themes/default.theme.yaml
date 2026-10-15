@@ -1,0 +1,19 @@
+# ReelForge default theme — the "System Design بالعربي" Season 1 look (PRD F8).
+# Every series can override any token with its own theme file that `extends: default`.
+name: default
+colors:
+  bg: '#07080c'
+  ink: '#eef1f7'
+  dim: '#7d8496'
+  line: '#222735'
+  card: '#10131b'
+  lime: '#b8ff3c'
+  cyan: '#55dcff'
+  red: '#ff4a5c'
+  amber: '#ffb238'
+  violet: '#c792ff'
+fonts: { display: 'Space Grotesk', mono: 'JetBrains Mono', arabic: 'Cairo' }
+type: { caption: 66, title: 120, h2: 84, body: 32, label: 24 }
+chrome: { header: true, progress: true, waveform: true, grain: 0.07, vignette: 0.75, grid: true }
+motion: { pop_overshoot: 1.9, default_dur: 0.45, crossfade: 0.3 }
+captions: { active: lime, english: cyan, future_opacity: 0.32, max_lines: 2, max_chars: 34, scrim: 0.78 }

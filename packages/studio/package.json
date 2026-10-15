@@ -1,0 +1,26 @@
+{
+  "name": "@reelforge/studio",
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/server/index.js",
+  "types": "./dist/server/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/server/index.d.ts", "default": "./dist/server/index.js" }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -b && vite build"
+  },
+  "dependencies": {
+    "@reelforge/audio": "workspace:*",
+    "@reelforge/core": "workspace:*",
+    "@reelforge/renderer": "workspace:*",
+    "@reelforge/runtime": "workspace:*",
+    "ws": "8.18.3"
+  },
+  "devDependencies": {
+    "@types/ws": "8.18.1",
+    "vite": "6.4.1"
+  }
+}

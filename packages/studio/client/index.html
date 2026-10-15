@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ReelForge Studio</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <header id="top">
+      <div class="brand"><i></i>ReelForge <span id="ep"></span></div>
+      <nav id="tabs">
+        <button data-mode="cue" title="Cue marker (C)">Cue</button>
+        <button data-mode="dev" title="Preview (V)">Preview</button>
+      </nav>
+      <div class="spacer"></div>
+      <div id="speed" class="seg" title="Playback speed (1/2/3)">
+        <button data-speed="0.5">0.5×</button><button data-speed="0.75">0.75×</button><button data-speed="1">1×</button>
+      </div>
+      <div id="clock" class="mono">0:00.00</div>
+      <div id="status" class="mono"></div>
+      <button id="helpBtn" title="Shortcuts (?)">?</button>
+    </header>
+    <main>
+      <section id="stage">
+        <div id="frame">
+          <iframe id="runtime" title="ReelForge runtime" src="/runtime/runtime.html"></iframe>
+          <svg id="overlay" viewBox="0 0 1080 1920" preserveAspectRatio="none"></svg>
+          <div id="errorBox" hidden></div>
+        </div>
+      </section>
+      <aside id="panel">
+        <div id="cuePanel">
+          <div class="panelHead">
+            <b>Script</b>
+            <span id="cueStats" class="mono dim"></span>
+            <label class="toggle" title="Auto snap to onset (A)"><input type="checkbox" id="autoSnap" /> snap</label>
+          </div>
+          <ol id="lines"></ol>
+          <p class="hint">Space: mark next line · click a line to re-mark it · ←/→ nudge · Backspace undo · W word mode</p>
+        </div>
+        <div id="devPanel">
+          <div class="panelHead">
+            <b>Lint</b>
+            <span id="lintStats" class="mono dim"></span>
+          </div>
+          <div id="toggles">
+            <label class="toggle"><input type="checkbox" data-ov="safe" checked /> safe zones <kbd>Z</kbd></label>
+            <label class="toggle"><input type="checkbox" data-ov="stage" /> stage <kbd>B</kbd></label>
+            <label class="toggle"><input type="checkbox" data-ov="boxes" /> boxes <kbd>E</kbd></label>
+            <label class="toggle"><input type="checkbox" data-ov="time" checked /> time <kbd>T</kbd></label>
+          </div>
+          <ul id="issues"></ul>
+        </div>
+      </aside>
+    </main>
+    <footer id="bottom">
+      <div id="transport">
+        <button id="play" title="Play/pause (K, Enter)">▶</button>
+        <span class="mono dim" id="dur"></span>
+      </div>
+      <canvas id="zoom" height="120"></canvas>
+      <canvas id="overview" height="74"></canvas>
+    </footer>
+    <div id="help" hidden>
+      <div class="card">
+        <h2>Shortcuts</h2>
+        <div class="cols">
+          <section>
+            <h3>Everywhere</h3>
+            <dl>
+              <dt>C / V</dt><dd>Cue / Preview mode</dd>
+              <dt>K, Enter</dt><dd>Play / pause</dd>
+              <dt>J / L</dt><dd>Back / forward 1 s</dd>
+              <dt>, / .</dt><dd>Previous / next frame</dd>
+              <dt>Home / End</dt><dd>Start / end</dd>
+              <dt>1 2 3</dt><dd>Speed 0.5× 0.75× 1×</dd>
+              <dt>?</dt><dd>This help</dd>
+            </dl>
+          </section>
+          <section>
+            <h3>Cue mode</h3>
+            <dl>
+              <dt>Space</dt><dd>Mark next line (or the selected line)</dd>
+              <dt>Backspace</dt><dd>Undo last mark</dd>
+              <dt>Click / ↑ ↓</dt><dd>Select a line to re-mark</dd>
+              <dt>← / →</dt><dd>Nudge selected cue 50 ms (Shift 10 ms)</dd>
+              <dt>S</dt><dd>Snap selected cue to onset</dd>
+              <dt>A</dt><dd>Toggle auto-snap</dd>
+              <dt>W</dt><dd>Word mode for the selected line</dd>
+              <dt>G</dt><dd>Go to the selected cue</dd>
+              <dt>Esc</dt><dd>Clear selection</dd>
+            </dl>
+          </section>
+          <section>
+            <h3>Preview mode</h3>
+            <dl>
+              <dt>Space</dt><dd>Play / pause</dd>
+              <dt>Z</dt><dd>Safe zones</dd>
+              <dt>B</dt><dd>Stage bounds</dd>
+              <dt>E</dt><dd>Element boxes</dd>
+              <dt>T</dt><dd>Time readout</dd>
+            </dl>
+          </section>
+        </div>
+        <p class="dim">Edit episode.yaml in your editor: the preview reloads on save.</p>
+      </div>
+    </div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+out/
+*.tsbuildinfo
+.DS_Store
+*.log
+/episodes/
+fixtures/**/out/
+examples/**/voice.wav
+!fixtures/mini/voice.wav
+.vite/

@@ -1,0 +1,68 @@
+# fixtures/mini — a 6-second end-to-end integration episode (SRS §12.1).
+meta:
+  id: mini
+  series: "SYSTEM DESIGN"
+  title: "Mini"
+  episode: 1
+  preset: tiktok
+  theme: default
+  lang: ar-EG
+  publish:
+    cover: "اختبار"
+    caption: "حلقة اختبار قصيرة"
+    hashtags: ["#reelforge"]
+
+audio:
+  voice: voice.wav
+  sfx: auto
+  sfx_gain_db: -16
+
+script:
+  - text: "المشكلة دي اسمها Duplicate Charge"
+  - text: "الـ client بعت الـ request مرتين"
+  - text: "والحل؟ Idempotency key"
+
+chapters:
+  - { at: l1, label: "01 · THE PROBLEM" }
+  - { at: l3, label: "02 · THE FIX" }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: red
+    elements:
+      - use: title
+        id: t1
+        props: { text: "**Duplicate** Charge" }
+        place: { x: 60, y: 120, w: 960, h: 200 }
+        enter: { at: "l1:'Duplicate'", anim: pop }
+      - use: node
+        id: client
+        props: { title: "Client", sub: "POST /pay" }
+        place: { x: 80, y: 520, w: 300, h: 170 }
+        enter: { at: l2, anim: pop }
+      - use: node
+        id: api
+        props: { title: "API", sub: "charge()", color: violet }
+        place: { x: 620, y: 520, w: 300, h: 170 }
+        enter: { at: "l2:'request'", anim: pop }
+        states:
+          - { at: "l2:'مرتين'", set: { status: err, sub: "charged ×2" } }
+      - use: arrow
+        id: req
+        props: { from: client, to: api, label: "POST /pay", packet: true, color: cyan }
+        enter: { at: "l2:'request'", anim: draw }
+      - use: stamp
+        id: twice
+        props: { text: "×2" }
+        place: { x: 640, y: 760, w: 300, h: 180 }
+        enter: { at: "l2:'مرتين'" }
+  - id: fix
+    at: l3
+    glow: lime
+    elements:
+      - use: chip
+        id: key
+        props: { text: "Idempotency-Key", color: lime }
+        place: { center: true, w: 560, h: 100 }
+        enter: { at: "l3:'Idempotency'", anim: pop }
