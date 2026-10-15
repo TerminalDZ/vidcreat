@@ -147,7 +147,7 @@ describe('studio UI', () => {
       for (let i = 0; i < 100 && !pred(); i++) await new Promise((r) => setTimeout(r, 50));
       expect(pred()).toBe(true);
     };
-    writeFileSync(yamlFile, original.replace(/^  title: .*$/m, '  title: Hot'));
+    writeFileSync(yamlFile, original.replace(/^ {2}title: .*$/m, '  title: Hot'));
     await waitFor(() => studio.state().title === 'Hot');
     writeFileSync(yamlFile, original.replace('scenes:', 'scenes:\n  - bogus: [\n'));
     await waitFor(() => studio.state().error);

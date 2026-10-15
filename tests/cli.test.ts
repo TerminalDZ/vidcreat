@@ -44,6 +44,14 @@ describe('reelforge CLI', () => {
     expect(res.frames).toHaveLength(3);
     expect(readFileSync(res.sheet).subarray(0, 2).toString('hex')).toBe('ffd8');
     expect(run(['snap', 'ep10', 'l99', '--root', root]).code).toBe(2);
+    // v1.1: cover image and theme generator
+    expect(run(['snap', 'ep10', 'l2', '--cover', '--root', root]).code).toBe(0);
+    expect(existsSync(path.join(root, 'episodes/ep10/out/ep10.cover.png'))).toBe(true);
+    expect(run(['snap', 'ep10', 'l1', 'l2', '--cover', '--root', root]).code).toBe(2);
+    expect(run(['theme', 'new', 'ocean', '--accent', '#3cc8ff', '--root', root]).code).toBe(0);
+    expect(readFileSync(path.join(root, 'themes/ocean.theme.yaml'), 'utf8')).toMatch(/lime: '#3cc8ff'/);
+    expect(run(['theme', 'new', 'bad', '--accent', 'blue', '--root', root]).code).toBe(2);
+    expect(run(['render', '--root', root]).code).toBe(2);
   });
 
   it('reports unknown episodes and writes the JSON schema', () => {

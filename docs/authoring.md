@@ -117,7 +117,8 @@ same sound closer than 80 ms are merged.
 ## 6. Themes and presets
 
 Themes (`themes/*.theme.yaml`) hold every color, font, size and motion token and can `extends:`
-another theme. Presets (`presets/*.preset.yaml`) hold the canvas, header/stage/caption positions,
+another theme. `chrome.grain_fps` (default 0, a static texture) controls how often the film grain
+changes; animated grain multiplies the file size (see ADR-011). Presets (`presets/*.preset.yaml`) hold the canvas, header/stage/caption positions,
 safe-zone rectangles, share size and maximum duration — edit them without touching code.
 
 ## 7. Validation rules

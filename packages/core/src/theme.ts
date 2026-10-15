@@ -30,6 +30,7 @@ const partialTheme = z
         progress: z.boolean(),
         waveform: z.boolean(),
         grain: z.number().min(0).max(1),
+        grain_fps: z.number().min(0).max(30),
         vignette: z.number().min(0).max(1),
         grid: z.boolean(),
       })
@@ -73,7 +74,15 @@ export const FALLBACK_THEME: Theme = {
   },
   fonts: { display: 'Space Grotesk', mono: 'JetBrains Mono', arabic: 'Cairo' },
   type: { caption: 66, title: 120, h2: 84, body: 32, label: 24 },
-  chrome: { header: true, progress: true, waveform: true, grain: 0.07, vignette: 0.75, grid: true },
+  chrome: {
+    header: true,
+    progress: true,
+    waveform: true,
+    grain: 0.07,
+    grain_fps: 0,
+    vignette: 0.75,
+    grid: true,
+  },
   motion: { pop_overshoot: 1.9, default_dur: 0.45, crossfade: 0.3 },
   captions: {
     active: 'lime',
@@ -171,7 +180,50 @@ export function loadTheme(name: string, root: string, episodeDir: string, seen: 
       });
     }
   }
+  if (!seen.length) issues.push(...captionContrastIssues(theme).map((i) => ({ ...i, file })));
   return { theme, files: [...base.files, file], issues };
+}
+
+function luminance(hex: string): number | undefined {
+  const m = hex.match(/^#([0-9a-f]{6})$/i);
+  if (!m) return undefined;
+  const ch = [0, 2, 4]
+    .map((i) => parseInt(m[1].slice(i, i + 2), 16) / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
+}
+
+/** WCAG contrast ratio between two #rrggbb colors (undefined for other formats). */
+export function contrastRatio(a: string, b: string): number | undefined {
+  const la = luminance(a);
+  const lb = luminance(b);
+  if (la === undefined || lb === undefined) return undefined;
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+/**
+ * NFR-14: caption text (ink, active and english colors) must reach 7:1 against the scrim.
+ * The scrim is the background color at `captions.scrim` opacity over the background, i.e. ≈ bg.
+ */
+export function captionContrastIssues(theme: Theme): Issue[] {
+  const bg = theme.colors.bg;
+  const out: Issue[] = [];
+  for (const [name, c] of [
+    ['colors.ink', theme.colors.ink],
+    ['captions.active', resolveColor(theme, theme.captions.active)],
+    ['captions.english', resolveColor(theme, theme.captions.english)],
+  ] as const) {
+    const r = contrastRatio(c, bg);
+    if (r !== undefined && r < 7) {
+      out.push({
+        rule: 'V-1',
+        level: 'warn',
+        message: `Theme "${theme.name}": caption color ${name} (${c}) has contrast ${r.toFixed(1)}:1 against the background (needs ≥ 7:1)`,
+        hint: 'Use a lighter caption color or a darker bg',
+      });
+    }
+  }
+  return out;
 }
 
 /** Theme with caption color tokens resolved to CSS values (DR-5). */

@@ -2,11 +2,11 @@
 
 export const ARABIC_RE = /[؀-ۿ]/;
 export const LATIN_RE = /[A-Za-z]/;
-export const TATWEEL = 'ـ';
+export const TATWEEL = '\u0640';
 export const NBSP = '\u00A0';
 /** Punctuation ignored for word weighting and matching (SRS §5.2). */
 const PUNCT_RE = /[،؟؛.,?!:;"'“”«»()[\]{}…\-–—]/g;
-const DIACRITICS_RE = /[ً-ٰٟۖ-ۭ]/g;
+const DIACRITICS_RE = /[\u064B-\u065F\u0670\u06D6-\u06ED]/g;
 
 export const hasArabic = (s: string): boolean => ARABIC_RE.test(s);
 export const hasLatin = (s: string): boolean => LATIN_RE.test(s);

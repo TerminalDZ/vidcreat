@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildLineTimings,
+  letterCount,
+  normalizeWord,
   estimateWordStarts,
   LINE_TAIL,
   parseTime,
@@ -93,6 +95,15 @@ describe('time expressions (SRS §5)', () => {
     expect(() => resolveTime('l1-1', c)).toThrow(/before the start/);
     expect(() => resolveTime('20s', c)).toThrow(/after the end/);
     expect(() => resolveTime("l2:'request'#5", c)).toThrow(/fewer than 5/);
+  });
+});
+
+describe('text normalization', () => {
+  it('strips diacritics and tatweel but keeps Arabic-Indic digits', () => {
+    expect(normalizeWord('مَرَّتين؟')).toBe('مرتين');
+    expect(normalizeWord('الـ')).toBe('ال');
+    expect(normalizeWord('٣')).toBe('٣');
+    expect(letterCount('٣٠٠')).toBe(3);
   });
 });
 

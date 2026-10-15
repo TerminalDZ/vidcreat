@@ -279,8 +279,10 @@ export class Overlays {
     css(this.flash, 'opacity', best.toFixed(3));
     if (best > 0) css(this.flash, 'background', color);
     if (this.grain) {
-      // 8 seeded offsets cycled by frame index (FR-RT-5: "8 pre-generated tiles chosen by frame index").
-      const k = frame % 8;
+      // 8 seeded offsets chosen by frame index (FR-RT-5). `grain_fps` sets how often the grain
+      // changes; the default 0 keeps it static, because per-frame noise multiplies the bitrate ~30×.
+      const rate = this.tl.theme.chrome.grain_fps;
+      const k = rate > 0 ? Math.floor((frame * rate) / this.tl.fps) % 8 : 0;
       const ox = Math.floor(rnd(this.tl.seed + k * 2) * GRAIN_PAD);
       const oy = Math.floor(rnd(this.tl.seed + k * 2 + 1) * GRAIN_PAD);
       css(this.grain, 'transform', `translate(${-ox}px, ${-oy}px)`);

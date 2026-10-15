@@ -1,6 +1,6 @@
 /** `reelforge` command-line interface (SRS §4.1, FR-CLI-1…8). */
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, renameSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { Command, InvalidArgumentError, Option } from 'commander';
@@ -11,6 +11,7 @@ import {
   episodePaths,
   episodeTemplate,
   INSTALL_ROOT,
+  normalizeWord,
   projectRoot,
   resolveEpisode,
   resolveTime,
@@ -351,13 +352,44 @@ async function cmdRender(id: string, o: RenderFlags, g: Globals) {
   }
 }
 
+function usage(msg: string): never {
+  throw new CliError(msg, 2);
+}
+
+/** v1.1 batch render: every folder with an episode.yaml, in name order. */
+async function cmdRenderAll(dirArg: string | undefined, o: RenderFlags, g: Globals) {
+  const root = projectRoot(g.root);
+  const base = path.resolve(root, dirArg ?? 'episodes');
+  if (!existsSync(base)) throw new CliError(`No such folder: ${base}`);
+  const eps = readdirSync(base)
+    .filter((d) => existsSync(path.join(base, d, 'episode.yaml')))
+    .sort();
+  if (!eps.length) throw new CliError(`No episodes (folders with episode.yaml) in ${base}`);
+  const failed: string[] = [];
+  for (const ep of eps) {
+    if (!g.json) console.error(c.bold(`\n▶ ${ep}`));
+    process.exitCode = 0;
+    await cmdRender(path.join(base, ep), o, g);
+    if (process.exitCode) failed.push(ep);
+  }
+  process.exitCode = failed.length ? 1 : 0;
+  if (!g.json)
+    console.error(
+      failed.length
+        ? c.red(`\n✗ failed: ${failed.join(', ')}`)
+        : c.green(`\n✓ rendered ${eps.length} episode(s)`),
+    );
+}
+
 async function cmdSnap(
   id: string,
   times: string[],
-  o: { every?: number; out?: string; preset?: string },
+  o: { every?: number; out?: string; preset?: string; cover?: boolean },
   g: Globals,
 ) {
   const p = episode(id, g);
+  if (o.cover && times.length !== 1)
+    throw new CliError('--cover takes exactly one time, e.g. `reelforge snap ep01 l3 --cover`', 2);
   const r = compileEpisode(p, { draftCues: true, preset: o.preset, decode: ffmpegDecode });
   if (!r.timeline || r.issues.some((i) => i.level === 'error' && (i.rule === 'V-1' || i.rule === 'V-13'))) {
     printIssues(r.issues, g);
@@ -374,7 +406,7 @@ async function cmdSnap(
           id: l.id,
           start: l.start,
           next: l.end,
-          words: l.words.map((w) => ({ ...w, norm: normalize(w.text) })),
+          words: l.words.map((w) => ({ ...w, norm: normalizeWord(w.text) })),
         },
       ]),
     );
@@ -386,22 +418,18 @@ async function cmdSnap(
       }
     });
   } else throw new CliError('Give times (e.g. `reelforge snap ep01 0 l7 12.5s`) or --every <seconds>', 2);
-  const dir = o.out ? path.resolve(o.out) : path.join(p.out, 'snaps');
-  const res = await snapFrames(tl, ts, dir, { assetsDir: p.assets });
+  const dir = o.out ? path.resolve(o.out) : o.cover ? p.out : path.join(p.out, 'snaps');
+  const res = await snapFrames(tl, ts, dir, { assetsDir: p.assets, sheet: !o.cover });
+  if (o.cover) {
+    const cover = path.join(dir, `${tl.meta.id}.cover.png`);
+    renameSync(res.frames[0], cover);
+    res.frames = [cover];
+  }
   out(g, res, () => {
     for (const f of res.frames) console.log(`${c.green('✓')} ${path.relative(process.cwd(), f)}`);
     if (res.sheet)
       console.log(`${c.green('✓')} ${path.relative(process.cwd(), res.sheet)} ${c.dim('(contact sheet)')}`);
   });
-}
-
-function normalize(w: string): string {
-  return w
-    .replace(/[،؟؛.,?!:;"'“”«»()[\]{}…\-–—]/g, '')
-    .replace(/[ً-ٰٟ]/g, '')
-    .replaceAll('ـ', '')
-    .replace(/[أإآ]/g, 'ا')
-    .toLowerCase();
 }
 
 async function cmdDoctor(o: { fix?: boolean }, g: Globals) {
@@ -433,6 +461,51 @@ async function cmdDoctor(o: { fix?: boolean }, g: Globals) {
     );
   });
   if (!ok) process.exitCode = 1;
+}
+
+/** v1.1 theme generator: a theme that extends default with a palette derived from one accent color. */
+async function cmdThemeNew(name: string, o: { accent: string; out?: string }, g: Globals) {
+  if (!/^[a-z0-9][a-z0-9_-]*$/i.test(name)) throw new CliError('Theme name must be a slug', 2);
+  const m = o.accent.match(/^#?([0-9a-f]{6})$/i);
+  if (!m) throw new CliError('--accent must be a hex color like #b8ff3c', 2);
+  const [r, gg, b] = [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16) / 255);
+  const max = Math.max(r, gg, b);
+  const min = Math.min(r, gg, b);
+  const d = max - min;
+  let h = 0;
+  if (d) h = max === r ? ((gg - b) / d) % 6 : max === gg ? (b - r) / d + 2 : (r - gg) / d + 4;
+  h = (h * 60 + 360) % 360;
+  const hsl = (hh: number, s: number, l: number) => {
+    const k = (n: number) => (n + hh / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1));
+    return `#${[f(0), f(8), f(4)]
+      .map((x) =>
+        Math.round(x * 255)
+          .toString(16)
+          .padStart(2, '0'),
+      )
+      .join('')}`;
+  };
+  const yaml = `# Generated by \`reelforge theme new ${name} --accent #${m[1]}\`. Edit freely.
+name: ${name}
+extends: default
+colors:
+  bg: '${hsl(h, 0.35, 0.04)}'
+  card: '${hsl(h, 0.3, 0.08)}'
+  line: '${hsl(h, 0.2, 0.17)}'
+  lime: '#${m[1].toLowerCase()}'
+  cyan: '${hsl((h + 150) % 360, 0.9, 0.67)}'
+  violet: '${hsl((h + 210) % 360, 0.9, 0.78)}'
+captions: { active: lime, english: cyan }
+`;
+  const file = path.resolve(o.out ?? path.join(projectRoot(g.root), 'themes', `${name}.theme.yaml`));
+  if (existsSync(file)) throw new CliError(`${file} already exists`);
+  mkdirSync(path.dirname(file), { recursive: true });
+  writeFileSync(file, yaml);
+  out(g, { ok: true, file }, () =>
+    console.log(`${c.green('✓')} wrote ${path.relative(process.cwd(), file)} (set meta.theme: ${name})`),
+  );
 }
 
 async function cmdSchema(o: { out?: string }, g: Globals) {
@@ -497,7 +570,8 @@ export function buildProgram(): Command {
   program
     .command('render')
     .description('render master + share MP4, SRT, contact sheet and publish.md')
-    .argument('<id>', 'episode id or path')
+    .argument('[id]', 'episode id or path (or a folder of episodes with --all)')
+    .option('--all', 'render every episode in episodes/ (or in the given folder)')
     .option('--preset <name>', 'tiktok | reels | shorts (default: meta.preset, $REELFORGE_PRESET)')
     .option(
       '--workers <n>',
@@ -518,7 +592,13 @@ export function buildProgram(): Command {
     .option('--silent', 'allow rendering without a voice recording')
     .option('--keep-tmp', 'keep out/.tmp/<run-id>/ on failure')
     .option('--no-measure', 'skip the headless V-9/V-10 checks')
-    .action((id, o, cmd) => cmdRender(id, o, globals(cmd)));
+    .action((id, o, cmd) =>
+      o.all
+        ? cmdRenderAll(id, o, globals(cmd))
+        : id
+          ? cmdRender(id, o, globals(cmd))
+          : usage('render needs an episode id, or --all'),
+    );
 
   program
     .command('snap')
@@ -528,6 +608,7 @@ export function buildProgram(): Command {
     .option('--every <seconds>', 'one frame every N seconds', num('--every'))
     .option('--out <dir>', 'output folder (default out/snaps)')
     .option('--preset <name>', 'override meta.preset')
+    .option('--cover', 'write a single 1080×1920 cover image to out/<id>.cover.png')
     .action((id, times, o, cmd) => cmdSnap(id, times, o, globals(cmd)));
 
   program
@@ -535,6 +616,15 @@ export function buildProgram(): Command {
     .description('check Node, ffmpeg, Chromium and fonts; print install steps')
     .option('--fix', 'install the pinned Chromium if missing')
     .action((o, cmd) => cmdDoctor(o, globals(cmd)));
+
+  const theme = program.command('theme').description('theme tools');
+  theme
+    .command('new')
+    .description('generate themes/<name>.theme.yaml from one accent color')
+    .argument('<name>', 'theme name (slug)')
+    .requiredOption('--accent <hex>', 'accent color, e.g. #b8ff3c')
+    .option('--out <file>', 'output file')
+    .action((name, o, cmd) => cmdThemeNew(name, o, globals(cmd)));
 
   program
     .command('schema')

@@ -3,7 +3,9 @@ import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  captionContrastIssues,
   compileEpisode,
+  contrastRatio,
   draftCues,
   episodeJsonSchema,
   episodePaths,
@@ -308,6 +310,13 @@ describe('themes, presets, cues, outputs', () => {
     const w = loadTheme('workshop', ROOT, ROOT);
     expect(w.theme.chrome.grain).toBe(0);
     expect(w.theme.fonts.arabic).toBe('Cairo');
+  });
+
+  it('checks caption contrast ≥ 7:1 (NFR-14)', () => {
+    const t = loadTheme('season1', ROOT, ROOT).theme;
+    expect(captionContrastIssues(t)).toEqual([]);
+    expect(contrastRatio('#ffffff', '#000000')).toBeCloseTo(21, 1);
+    expect(captionContrastIssues({ ...t, colors: { ...t.colors, ink: '#444444' } })).toHaveLength(1);
   });
 
   it('loads editable presets', () => {

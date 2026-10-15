@@ -10,16 +10,17 @@ platform-ready encoding.
 - **Deterministic.** The same inputs always give the same frames (`render(t)` is a pure function).
 - **Arabic first.** RTL captions with English terms, `الـ client` kept together, punctuation on the right side.
 
-| Command                    | What it does                                                                        |
-| -------------------------- | ----------------------------------------------------------------------------------- |
-| `reelforge new <id>`       | create `episodes/<id>/episode.yaml` from a commented template                       |
-| `reelforge cue <id>`       | studio: mark the start of each script line while listening (writes `cues.json`)     |
-| `reelforge dev <id>`       | studio: live preview synced to the audio, safe-zone overlay, lint panel, hot reload |
-| `reelforge validate <id>`  | schema, cues, timing, overlap, safe zones, text overflow (V-1…V-13)                 |
-| `reelforge render <id>`    | `out/<id>.master.mp4`, `out/<id>.share.mp4`, `.srt`, `.sheet.jpg`, `publish.md`     |
-| `reelforge snap <id> <t…>` | PNG frames at times (or `l7`, `l7:'word'`) plus a contact sheet                     |
-| `reelforge doctor [--fix]` | check Node, ffmpeg, Chromium and fonts                                              |
-| `reelforge schema`         | write the JSON Schema for editor autocompletion                                     |
+| Command                                    | What it does                                                                                                    |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `reelforge new <id>`                       | create `episodes/<id>/episode.yaml` from a commented template                                                   |
+| `reelforge cue <id>`                       | studio: mark the start of each script line while listening (writes `cues.json`)                                 |
+| `reelforge dev <id>`                       | studio: live preview synced to the audio, safe-zone overlay, lint panel, hot reload                             |
+| `reelforge validate <id>`                  | schema, cues, timing, overlap, safe zones, text overflow (V-1…V-13)                                             |
+| `reelforge render <id>`                    | `out/<id>.master.mp4`, `out/<id>.share.mp4`, `.srt`, `.sheet.jpg`, `publish.md` (`--all` renders every episode) |
+| `reelforge snap <id> <t…>`                 | PNG frames at times (or `l7`, `l7:'word'`) plus a contact sheet; `--cover` writes `out/<id>.cover.png`          |
+| `reelforge theme new <name> --accent #hex` | generate a series theme from one accent color                                                                   |
+| `reelforge doctor [--fix]`                 | check Node, ffmpeg, Chromium and fonts                                                                          |
+| `reelforge schema`                         | write the JSON Schema for editor autocompletion                                                                 |
 
 ## Install
 
@@ -105,7 +106,7 @@ pnpm test              # unit + browser/integration suites
 pnpm test:unit         # fast, no browser
 pnpm coverage          # unit coverage (≥ 85% lines on core/runtime/audio)
 pnpm typecheck && pnpm lint
-pnpm licenses          # dependency license allow-list check
+pnpm check:licenses    # dependency license allow-list check
 UPDATE_GOLDEN=1 pnpm test:browser   # refresh golden frames after an intended visual change
 node scripts/gen-components-doc.mjs # regenerate docs/components.md from the schemas
 ```

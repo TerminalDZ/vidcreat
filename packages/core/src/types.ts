@@ -40,6 +40,8 @@ export interface Theme {
     progress: boolean;
     waveform: boolean;
     grain: number;
+    /** Grain changes per second (0 = static texture; animated grain costs a lot of bitrate). */
+    grain_fps: number;
     vignette: number;
     grid: boolean;
   };

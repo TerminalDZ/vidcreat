@@ -21,7 +21,7 @@
     "coverage": "vitest run --project unit --coverage",
     "lint": "eslint . && prettier --check \"**/*.{ts,json,yaml,md}\" --log-level warn",
     "format": "prettier --write \"**/*.{ts,json,yaml,md}\"",
-    "licenses": "node scripts/check-licenses.mjs",
+    "check:licenses": "node scripts/check-licenses.mjs",
     "reelforge": "node packages/cli/bin/reelforge.js"
   },
   "devDependencies": {

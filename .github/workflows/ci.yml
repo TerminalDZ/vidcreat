@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    name: Linux (full suite)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: pnpm install --frozen-lockfile
+      - name: Install pinned Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm build
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - name: License check (NFR-12)
+        run: pnpm check:licenses
+      - name: Unit tests with coverage (NFR-11)
+        run: pnpm coverage
+      - name: Browser and integration tests (golden frames, determinism, render, studio)
+        run: pnpm test:browser
+      - name: Doctor
+        run: pnpm reelforge doctor
+      - name: Validate Season 1 examples
+        run: for ep in examples/season1/ep0*; do pnpm -s reelforge validate "$ep" || exit 1; done
+      - name: Offline render (NFR-8, networking disabled)
+        run: |
+          sudo unshare --net -- env "PATH=$PATH" HOME="$HOME" PLAYWRIGHT_BROWSERS_PATH="$HOME/.cache/ms-playwright" \
+            node packages/cli/bin/reelforge.js render fixtures/mini --workers 2 --fast
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: renders-and-diffs
+          path: |
+            fixtures/mini/out/*.mp4
+            fixtures/mini/out/*.jpg
+            fixtures/golden/**/*.diff.png
+          if-no-files-found: ignore
+
+  cross-platform:
+    name: ${{ matrix.os }} (unit + doctor)
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-14, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install ffmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ffmpeg
+      - name: Install ffmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg -y --no-progress
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install chromium
+      - run: pnpm build
+      - run: pnpm test:unit
+      - run: pnpm reelforge doctor
+      - name: Validate Season 1 examples
+        shell: bash
+        run: for ep in examples/season1/ep0*; do pnpm -s reelforge validate "$ep" || exit 1; done

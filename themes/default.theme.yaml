@@ -14,6 +14,7 @@ colors:
   violet: '#c792ff'
 fonts: { display: 'Space Grotesk', mono: 'JetBrains Mono', arabic: 'Cairo' }
 type: { caption: 66, title: 120, h2: 84, body: 32, label: 24 }
-chrome: { header: true, progress: true, waveform: true, grain: 0.07, vignette: 0.75, grid: true }
+chrome:
+  { header: true, progress: true, waveform: true, grain: 0.07, grain_fps: 0, vignette: 0.75, grid: true }
 motion: { pop_overshoot: 1.9, default_dur: 0.45, crossfade: 0.3 }
 captions: { active: lime, english: cyan, future_opacity: 0.32, max_lines: 2, max_chars: 34, scrim: 0.78 }
