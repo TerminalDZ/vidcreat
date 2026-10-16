@@ -401,6 +401,8 @@ $<HTMLFormElement>('#newForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const f = e.target as HTMLFormElement;
   const val = (n: string) => (f.elements.namedItem(n) as HTMLInputElement).value;
+  // Open the tab now, while the click still counts as a user action (popup blockers).
+  const win = window.open('about:blank', '_blank');
   try {
     const r = await api<{ key: string }>('/api/episodes', {
       id: val('id'),
@@ -412,10 +414,11 @@ $<HTMLFormElement>('#newForm').addEventListener('submit', async (e) => {
     $<HTMLDialogElement>('#newDlg').close();
     toast(`Created ${r.key}. Opening the editor…`, 'ok');
     await refresh();
-    const win = window.open('about:blank', '_blank');
     const { url } = await api<{ url: string }>('/api/studio', { ep: r.key, mode: 'edit' });
     if (win) win.location.href = url;
+    else location.href = url;
   } catch (err) {
+    win?.close();
     $('#newErr').textContent = (err as Error).message;
   }
 });

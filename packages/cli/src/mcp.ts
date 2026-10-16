@@ -62,9 +62,15 @@ interface Tool {
 
 class ToolError extends Error {}
 
+/**
+ * Text result. Some clients (Claude Code among them) show only structuredContent when it is present,
+ * so it always carries the human message too.
+ */
 const text = (t: string, structured?: Json): ToolResult => ({
   content: [{ type: 'text', text: t }],
-  ...(structured ? { structuredContent: structured } : {}),
+  ...(structured
+    ? { structuredContent: /^\s*[[{]/.test(t) ? structured : { message: t, ...structured } }
+    : {}),
 });
 
 const EPISODE = {

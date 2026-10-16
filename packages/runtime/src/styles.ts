@@ -37,7 +37,8 @@ body { -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; 
 .rf-chunk { position: absolute; left: 0; top: 0; width: 100%; }
 .rf-cline { background: var(--scrim); padding: 0.06em 0.34em 0.12em; border-radius: 18px;
   -webkit-box-decoration-break: clone; box-decoration-break: clone; }
-.rf-tok { display: inline-block; white-space: nowrap; transform-origin: 50% 60%; }
+.rf-tok { position: relative; display: inline-block; white-space: nowrap; transform-origin: 50% 60%; }
+.rf-chunk[dir='ltr'] .rf-cline { word-spacing: 0.08em; }
 .rf-tok bdi { unicode-bidi: isolate; direction: ltr; }
 
 /* waveform */

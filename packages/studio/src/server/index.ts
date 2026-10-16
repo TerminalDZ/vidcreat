@@ -118,7 +118,9 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
 
   const voiceInfo = () => {
     const v = result?.voice;
-    return v ? { url: `/episode/voice${path.extname(v.file)}`, duration: v.duration } : null;
+    // The version query makes the editor reload the audio when a new recording is uploaded.
+    const version = existsSync(v?.file ?? '') ? Math.round(statSync(v!.file).mtimeMs) : 0;
+    return v ? { url: `/episode/voice${path.extname(v.file)}?v=${version}`, duration: v.duration } : null;
   };
 
   const compile = () => {
