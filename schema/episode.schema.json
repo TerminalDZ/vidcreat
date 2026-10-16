@@ -62,7 +62,9 @@
               "additionalProperties": false
             }
           },
-          "required": ["id"],
+          "required": [
+            "id"
+          ],
           "additionalProperties": false
         },
         "audio": {
@@ -74,7 +76,11 @@
             },
             "sfx": {
               "type": "string",
-              "enum": ["auto", "none", "manual"],
+              "enum": [
+                "auto",
+                "none",
+                "manual"
+              ],
               "default": "auto"
             },
             "sfx_gain_db": {
@@ -106,13 +112,25 @@
                   },
                   "sound": {
                     "type": "string",
-                    "enum": ["whoosh", "hit", "ding", "err", "glitch", "tick", "tap", "typing"]
+                    "enum": [
+                      "whoosh",
+                      "hit",
+                      "ding",
+                      "err",
+                      "glitch",
+                      "tick",
+                      "tap",
+                      "typing"
+                    ]
                   },
                   "gain_db": {
                     "type": "number"
                   }
                 },
-                "required": ["at", "sound"],
+                "required": [
+                  "at",
+                  "sound"
+                ],
                 "additionalProperties": false
               },
               "default": []
@@ -146,7 +164,9 @@
                 "default": []
               }
             },
-            "required": ["text"],
+            "required": [
+              "text"
+            ],
             "additionalProperties": false
           },
           "minItems": 1
@@ -172,7 +192,10 @@
                 "type": "string"
               }
             },
-            "required": ["at", "label"],
+            "required": [
+              "at",
+              "label"
+            ],
             "additionalProperties": false
           },
           "default": []
@@ -238,7 +261,10 @@
                           "minLength": 1
                         }
                       },
-                      "required": ["at", "color"],
+                      "required": [
+                        "at",
+                        "color"
+                      ],
                       "additionalProperties": false
                     },
                     "minItems": 1
@@ -247,17 +273,32 @@
               },
               "transition": {
                 "type": "string",
-                "enum": ["crossfade", "cut", "slide-up", "zoom", "push", "blur"],
+                "enum": [
+                  "crossfade",
+                  "cut",
+                  "slide-up",
+                  "zoom",
+                  "push",
+                  "blur"
+                ],
                 "default": "crossfade"
               },
               "camera": {
                 "type": "string",
-                "enum": ["still", "drift", "push-in", "pull-out"],
+                "enum": [
+                  "still",
+                  "drift",
+                  "push-in",
+                  "pull-out"
+                ],
                 "default": "still"
               },
               "layout": {
                 "type": "string",
-                "enum": ["stage", "full"],
+                "enum": [
+                  "stage",
+                  "full"
+                ],
                 "default": "stage"
               },
               "row": {
@@ -269,7 +310,11 @@
                   },
                   "align": {
                     "type": "string",
-                    "enum": ["start", "center", "end"]
+                    "enum": [
+                      "start",
+                      "center",
+                      "end"
+                    ]
                   },
                   "x": {
                     "type": "integer"
@@ -297,7 +342,11 @@
                   },
                   "align": {
                     "type": "string",
-                    "enum": ["start", "center", "end"]
+                    "enum": [
+                      "start",
+                      "center",
+                      "end"
+                    ]
                   },
                   "x": {
                     "type": "integer"
@@ -364,7 +413,13 @@
                         },
                         "anchor": {
                           "type": "string",
-                          "enum": ["top", "bottom", "center", "left", "right"]
+                          "enum": [
+                            "top",
+                            "bottom",
+                            "center",
+                            "left",
+                            "right"
+                          ]
                         },
                         "margin": {
                           "type": "integer"
@@ -392,7 +447,10 @@
                     },
                     "layer": {
                       "type": "string",
-                      "enum": ["base", "overlay"]
+                      "enum": [
+                        "base",
+                        "overlay"
+                      ]
                     },
                     "z": {
                       "type": "integer"
@@ -441,7 +499,12 @@
                         },
                         "ease": {
                           "type": "string",
-                          "enum": ["smooth", "snappy", "gentle", "linear"]
+                          "enum": [
+                            "smooth",
+                            "snappy",
+                            "gentle",
+                            "linear"
+                          ]
                         },
                         "s0": {
                           "type": "number"
@@ -503,7 +566,9 @@
                           "exclusiveMinimum": 0
                         }
                       },
-                      "required": ["at"],
+                      "required": [
+                        "at"
+                      ],
                       "additionalProperties": false
                     },
                     "states": {
@@ -528,7 +593,10 @@
                             "additionalProperties": {}
                           }
                         },
-                        "required": ["at", "set"],
+                        "required": [
+                          "at",
+                          "set"
+                        ],
                         "additionalProperties": false
                       },
                       "default": []
@@ -552,7 +620,13 @@
                           },
                           "do": {
                             "type": "string",
-                            "enum": ["shake", "flash", "glitch", "pulse", "bump"]
+                            "enum": [
+                              "shake",
+                              "flash",
+                              "glitch",
+                              "pulse",
+                              "bump"
+                            ]
                           },
                           "amp": {
                             "type": "number"
@@ -571,13 +645,25 @@
                           },
                           "target": {
                             "type": "string",
-                            "enum": ["self", "camera"]
+                            "enum": [
+                              "self",
+                              "camera"
+                            ]
                           },
                           "sound": {
                             "anyOf": [
                               {
                                 "type": "string",
-                                "enum": ["whoosh", "hit", "ding", "err", "glitch", "tick", "tap", "typing"]
+                                "enum": [
+                                  "whoosh",
+                                  "hit",
+                                  "ding",
+                                  "err",
+                                  "glitch",
+                                  "tick",
+                                  "tap",
+                                  "typing"
+                                ]
                               },
                               {
                                 "type": "string",
@@ -586,7 +672,10 @@
                             ]
                           }
                         },
-                        "required": ["at", "do"],
+                        "required": [
+                          "at",
+                          "do"
+                        ],
                         "additionalProperties": false
                       },
                       "default": []
@@ -595,7 +684,10 @@
                       "anyOf": [
                         {
                           "type": "string",
-                          "enum": ["auto", "none"]
+                          "enum": [
+                            "auto",
+                            "none"
+                          ]
                         },
                         {
                           "type": "array",
@@ -616,13 +708,25 @@
                               },
                               "sound": {
                                 "type": "string",
-                                "enum": ["whoosh", "hit", "ding", "err", "glitch", "tick", "tap", "typing"]
+                                "enum": [
+                                  "whoosh",
+                                  "hit",
+                                  "ding",
+                                  "err",
+                                  "glitch",
+                                  "tick",
+                                  "tap",
+                                  "typing"
+                                ]
                               },
                               "gain_db": {
                                 "type": "number"
                               }
                             },
-                            "required": ["at", "sound"],
+                            "required": [
+                              "at",
+                              "sound"
+                            ],
                             "additionalProperties": false
                           }
                         }
@@ -630,19 +734,28 @@
                       "default": "auto"
                     }
                   },
-                  "required": ["use"],
+                  "required": [
+                    "use"
+                  ],
                   "additionalProperties": false
                 },
                 "default": []
               }
             },
-            "required": ["id", "at"],
+            "required": [
+              "id",
+              "at"
+            ],
             "additionalProperties": false
           },
           "minItems": 1
         }
       },
-      "required": ["meta", "script", "scenes"],
+      "required": [
+        "meta",
+        "script",
+        "scenes"
+      ],
       "additionalProperties": false
     }
   },
@@ -661,7 +774,11 @@
         },
         "align": {
           "type": "string",
-          "enum": ["left", "center", "right"],
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ],
           "default": "center"
         },
         "color": {
@@ -676,7 +793,12 @@
         },
         "font": {
           "type": "string",
-          "enum": ["auto", "display", "arabic", "mono"],
+          "enum": [
+            "auto",
+            "display",
+            "arabic",
+            "mono"
+          ],
           "default": "auto"
         },
         "weight": {
@@ -689,7 +811,9 @@
           "type": "string"
         }
       },
-      "required": ["text"],
+      "required": [
+        "text"
+      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
@@ -710,7 +834,11 @@
         },
         "align": {
           "type": "string",
-          "enum": ["left", "center", "right"],
+          "enum": [
+            "left",
+            "center",
+            "right"
+          ],
           "default": "left"
         },
         "dot": {
@@ -718,7 +846,9 @@
           "default": false
         }
       },
-      "required": ["text"],
+      "required": [
+        "text"
+      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
@@ -765,7 +895,9 @@
                     "type": "boolean"
                   }
                 },
-                "required": ["text"],
+                "required": [
+                  "text"
+                ],
                 "additionalProperties": false
               }
             ]
@@ -833,13 +965,17 @@
                 "default": "lime"
               }
             },
-            "required": ["line"],
+            "required": [
+              "line"
+            ],
             "additionalProperties": false
           },
           "default": []
         }
       },
-      "required": ["lines"],
+      "required": [
+        "lines"
+      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
@@ -859,7 +995,14 @@
         },
         "status": {
           "type": "string",
-          "enum": ["idle", "ok", "err", "warn", "busy", "off"],
+          "enum": [
+            "idle",
+            "ok",
+            "err",
+            "warn",
+            "busy",
+            "off"
+          ],
           "default": "idle"
         },
         "icon": {
@@ -901,7 +1044,9 @@
           "type": "string"
         }
       },
-      "required": ["title"],
+      "required": [
+        "title"
+      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
@@ -924,7 +1069,10 @@
                   "type": "number"
                 }
               },
-              "required": ["x", "y"],
+              "required": [
+                "x",
+                "y"
+              ],
               "additionalProperties": false
             }
           ]
@@ -945,7 +1093,10 @@
                   "type": "number"
                 }
               },
-              "required": ["x", "y"],
+              "required": [
+                "x",
+                "y"
+              ],
               "additionalProperties": false
             }
           ]
@@ -964,7 +1115,11 @@
         },
         "route": {
           "type": "string",
-          "enum": ["straight", "elbow", "curve"],
+          "enum": [
+            "straight",
+            "elbow",
+            "curve"
+          ],
           "default": "straight"
         },
         "width": {
@@ -974,7 +1129,12 @@
         },
         "head": {
           "type": "string",
-          "enum": ["end", "start", "both", "none"],
+          "enum": [
+            "end",
+            "start",
+            "both",
+            "none"
+          ],
           "default": "end"
         },
         "packet": {
@@ -1063,7 +1223,10 @@
           "default": 14
         }
       },
-      "required": ["from", "to"],
+      "required": [
+        "from",
+        "to"
+      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
@@ -1135,7 +1298,11 @@
         },
         "variant": {
           "type": "string",
-          "enum": ["solid", "outline", "soft"],
+          "enum": [
+            "solid",
+            "outline",
+            "soft"
+          ],
           "default": "soft"
         },
         "size": {
@@ -1144,7 +1311,9 @@
           "default": 34
         }
       },
-      "required": ["text"],
+      "required": [
+        "text"
+      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
@@ -1169,7 +1338,9 @@
           "default": -5
         }
       },
-      "required": ["text"],
+      "required": [
+        "text"
+      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
@@ -1202,14 +1373,20 @@
                       "type": "object",
                       "properties": {
                         "text": {
-                          "type": ["string", "number"]
+                          "type": [
+                            "string",
+                            "number"
+                          ]
                         },
                         "color": {
                           "type": "string",
                           "minLength": 1
                         }
                       },
-                      "required": ["text", "color"],
+                      "required": [
+                        "text",
+                        "color"
+                      ],
                       "additionalProperties": false
                     }
                   ]
@@ -1270,7 +1447,9 @@
                 ]
               }
             },
-            "required": ["cells"],
+            "required": [
+              "cells"
+            ],
             "additionalProperties": false
           },
           "default": []
@@ -1293,7 +1472,9 @@
           "default": "lime"
         }
       },
-      "required": ["columns"],
+      "required": [
+        "columns"
+      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
@@ -1339,16 +1520,25 @@
                     },
                     "mark": {
                       "type": "string",
-                      "enum": ["ok", "err", "warn"]
+                      "enum": [
+                        "ok",
+                        "err",
+                        "warn"
+                      ]
                     }
                   },
-                  "required": ["text", "at"],
+                  "required": [
+                    "text",
+                    "at"
+                  ],
                   "additionalProperties": false
                 },
                 "default": []
               }
             },
-            "required": ["title"],
+            "required": [
+              "title"
+            ],
             "additionalProperties": false
           },
           "minItems": 1
@@ -1363,7 +1553,9 @@
           "default": 26
         }
       },
-      "required": ["lanes"],
+      "required": [
+        "lanes"
+      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
@@ -1398,7 +1590,9 @@
                 "default": true
               }
             },
-            "required": ["text"],
+            "required": [
+              "text"
+            ],
             "additionalProperties": false
           },
           "minItems": 1
@@ -1414,7 +1608,9 @@
           "default": "lime"
         }
       },
-      "required": ["items"],
+      "required": [
+        "items"
+      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
@@ -1446,7 +1642,10 @@
                 "minimum": 0
               }
             },
-            "required": ["at", "value"],
+            "required": [
+              "at",
+              "value"
+            ],
             "additionalProperties": false
           },
           "minItems": 1
@@ -1487,7 +1686,9 @@
           "default": 180
         }
       },
-      "required": ["keyframes"],
+      "required": [
+        "keyframes"
+      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
@@ -1519,7 +1720,10 @@
                 "minimum": 0
               }
             },
-            "required": ["at", "value"],
+            "required": [
+              "at",
+              "value"
+            ],
             "additionalProperties": false
           },
           "minItems": 1
@@ -1554,7 +1758,9 @@
           "default": "red"
         }
       },
-      "required": ["keyframes"],
+      "required": [
+        "keyframes"
+      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
@@ -1594,7 +1800,10 @@
                 "minLength": 1
               }
             },
-            "required": ["pos", "label"],
+            "required": [
+              "pos",
+              "label"
+            ],
             "additionalProperties": false
           },
           "default": []
@@ -1637,7 +1846,10 @@
                 "minimum": 0
               }
             },
-            "required": ["at", "pos"],
+            "required": [
+              "at",
+              "pos"
+            ],
             "additionalProperties": false
           },
           "default": []
@@ -1674,7 +1886,14 @@
                   },
                   "state": {
                     "type": "string",
-                    "enum": ["idle", "ok", "err", "warn", "busy", "off"]
+                    "enum": [
+                      "idle",
+                      "ok",
+                      "err",
+                      "warn",
+                      "busy",
+                      "off"
+                    ]
                   }
                 },
                 "additionalProperties": false
@@ -1704,11 +1923,21 @@
                 "type": "object",
                 "additionalProperties": {
                   "type": "string",
-                  "enum": ["idle", "ok", "err", "warn", "busy", "off"]
+                  "enum": [
+                    "idle",
+                    "ok",
+                    "err",
+                    "warn",
+                    "busy",
+                    "off"
+                  ]
                 }
               }
             },
-            "required": ["at", "set"],
+            "required": [
+              "at",
+              "set"
+            ],
             "additionalProperties": false
           },
           "default": []
@@ -1722,7 +1951,10 @@
           "type": "string"
         }
       },
-      "required": ["cols", "rows"],
+      "required": [
+        "cols",
+        "rows"
+      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
@@ -1756,7 +1988,10 @@
                 "minimum": 0
               }
             },
-            "required": ["at", "tokens"],
+            "required": [
+              "at",
+              "tokens"
+            ],
             "additionalProperties": false
           },
           "default": []
@@ -1773,7 +2008,9 @@
           "default": "lime"
         }
       },
-      "required": ["capacity"],
+      "required": [
+        "capacity"
+      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
@@ -1860,7 +2097,9 @@
                 "default": "bell"
               }
             },
-            "required": ["text"],
+            "required": [
+              "text"
+            ],
             "additionalProperties": false
           },
           "default": []
@@ -1883,7 +2122,9 @@
                 ]
               }
             },
-            "required": ["at"],
+            "required": [
+              "at"
+            ],
             "additionalProperties": false
           },
           "default": []
@@ -1897,7 +2138,10 @@
           "default": false
         },
         "success": {
-          "type": ["boolean", "string"],
+          "type": [
+            "boolean",
+            "string"
+          ],
           "default": false
         }
       },
@@ -1936,7 +2180,9 @@
           "default": 56
         }
       },
-      "required": ["text"],
+      "required": [
+        "text"
+      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
@@ -1945,7 +2191,13 @@
       "properties": {
         "kind": {
           "type": "string",
-          "enum": ["burst", "herd", "stream", "dust", "confetti"],
+          "enum": [
+            "burst",
+            "herd",
+            "stream",
+            "dust",
+            "confetti"
+          ],
           "default": "burst"
         },
         "from": {
@@ -1964,7 +2216,10 @@
                   "type": "number"
                 }
               },
-              "required": ["x", "y"],
+              "required": [
+                "x",
+                "y"
+              ],
               "additionalProperties": false
             }
           ]
@@ -1985,7 +2240,10 @@
                   "type": "number"
                 }
               },
-              "required": ["x", "y"],
+              "required": [
+                "x",
+                "y"
+              ],
               "additionalProperties": false
             }
           ]
@@ -2121,7 +2379,9 @@
           "default": "lime"
         }
       },
-      "required": ["next"],
+      "required": [
+        "next"
+      ],
       "additionalProperties": false,
       "$schema": "http://json-schema.org/draft-07/schema#"
     },
