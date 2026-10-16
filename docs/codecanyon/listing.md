@@ -97,7 +97,7 @@ How to test it quickly (about 5 minutes):
 The documentation is in documentation/index.html.
 
 Notes:
-- Full, unminified TypeScript source is included next to the prebuilt dist; 117 automated tests run with "pnpm test".
+- Full, unminified TypeScript source is included next to the prebuilt dist; 122 automated tests run with "pnpm test".
 - All preview images and the demo video were made with ReelForge and the included examples; nothing in them
   is missing from the download.
 - Bundled fonts are SIL OFL 1.1 and npm dependencies are MIT/ISC/Apache-2.0. Credits are in
@@ -119,7 +119,7 @@ Notes:
 | Item not available free or elsewhere (exclusivity)                    | **Action: make the GitHub repository private before submitting** (see below)                                                 |
 | Works on a clean machine                                              | `pnpm release` installs from the ZIP and renders two videos; also test real Windows and Mac                                  |
 | No security or malware issues                                         | `pnpm audit` clean; localhost-only server with origin checks and path containment                                            |
-| Quality / not too general                                             | 21 components, dashboard, visual editor, MCP server, 13 lint rules, audio mastering, 117 tests                               |
+| Quality / not too general                                             | 21 components, dashboard, visual editor, MCP server, 13 lint rules, audio mastering, 122 tests                               |
 | Support policy stated                                                 | `SUPPORT.md`, plus the Support section of the description                                                                    |
 | Changelog                                                             | `CHANGELOG.md` and the end of the description                                                                                |
 | Thumbnail 80×80, inline preview 590×300, cover 3:2                    | Generated and checked by `scripts/marketing.mjs`                                                                             |
