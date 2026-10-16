@@ -42,6 +42,8 @@ export class ElementView {
   private inst: Instance;
   private comp: RuntimeComponent;
   private seed: number;
+  /** Direction wipes and reveals start from: the element's own text, else the episode's. */
+  private rtl = false;
 
   constructor(
     readonly spec: TElement,
@@ -70,6 +72,7 @@ export class ElementView {
       seed: this.seed,
       asset: (p) => (/^(https?:|data:)/.test(p) ? p : tl.assetBase + p.replace(/^assets\//, '')),
     });
+    this.rtl = textIsRtl(this.el.textContent ?? '') ?? tl.meta.dir === 'rtl';
   }
 
   /** Whether the element is on screen at t (inside its scene's visible window). */
@@ -117,7 +120,7 @@ export class ElementView {
       filters.push(`drop-shadow(${(-a * 0.35 * (1 - j)).toFixed(1)}px 0 0 rgba(85,220,255,.85))`);
     }
     css(this.el, 'filter', filters.length ? filters.join(' ') : 'none');
-    css(this.el, 'clip-path', clipCss(tr, this.el.style.direction === 'rtl'));
+    css(this.el, 'clip-path', clipCss(tr, this.rtl));
 
     const ease = enter.anim === 'pop' ? easeOutBack(this.theme.motion.pop_overshoot) : easeFor(enter.ease);
     const local: LocalTime = {
@@ -297,6 +300,14 @@ export function applyExit(tr: Transform, anim: string, q: number): void {
       tr.clipEnd = easeInOutCubic(q);
       break;
   }
+}
+
+/** Direction of the first strong character (like `dir="auto"`), or undefined when there is none. */
+export function textIsRtl(text: string): boolean | undefined {
+  const m = /[A-Za-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u04FF\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/.exec(
+    text,
+  );
+  return m ? /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/.test(m[0]) : undefined;
 }
 
 /** clip-path for the reveal/wipe/mask animations (inline-start follows the text direction). */

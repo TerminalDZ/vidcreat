@@ -1,7 +1,7 @@
 // Builds the CodeCanyon release into release/:
 //   ReelForge-<v>.zip            main file (prebuilt, installs with --prod; documentation inside)
 //   ReelForge-<v>-previews.zip   preview screenshots + full-resolution example frames
-//   ReelForge-<v>-marketing/     thumbnail.png, inline-preview.jpg, cover, demo.mp4, item description
+//   ReelForge-<v>-marketing/     thumbnail.png, inline-preview.jpg, cover, demo.mp4, intro.mp4, item description
 // Then unzips the main file into a temporary folder and verifies install → doctor → validate → render.
 // Usage: node scripts/release.mjs [--skip-tests] [--skip-verify] [--skip-assets]
 import { execFileSync } from 'node:child_process';
@@ -34,6 +34,7 @@ step('Generated docs, notices and marketing assets');
 run('node', ['scripts/gen-components-doc.mjs']);
 run('node', ['scripts/gen-notices.mjs']);
 run('node', ['packages/cli/bin/reelforge.js', 'schema']);
+run('node', ['node_modules/prettier/bin/prettier.cjs', '--write', '--log-level', 'warn', 'schema/episode.schema.json', 'docs/components.md']);
 if (!args.has('--skip-assets') && !existsSync(path.join(ROOT, 'docs/screenshots/00-dashboard.jpg'))) run('node', ['scripts/screenshots.mjs']);
 run('node', ['scripts/build-docs.mjs']);
 if (!args.has('--skip-assets')) run('node', ['scripts/marketing.mjs']);
@@ -97,6 +98,8 @@ if (!args.has('--skip-verify')) {
     step('Demo video for the item page');
     execFileSync('./reelforge', ['render', 'examples/season1/ep02', '--silent', '--no-measure'], { cwd: dir, stdio: 'inherit', env });
     copyFileSync(path.join(dir, 'examples/season1/ep02/out/ep02.share.mp4'), path.join(mkt, 'demo.mp4'));
+    execFileSync('./reelforge', ['render', 'examples/promo/intro', '--silent', '--no-measure'], { cwd: dir, stdio: 'inherit', env });
+    copyFileSync(path.join(dir, 'examples/promo/intro/out/intro.share.mp4'), path.join(mkt, 'intro.mp4'));
   }
   rmSync(t, { recursive: true, force: true });
 }

@@ -6,7 +6,7 @@
 import { describe, expect, it } from 'vitest';
 import { ENTER_ANIMS, EXIT_ANIMS, type Theme } from '@reelforge/core';
 import { easeFor, easeOutBounce, identity, spring, type Transform } from '../src/anim.js';
-import { applyEnter, applyExit } from '../src/scene.js';
+import { applyEnter, applyExit, textIsRtl } from '../src/scene.js';
 
 const theme = { motion: { pop_overshoot: 1.9, default_dur: 0.5, crossfade: 0.35 } } as unknown as Theme;
 const STEPS = 60;
@@ -117,5 +117,15 @@ describe('easing curves', () => {
     expect(Math.max(...Array.from({ length: 200 }, (_, i) => easeOutBounce(i / 200)))).toBeLessThanOrEqual(
       1.0001,
     );
+  });
+});
+
+describe('wipe direction', () => {
+  it('follows the first strong character of the text, like dir="auto"', () => {
+    expect(textIsRtl('كلمة بكلمة')).toBe(true);
+    expect(textIsRtl('الـ client')).toBe(true);
+    expect(textIsRtl('42 · word by word')).toBe(false);
+    expect(textIsRtl('API الـ')).toBe(false);
+    expect(textIsRtl('1080 × 1920')).toBeUndefined();
   });
 });

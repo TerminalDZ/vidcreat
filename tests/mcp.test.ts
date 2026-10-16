@@ -175,6 +175,17 @@ describe('reelforge mcp', () => {
     expect(emptyPath.isError).toBe(true);
     expect(readFileSync(yamlFile, 'utf8')).not.toContain('? null');
 
+    // Without a recording, cues can run past the estimated length and `duration` sets the length.
+    const cuesFile = path.join(root, 'episodes/ep1/cues.json');
+    const grown = await tool('set_cues', { episode: 'ep1', cues: { l3: 20 } });
+    expect(grown.isError).toBeFalsy();
+    const len = (JSON.parse(readFileSync(cuesFile, 'utf8')) as { audio: { duration: number } }).audio
+      .duration;
+    expect(len).toBeGreaterThan(21);
+    expect((grown.structuredContent as { issues: { errors: number } }).issues.errors).toBe(0);
+    await tool('set_cues', { episode: 'ep1', cues: {}, duration: 30 });
+    expect(JSON.parse(readFileSync(cuesFile, 'utf8')).audio.duration).toBe(30);
+
     const missing = await tool('get_episode', { episode: '../../etc' });
     expect(missing.isError).toBe(true);
   });

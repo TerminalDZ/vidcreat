@@ -39,6 +39,7 @@ captions, sound effects and series branding, masters the audio and encodes platf
 | `reelforge.cmd`, `reelforge`                 | The command-line interface                                             |
 | `examples/season1/`                          | Nine complete example episodes in English (“System Design”)            |
 | `examples/season1-arabic/`                   | The same series in Arabic with English technical terms                 |
+| `examples/promo/intro/`                      | A 45-second ReelForge intro video, a showcase of animations            |
 | `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, …     | Instructions for AI assistants (see [AI agents & MCP](#ai-agents-mcp)) |
 | `themes/`, `presets/`                        | Editable visual themes and platform layouts                            |
 | `documentation/`                             | This documentation (offline)                                           |

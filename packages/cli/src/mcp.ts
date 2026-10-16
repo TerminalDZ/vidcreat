@@ -559,12 +559,17 @@ export async function startMcp(opts: { root: string; version: string }): Promise
       name: 'set_cues',
       title: 'Set cues',
       description:
-        'Set the start time (seconds in the voice recording) of script lines, e.g. {"l1": 0.2, "l2": 3.4}. Normally a person marks cues by ear in the studio; use this to apply known timings. Use draft_cues for estimates.',
+        'Set the start time (seconds in the voice recording) of script lines, e.g. {"l1": 0.2, "l2": 3.4}. Normally a person marks cues by ear in the studio; use this to apply known timings. Use draft_cues for estimates. Without a recording (silent videos), `duration` sets the total length; otherwise it grows to fit the last line.',
       inputSchema: {
         type: 'object',
         properties: {
           episode: EPISODE,
           cues: { type: 'object', additionalProperties: { type: 'number', minimum: 0 } },
+          duration: {
+            type: 'number',
+            exclusiveMinimum: 0,
+            description: 'Total length in seconds. Only used when there is no voice recording.',
+          },
         },
         required: ['episode', 'cues'],
         additionalProperties: false,
@@ -578,12 +583,22 @@ export async function startMcp(opts: { root: string; version: string }): Promise
         if (unknown.length) throw new ToolError(`Unknown line ids: ${unknown.join(', ')}`);
         const cur = readCues(p.cues).cues;
         const cues = { ...(cur?.cues ?? {}), ...given };
+        const file = cur?.audio.file ?? r.spec?.audio.voice ?? 'voice.wav';
+        let duration = r.voice?.duration ?? cur?.audio.duration ?? r.timeline?.duration ?? 0;
+        if (!r.voice) {
+          // No recording to measure: the length is the caller's, or long enough to say the last line.
+          const est = draftCues(r.script, file);
+          const ids = r.script.map((l) => l.id);
+          const last = ids.filter((id) => cues[id] !== undefined).at(-1);
+          const lastLen = last
+            ? (est.cues[ids[ids.indexOf(last) + 1]] ?? est.audio.duration - 0.6) - est.cues[last]
+            : 0;
+          const fit = last ? cues[last] + lastLen + 0.6 : 0;
+          duration = typeof a.duration === 'number' ? a.duration : Math.max(duration, fit);
+        }
         writeCues(p.cues, {
           version: 1,
-          audio: cur?.audio ?? {
-            file: r.spec?.audio.voice ?? 'voice.wav',
-            duration: r.voice?.duration ?? r.timeline?.duration ?? 0,
-          },
+          audio: { file, duration: Math.round(duration * 1000) / 1000 },
           cues,
           words: cur?.words ?? {},
         });

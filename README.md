@@ -106,6 +106,7 @@ themes/      default, season1, workshop
 presets/     tiktok, reels, shorts (editable)
 examples/season1/          English example series (ep01…ep09)
 examples/season1-arabic/   the same series in Arabic
+examples/promo/intro/      a 45-second product intro, made with ReelForge (silent)
 fixtures/    mini (integration), golden frames, seeded lint bugs
 docs/        PRD, SRS, authoring guide, component reference, ADRs
 ```

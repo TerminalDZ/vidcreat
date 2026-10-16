@@ -62,22 +62,25 @@ video editor, video generator, explainer video, vertical video, short video, ani
 
 ## 8. Files to upload
 
-| Upload field                        | File (produced by `pnpm release`)                              | Spec checked                                             |
-| ----------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------- |
-| Thumbnail                           | `release/ReelForge-<v>-marketing/thumbnail.png`                | 80×80 PNG                                                |
-| Inline preview (if the form asks)   | `release/ReelForge-<v>-marketing/inline-preview.jpg`           | 590×300 JPEG                                             |
-| Cover image (if the form asks)      | `release/ReelForge-<v>-marketing/cover-2340x1560.jpg`          | 3:2 ratio, 2340×1560 recommended, JPEG < 20 MB           |
-| Main files                          | `release/ReelForge-<v>.zip`                                    | Source + prebuilt dist + English HTML docs + installers  |
-| Preview screenshots (ZIP)           | `release/ReelForge-<v>-previews.zip`                           | 18 screenshots ≥ 1170 px wide + 8 full-resolution frames |
-| Video preview                       | `release/ReelForge-<v>-marketing/demo.mp4` → upload to YouTube | Rendered with ReelForge from example ep02                |
-| Wide banner (social media, YouTube) | `release/ReelForge-<v>-marketing/cover-1920x1080.jpg`          | 16:9                                                     |
+| Upload field                        | File (produced by `pnpm release`)                               | Spec checked                                                  |
+| ----------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------- |
+| Thumbnail                           | `release/ReelForge-<v>-marketing/thumbnail.png`                 | 80×80 PNG                                                     |
+| Inline preview (if the form asks)   | `release/ReelForge-<v>-marketing/inline-preview.jpg`            | 590×300 JPEG                                                  |
+| Cover image (if the form asks)      | `release/ReelForge-<v>-marketing/cover-2340x1560.jpg`           | 3:2 ratio, 2340×1560 recommended, JPEG < 20 MB                |
+| Main files                          | `release/ReelForge-<v>.zip`                                     | Source + prebuilt dist + English HTML docs + installers       |
+| Preview screenshots (ZIP)           | `release/ReelForge-<v>-previews.zip`                            | 18 screenshots ≥ 1170 px wide + 8 full-resolution frames      |
+| Video preview                       | `release/ReelForge-<v>-marketing/intro.mp4` → upload to YouTube | 45-second product intro, rendered from `examples/promo/intro` |
+| Second video (full example)         | `release/ReelForge-<v>-marketing/demo.mp4`                      | Rendered with ReelForge from example ep02                     |
+| Wide banner (social media, YouTube) | `release/ReelForge-<v>-marketing/cover-1920x1080.jpg`           | 16:9                                                          |
 
 ## 9. Video preview (YouTube)
 
 - **Title:** `ReelForge - Voice and YAML to Vertical Explainer Videos (Demo)`
 - **Description:** the short pitch from §4, then "Made entirely with ReelForge, available on CodeCanyon."
-- Upload `demo.mp4` as a public or unlisted Short. Optionally add a 60–90 second screen recording of the
-  dashboard flow (create → upload voice → mark cues → preview → render) as a second video.
+- Upload `intro.mp4` (the 45-second product intro) as a public or unlisted Short and use it as the
+  item's preview video. Upload `demo.mp4` (a full 95-second example episode) as a second Short.
+- Optionally add a 60–90 second screen recording of the dashboard flow (create → upload voice →
+  mark cues → preview → render) as a third video.
 
 ## 10. Message to the reviewer
 
@@ -97,7 +100,7 @@ How to test it quickly (about 5 minutes):
 The documentation is in documentation/index.html.
 
 Notes:
-- Full, unminified TypeScript source is included next to the prebuilt dist; 153 automated tests run with "pnpm test".
+- Full, unminified TypeScript source is included next to the prebuilt dist; 154 automated tests run with "pnpm test".
 - All preview images and the demo video were made with ReelForge and the included examples; nothing in them
   is missing from the download.
 - Bundled fonts are SIL OFL 1.1 and npm dependencies are MIT/ISC/Apache-2.0. Credits are in
@@ -119,7 +122,7 @@ Notes:
 | Item not available free or elsewhere (exclusivity)                    | **Action: make the GitHub repository private before submitting** (see below)                                                 |
 | Works on a clean machine                                              | `pnpm release` installs from the ZIP and renders two videos; also test real Windows and Mac                                  |
 | No security or malware issues                                         | `pnpm audit` clean; localhost-only server with origin checks and path containment                                            |
-| Quality / not too general                                             | 21 components, dashboard, visual editor, MCP server, 13 lint rules, audio mastering, 153 tests                               |
+| Quality / not too general                                             | 21 components, dashboard, visual editor, MCP server, 13 lint rules, audio mastering, 154 tests                               |
 | Support policy stated                                                 | `SUPPORT.md`, plus the Support section of the description                                                                    |
 | Changelog                                                             | `CHANGELOG.md` and the end of the description                                                                                |
 | Thumbnail 80×80, inline preview 590×300, cover 3:2                    | Generated and checked by `scripts/marketing.mjs`                                                                             |
@@ -130,5 +133,5 @@ Notes:
 2. Make the GitHub repository **private**. Earlier commits were MIT-licensed, and an item that is
    available free elsewhere gets a hard rejection.
 3. Install from the ZIP once on a real Windows 10/11 PC and once on a Mac.
-4. Upload `demo.mp4` to YouTube and set it as the preview or demo link.
+4. Upload `intro.mp4` to YouTube and set it as the preview or demo link.
 5. Fill in your author profile (avatar, short bio) and Envato tax information. Turn on item support.
