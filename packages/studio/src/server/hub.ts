@@ -35,19 +35,12 @@ import {
   readCues,
   writeCues,
   type EpisodePaths,
-  type Issue,
 } from '@reelforge/core';
-import {
-  ffmpegBin,
-  measureTimeline,
-  renderEpisode,
-  runDoctor,
-  snapFrames,
-  type Progress,
-} from '@reelforge/renderer';
+import { ffmpegBin, measureTimeline, runDoctor, snapFrames } from '@reelforge/renderer';
 import { WebSocketServer, type WebSocket } from 'ws';
 import { listen, readBody, safeJoin, sendFile } from './http.js';
-import { startStudio, type Studio } from './index.js';
+import { startStudio, type Studio, type StudioMode } from './index.js';
+import { RenderBusyError, RenderRunner, type RenderOptions } from './jobs.js';
 
 const CLIENT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'client');
 const VERSION = '1.0.0';
@@ -92,20 +85,7 @@ export interface EpisodeSummary {
   updated: number;
 }
 
-export interface Job {
-  id: number;
-  key: string;
-  status: 'running' | 'done' | 'failed' | 'cancelled';
-  phase: string;
-  done: number;
-  total: number;
-  fps?: number;
-  eta?: number;
-  started: number;
-  finished?: number;
-  message?: string;
-  issues?: Issue[];
-}
+export type { Job } from './jobs.js';
 
 const SLUG = /^[a-z0-9][a-z0-9_-]{0,63}$/i;
 
@@ -177,9 +157,12 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
   const log = opts.log ?? (() => undefined);
   const studios = new Map<string, Studio>();
   const summaryCache = new Map<string, { stamp: string; summary: EpisodeSummary }>();
-  let job: Job | null = null;
-  let jobAbort: AbortController | null = null;
-  let jobSeq = 0;
+  const runner = new RenderRunner({ decode: opts.decode, log });
+  runner.subscribe((j) => {
+    if (j.status !== 'running') summaryCache.delete(j.key);
+    broadcast({ type: 'job', job: j });
+    if (j.status !== 'running') broadcast({ type: 'project' });
+  });
   let thumbQueue: Promise<unknown> = Promise.resolve();
 
   // ------------------------------------------------------------------ episodes
@@ -274,7 +257,7 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
         }
       })
       .filter(Boolean),
-    job,
+    job: runner.job,
   });
 
   // ------------------------------------------------------------------ actions
@@ -301,7 +284,7 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
     return { key: `episodes/${id}` };
   };
 
-  const openStudio = async (key: string, mode: 'cue' | 'dev') => {
+  const openStudio = async (key: string, mode: StudioMode) => {
     const p = resolveKey(key);
     let s = studios.get(p.dir);
     if (!s) {
@@ -313,6 +296,8 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
         measure: (tl) =>
           measureTimeline(tl, { cacheDir: path.join(p.out, '.cache'), assetsDir: p.assets, file: p.yaml }),
         log,
+        renderer: runner,
+        renderKey: key,
       });
       studios.set(p.dir, s);
     }
@@ -343,63 +328,13 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
     return { issues };
   };
 
-  const startRender = (
-    key: string,
-    o: { preset?: string; shareMb?: number; sfx?: boolean; silent?: boolean; fast?: boolean },
-  ) => {
-    if (job?.status === 'running') throw new HttpError(409, `A render is already running (${job.key})`);
-    const p = resolveKey(key);
-    jobAbort = new AbortController();
-    const current: Job = {
-      id: ++jobSeq,
-      key,
-      status: 'running',
-      phase: 'validate',
-      done: 0,
-      total: 1,
-      started: Date.now(),
-    };
-    job = current;
-    broadcast({ type: 'job', job });
-    let lastSent = 0;
-    renderEpisode(p, {
-      preset: typeof o.preset === 'string' && o.preset ? o.preset : undefined,
-      shareMb: Number(o.shareMb) > 0 ? Number(o.shareMb) : undefined,
-      sfx: o.sfx !== false,
-      silent: Boolean(o.silent),
-      fast: Boolean(o.fast),
-      signal: jobAbort.signal,
-      compile: { decode: opts.decode },
-      onLog: log,
-      onProgress: (pr: Progress) => {
-        Object.assign(current, { phase: pr.phase, done: pr.done, total: pr.total, fps: pr.fps, eta: pr.eta });
-        const now = Date.now();
-        if (now - lastSent > 200 || pr.done === pr.total) {
-          lastSent = now;
-          broadcast({ type: 'job', job: current });
-        }
-      },
-    })
-      .then((r) => {
-        current.status = r.ok ? 'done' : 'failed';
-        current.message = r.ok
-          ? `Rendered ${r.frames} frames in ${Math.round(r.seconds)} s`
-          : `Output check failed: ${Object.values(r.compliance)
-              .flatMap((c) => c?.problems ?? [])
-              .join('; ')}`;
-      })
-      .catch((e: Error & { issues?: Issue[] }) => {
-        current.status = jobAbort?.signal.aborted ? 'cancelled' : 'failed';
-        current.message = e.message;
-        current.issues = (e.issues ?? []).filter((i) => i.level === 'error').slice(0, 20);
-      })
-      .finally(() => {
-        current.finished = Date.now();
-        summaryCache.delete(key);
-        broadcast({ type: 'job', job: current });
-        broadcast({ type: 'project' });
-      });
-    return { job: current };
+  const startRender = (key: string, o: RenderOptions) => {
+    try {
+      return { job: runner.start(key, resolveKey(key), o) };
+    } catch (e) {
+      if (e instanceof RenderBusyError) throw new HttpError(409, e.message);
+      throw e;
+    }
   };
 
   /** Stores an uploaded recording as the episode's voice file (converted to WAV when needed). */
@@ -565,13 +500,20 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
         case '/api/episodes':
           return json(res, 201, createEpisode(body));
         case '/api/studio':
-          return json(res, 200, await openStudio(String(body.ep), body.mode === 'cue' ? 'cue' : 'dev'));
+          return json(
+            res,
+            200,
+            await openStudio(
+              String(body.ep),
+              body.mode === 'cue' || body.mode === 'dev' ? body.mode : 'edit',
+            ),
+          );
         case '/api/validate':
           return json(res, 200, await validate(String(body.ep)));
         case '/api/render':
           return json(res, 202, startRender(String(body.ep), (body.options ?? {}) as Record<string, never>));
         case '/api/render/cancel':
-          if (job?.status === 'running') jobAbort?.abort();
+          runner.cancel();
           return json(res, 200, { ok: true });
         case '/api/cues/draft': {
           const ep = resolveKey(body.ep);
@@ -618,7 +560,7 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
     wss.handleUpgrade(req, socket, head, (ws) => {
       clients.add(ws);
       ws.on('close', () => clients.delete(ws));
-      if (job) ws.send(JSON.stringify({ type: 'job', job }));
+      if (runner.job) ws.send(JSON.stringify({ type: 'job', job: runner.job }));
     });
   });
   function broadcast(msg: unknown) {
@@ -631,7 +573,7 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
     url: `http://127.0.0.1:${port}/`,
     port,
     close: async () => {
-      jobAbort?.abort();
+      runner.cancel();
       for (const s of studios.values()) await s.close().catch(() => undefined);
       for (const c of clients) c.terminate();
       wss.close();

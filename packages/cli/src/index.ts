@@ -29,7 +29,7 @@ import {
   snapFrames,
   type Progress,
 } from '@reelforge/renderer';
-import { startHub, startStudio } from '@reelforge/studio';
+import { startHub, startStudio, type StudioMode } from '@reelforge/studio';
 import { ffmpegDecode } from './decode.js';
 import { openBrowser } from './open.js';
 import { bar, c, endStatus, fmtDur, formatIssue, statusLine, summary } from './term.js';
@@ -154,7 +154,7 @@ async function cmdCue(
 
 async function serve(
   p: EpisodePaths,
-  mode: 'cue' | 'dev',
+  mode: StudioMode,
   o: { port?: number; open?: boolean; preset?: string },
   g: Globals,
 ) {
@@ -165,7 +165,7 @@ async function serve(
     preset: o.preset,
     decode: ffmpegDecode,
     measure:
-      mode === 'dev'
+      mode !== 'cue'
         ? (tl: Timeline) =>
             measureTimeline(tl, { cacheDir: path.join(p.out, '.cache'), assetsDir: p.assets, file: p.yaml })
         : undefined,
@@ -173,7 +173,7 @@ async function serve(
   });
   out(g, { url: studio.url }, () => {
     console.log(
-      `${c.green('●')} ReelForge Studio (${mode === 'cue' ? 'cue marker' : 'preview'}) for ${c.bold(p.id)}`,
+      `${c.green('●')} ReelForge Studio (${{ edit: 'editor', cue: 'cue marker', dev: 'preview' }[mode]}) for ${c.bold(p.id)}`,
     );
     console.log(`  ${c.cyan(studio.url)}`);
     console.log(
@@ -577,6 +577,15 @@ export function buildProgram(): Command {
     .option('--preset <name>', 'override meta.preset')
     .option('--no-open', 'do not open the browser')
     .action((id, o, cmd) => cmdCue(id, o, globals(cmd)));
+
+  program
+    .command('edit')
+    .description('open the visual editor: canvas, layers, inspector and timeline (writes episode.yaml)')
+    .argument('<id>', 'episode id or path')
+    .option('--port <port>', 'port (default 4317 or $REELFORGE_PORT)', posInt('--port'))
+    .option('--preset <name>', 'override meta.preset')
+    .option('--no-open', 'do not open the browser')
+    .action((id, o, cmd) => serve(episode(id, globals(cmd)), 'edit', o, globals(cmd)));
 
   program
     .command('dev')

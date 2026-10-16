@@ -1,35 +1,58 @@
-/** ReelForge Studio client: cue marker + live preview (SRS §4.2, §4.3, §8). */
-import type { Issue, Timeline } from '@reelforge/core';
+/**
+ * ReelForge Studio: a visual editor for one episode (canvas, layers, inspector, timeline), the cue
+ * marker and the review panel, all synced to the voice recording and to episode.yaml on disk.
+ */
+import type { Timeline } from '@reelforge/core';
+import {
+  addScene,
+  copySelection,
+  deleteSelection,
+  duplicateSelection,
+  insertElement,
+  paste,
+  reorder,
+  setInOut,
+  takePendingSelect,
+} from './actions.js';
+import { $, app, fmt, h, toast, type Mode, type Selection } from './app.js';
+import { drawOverlay, fit, initCanvas, nudge, zoom100, zoomBy, zoomToSelection } from './canvas.js';
 import { Clock } from './clock.js';
-import { CueModel } from './cue.js';
-import type { RuntimeApi, StudioState } from './types.js';
-import { decodeAudio, Waves, type DecodedAudio } from './wave.js';
+import { handleKey, openContextMenu, openHelp, openPalette, register } from './commands.js';
+import { cueKey, initCuePanel, initReview, renderIssues, renderLines, syncCueModel } from './cuepanel.js';
+import { icon } from './icons.js';
+import { initInspector, renderInspector } from './inspector.js';
+import { initPanels, renderPanels, setTab } from './panels.js';
+import {
+  fitTimeline,
+  initTimeline,
+  renderTimeline,
+  revealTime,
+  setTimelineAudio,
+  toggleSnap,
+  updatePlayhead,
+  zoomTimeline,
+} from './timeline.js';
+import type { Job, RuntimeApi, StudioState } from './types.js';
+import { decodeAudio, type DecodedAudio } from './wave.js';
 
-const $ = <T extends HTMLElement = HTMLElement>(sel: string) => document.querySelector(sel) as T;
-const SVG = 'http://www.w3.org/2000/svg';
-
-let state: StudioState | null = null;
-let mode: 'cue' | 'dev' = location.hash === '#dev' ? 'dev' : 'cue';
+const clock = new Clock();
 let runtime: RuntimeApi | null = null;
-let loadedTimeline: Timeline | null = null;
 let audio: DecodedAudio | null = null;
 let voiceUrl: string | null = null;
-let dirty = false;
-/** Incremented on every local cue edit; a save only clears `dirty` if no newer edit happened meanwhile. */
-let edits = 0;
-let saveTimer: number | undefined;
-let saveStatus = '';
-const overlays = { safe: true, stage: false, boxes: false, time: true };
-const clock = new Clock();
-const model = new CueModel([]);
-const waves = new Waves($<HTMLCanvasElement>('#overview'), $<HTMLCanvasElement>('#zoom'), (t) => seek(t));
+let loadedTimeline: Timeline | null = null;
+let first = true;
 
-// ---------------------------------------------------------------- runtime iframe
+// ------------------------------------------------------------------ static icons in the markup
+document.querySelectorAll<HTMLElement>('[data-icon]').forEach((el) => {
+  el.insertAdjacentHTML('afterbegin', icon(el.dataset.icon!, Number(el.dataset.size ?? 16)));
+});
+
+// ------------------------------------------------------------------ runtime iframe
 const iframe = $<HTMLIFrameElement>('#runtime');
 const runtimeReady = new Promise<RuntimeApi>((resolve) => {
   const check = () => {
     const w = iframe.contentWindow as (Window & { reelforge?: RuntimeApi }) | null;
-    if (w?.reelforge) w.reelforge.ready.then(() => resolve(w.reelforge!));
+    if (w?.reelforge) void w.reelforge.ready.then(() => resolve(w.reelforge!));
     else setTimeout(check, 30);
   };
   iframe.addEventListener('load', check);
@@ -41,390 +64,191 @@ async function loadTimeline(tl: Timeline): Promise<void> {
   await api.load(tl);
   runtime = api;
   loadedTimeline = tl;
-  clock.duration = tl.duration;
-  waves.duration = tl.duration;
-  renderNow();
+  app.timeline = tl;
+  clock.duration = app.duration;
+  $('#dur').textContent = fmt(app.duration);
+  if (first) {
+    first = false;
+    fitTimeline();
+  }
+  renderAll();
 }
 
-// ---------------------------------------------------------------- layout
-function layout(): void {
-  const stage = $('#stage');
-  const frame = $('#frame');
-  const s = Math.min((stage.clientWidth - 24) / 1080, (stage.clientHeight - 24) / 1920);
-  frame.style.transform = `scale(${s})`;
-  frame.style.position = 'absolute';
-  frame.style.left = `${(stage.clientWidth - 1080 * s) / 2}px`;
-  frame.style.top = `${(stage.clientHeight - 1920 * s) / 2}px`;
-}
-window.addEventListener('resize', layout);
-
-function setMode(m: 'cue' | 'dev'): void {
-  mode = m;
-  document.body.dataset.mode = m;
-  history.replaceState(null, '', `#${m}`);
-  document
-    .querySelectorAll<HTMLButtonElement>('#tabs button')
-    .forEach((b) => b.classList.toggle('on', b.dataset.mode === m));
-  requestAnimationFrame(layout);
-}
-
-// ---------------------------------------------------------------- state
+// ------------------------------------------------------------------ state
 function connect(): void {
   const ws = new WebSocket(`ws://${location.host}/ws`);
+  ws.onopen = () => document.body.classList.remove('offline');
   ws.onmessage = (e) => {
-    const msg = JSON.parse(e.data as string) as { type: string; state: StudioState };
-    if (msg.type === 'state') applyState(msg.state);
+    const msg = JSON.parse(e.data as string) as {
+      type: string;
+      state?: StudioState;
+      job?: Job;
+      outputs?: StudioState['outputs'];
+    };
+    if (msg.type === 'state' && msg.state) applyState(msg.state);
+    if (msg.type === 'job' && msg.job && app.state) {
+      app.state = { ...app.state, job: msg.job, outputs: msg.outputs ?? app.state.outputs };
+      renderJob();
+    }
   };
   ws.onclose = () => {
-    setStatus('disconnected — retrying…', 'err');
+    document.body.classList.add('offline');
+    app.status('disconnected — retrying…', 'err');
     setTimeout(connect, 1000);
   };
 }
 
+function validSelection(s: Selection): Selection {
+  if (!s) return null;
+  if (s.kind === 'element') return app.scenes[s.scene]?.elements?.[s.index] ? s : null;
+  if (s.kind === 'scene') return app.scenes[s.scene] ? s : null;
+  return app.spec.script?.[s.index] ? s : null;
+}
+
 function applyState(s: StudioState): void {
-  const first = !state;
-  const scriptChanged = !state || JSON.stringify(state.script) !== JSON.stringify(s.script);
-  state = s;
-  $('#ep').textContent = `${s.id} · ${s.title}`;
-  document.title = `${s.id} · ReelForge Studio`;
-  if (first) setMode(location.hash ? mode : s.mode);
-  if (scriptChanged) model.setScript(s.script);
-  if (!dirty) model.load(s.cues?.cues ?? {}, s.cues?.words ?? {});
-  if (s.timeline && s.timeline !== loadedTimeline) void loadTimeline(s.timeline);
+  const first = !app.state;
+  app.state = s;
+  $('#epTitle').textContent = s.title || s.id;
+  $('#epId').textContent = s.id;
+  document.title = `${s.title || s.id} · ReelForge Studio`;
+  if (first) setMode((location.hash.slice(1) as Mode) || s.mode, false);
+  const pending = takePendingSelect();
+  app.selection = pending ? { kind: 'element', ...pending } : validSelection(app.selection);
+  syncCueModel();
   const vurl = s.voice?.url ?? null;
   if (vurl !== voiceUrl) {
     voiceUrl = vurl;
     clock.setSource(vurl, s.voice?.duration ?? s.timeline?.duration ?? 1);
     audio = null;
-    waves.setAudio(null);
+    setTimelineAudio(null);
     if (vurl)
       void decodeAudio(vurl).then((a) => {
         audio = a;
-        waves.setAudio(a);
+        setTimelineAudio(a);
       });
   }
-  if (!clock.duration) clock.duration = s.voice?.duration ?? s.timeline?.duration ?? 1;
-  waves.duration = s.voice?.duration ?? s.timeline?.duration ?? 1;
-  $('#dur').textContent = fmt(waves.duration);
-  renderLines(true);
-  renderIssues(s.issues);
+  clock.duration = app.duration;
+  $('#dur').textContent = fmt(app.duration);
+  const errBox = $('#errorBox');
   const errors = s.issues.filter((i) => i.level === 'error');
-  const box = $('#errorBox');
   if (s.error) {
-    box.hidden = false;
-    box.innerHTML = `<b>Cannot compile episode.yaml</b> — showing the last good version\n\n${errors
-      .slice(0, 6)
-      .map((i) => `${esc(loc(i))}  ${esc(i.message)}${i.hint ? `\n   → ${esc(i.hint)}` : ''}`)
-      .join('\n\n')}`;
-  } else box.hidden = true;
-  if (errors.length) setStatus(`${errors.length} error(s) — see the lint panel`, 'err');
-  else setStatus(saveStatus || `compiled in ${s.compileMs} ms · no errors`, 'ok');
-}
-
-function setStatus(text: string, cls = ''): void {
-  const el = $('#status');
-  el.textContent = text;
-  el.className = `mono ${cls}`;
-}
-
-// ---------------------------------------------------------------- cue list
-let lastCurrent: string | null = null;
-function renderLines(force = false): void {
-  const ol = $('#lines');
-  const t = clock.time;
-  const current = model.currentAt(t);
-  if (!force && current === lastCurrent) return;
-  lastCurrent = current;
-  const next = model.nextUnmarked;
-  const bad = model.badIds;
-  if (force || ol.children.length !== model.script.length) {
-    ol.replaceChildren(
-      ...model.script.map((l) => {
-        const li = document.createElement('li');
-        li.dataset.id = l.id;
-        li.innerHTML = `<span class="id"></span><span class="tx"></span><span class="tm"></span><div class="words"></div>`;
-        li.querySelector('.id')!.textContent = l.id;
-        li.querySelector('.tx')!.textContent = l.text;
-        li.addEventListener('click', () => {
-          model.selected = model.selected === l.id ? null : l.id;
-          model.wordMode = false;
-          renderLines(true);
-        });
-        li.addEventListener('dblclick', () => {
-          if (model.cues[l.id] !== undefined) seek(model.cues[l.id]);
-        });
-        return li;
-      }),
-    );
-  }
-  let marked = 0;
-  for (const li of Array.from(ol.children) as HTMLElement[]) {
-    const id = li.dataset.id!;
-    const v = model.cues[id];
-    if (v !== undefined) marked++;
-    li.classList.toggle('marked', v !== undefined);
-    li.classList.toggle('current', id === current);
-    li.classList.toggle('next', id === next && !model.selected);
-    li.classList.toggle('sel', id === model.selected);
-    li.classList.toggle('bad', bad.has(id));
-    li.querySelector('.tm')!.textContent = v === undefined ? '—' : fmt(v);
-    const wordsEl = li.querySelector('.words') as HTMLElement;
-    const showWords = id === model.selected && (model.wordMode || (model.words[id]?.length ?? 0) > 0);
-    if (showWords) {
-      const ws = model.wordsOf(id);
-      const ms = model.words[id] ?? [];
-      wordsEl.replaceChildren(
-        ...ws.map((w, i) =>
-          Object.assign(document.createElement('span'), {
-            textContent: w,
-            className: i < ms.length ? 'm' : '',
-          }),
+    errBox.hidden = false;
+    errBox.innerHTML = '';
+    errBox.append(
+      h('b', {}, 'episode.yaml has an error — showing the last version that worked'),
+      ...errors
+        .slice(0, 4)
+        .map((i) =>
+          h(
+            'div',
+            { class: 'mono' },
+            `${i.line ? `line ${i.line}: ` : ''}${i.message}${i.hint ? ` → ${i.hint}` : ''}`,
+          ),
         ),
-      );
-    } else wordsEl.replaceChildren();
-  }
-  $('#cueStats').textContent =
-    `${marked}/${model.script.length} marked${model.wordMode ? ' · WORD MODE' : ''}${bad.size ? ` · ${bad.size} out of order` : ''}`;
-  if (current) ol.querySelector(`[data-id="${CSS.escape(current)}"]`)?.scrollIntoView({ block: 'nearest' });
+    );
+  } else errBox.hidden = true;
+  syncHistory();
+  renderJob();
+  if (s.timeline && s.timeline !== loadedTimeline) void loadTimeline(s.timeline);
+  else renderAll();
+  if (!errors.length && !/saved|…/.test($('#status').textContent ?? ''))
+    app.status(`Saved · compiled in ${s.compileMs} ms`, 'ok');
+  if (first) maybeOnboard();
 }
 
-function flashLine(id: string): void {
-  const li = document.querySelector(`#lines li[data-id="${CSS.escape(id)}"]`);
-  li?.classList.remove('flash');
-  void (li as HTMLElement | null)?.offsetWidth;
-  li?.classList.add('flash');
+function syncHistory(): void {
+  const hst = app.state?.history;
+  const u = $<HTMLButtonElement>('#undoBtn');
+  const r = $<HTMLButtonElement>('#redoBtn');
+  u.disabled = !hst?.undo;
+  r.disabled = !hst?.redo;
+  u.title = `Undo${hst?.undoLabel ? `: ${hst.undoLabel}` : ''} (${isMacLabel('Mod+Z')})`;
+  r.title = `Redo${hst?.redoLabel ? `: ${hst.redoLabel}` : ''} (${isMacLabel('Mod+Shift+Z')})`;
 }
 
-let actx: AudioContext | null = null;
-function click(): void {
-  actx ??= new AudioContext();
-  const o = actx.createOscillator();
-  const g = actx.createGain();
-  o.frequency.value = 1800;
-  g.gain.setValueAtTime(0.25, actx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.05);
-  o.connect(g).connect(actx.destination);
-  o.start();
-  o.stop(actx.currentTime + 0.06);
-}
+const isMacLabel = (k: string) => k.replace('Mod', /Mac/.test(navigator.platform) ? '⌘' : 'Ctrl');
 
-function changed(id: string | null): void {
-  if (!id) return;
-  flashLine(id);
-  click();
+function renderAll(): void {
+  renderPanels();
+  renderInspector();
+  renderTimeline();
+  renderIssues();
   renderLines(true);
-  scheduleSave();
-}
-
-function scheduleSave(): void {
-  dirty = true;
-  edits++;
-  clearTimeout(saveTimer);
-  saveTimer = window.setTimeout(save, 150);
-}
-
-async function save(): Promise<void> {
-  if (!state) return;
-  const rev = edits;
-  // The server fills in the real voice file name, duration and hash.
-  const body = model.toJson('voice.wav', state.voice?.duration ?? state.timeline?.duration ?? 0);
-  try {
-    const res = await fetch('/cues', {
-      method: 'PUT',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    const j = (await res.json()) as { ok?: boolean; error?: string };
-    if (!res.ok) throw new Error(j.error ?? res.statusText);
-    saveStatus = `saved ${new Date().toLocaleTimeString()}`;
-    if (edits === rev) dirty = false;
-    setStatus(saveStatus, 'ok');
-  } catch (e) {
-    saveStatus = '';
-    setStatus(`save failed: ${(e as Error).message}`, 'err');
-  }
-}
-
-// ---------------------------------------------------------------- lint panel
-function loc(i: Issue): string {
-  const file = i.file ? i.file.split(/[\\/]/).pop() : '';
-  return file
-    ? `${file}${i.line ? `:${i.line}:${i.col ?? 1}` : ''}`
-    : i.time !== undefined
-      ? `@${fmt(i.time)}`
-      : '';
-}
-
-function renderIssues(issues: Issue[]): void {
-  const ul = $('#issues');
-  const counts = { error: 0, warn: 0, info: 0 };
-  for (const i of issues) counts[i.level]++;
-  $('#lintStats').textContent = `${counts.error} errors · ${counts.warn} warnings · ${counts.info} info`;
-  if (!issues.length) {
-    ul.innerHTML = '<li class="empty">No issues. Ready to render.</li>';
-    return;
-  }
-  ul.replaceChildren(
-    ...issues.map((i) => {
-      const li = document.createElement('li');
-      li.className = i.level;
-      const link =
-        i.file && i.line
-          ? `<a href="vscode://file/${encodeURI(i.file)}:${i.line}:${i.col ?? 1}" title="Open in VS Code">${esc(loc(i))}</a>`
-          : esc(loc(i));
-      li.innerHTML = `<span class="rule">${esc(i.rule)}</span><span class="msg">${esc(i.message)}</span><span class="loc">${link}${i.time !== undefined ? ` · ${fmt(i.time)}` : ''}${i.hint ? ` · ${esc(i.hint)}` : ''}</span>`;
-      li.addEventListener('click', (e) => {
-        if ((e.target as HTMLElement).tagName === 'A') return;
-        if (i.time !== undefined) seek(i.time);
-        if (i.elementId) {
-          overlays.boxes = true;
-          syncToggles();
-        }
-      });
-      return li;
-    }),
-  );
-}
-
-// ---------------------------------------------------------------- overlays (FR-DEV-4)
-function syncToggles(): void {
-  document
-    .querySelectorAll<HTMLInputElement>('#toggles input')
-    .forEach((i) => (i.checked = overlays[i.dataset.ov as keyof typeof overlays]));
   renderNow();
 }
-document.querySelectorAll<HTMLInputElement>('#toggles input').forEach((i) =>
-  i.addEventListener('change', () => {
-    overlays[i.dataset.ov as keyof typeof overlays] = i.checked;
-    renderNow();
-  }),
-);
 
-function svg(tag: string, attrs: Record<string, string | number>, text?: string): SVGElement {
-  const el = document.createElementNS(SVG, tag);
-  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
-  if (text) el.textContent = text;
-  return el;
+app.on('selection', () => {
+  renderPanels();
+  renderInspector();
+  renderTimeline();
+  renderNow();
+});
+
+// ------------------------------------------------------------------ modes
+function setMode(m: Mode, focus = true): void {
+  if (!['edit', 'cue', 'dev'].includes(m)) m = 'edit';
+  app.mode = m;
+  document.body.dataset.mode = m;
+  history.replaceState(null, '', `#${m}`);
+  document.querySelectorAll<HTMLButtonElement>('#modes button').forEach((b) => {
+    b.classList.toggle('on', b.dataset.mode === m);
+    b.setAttribute('aria-selected', String(b.dataset.mode === m));
+  });
+  if (m === 'edit') renderInspector();
+  if (m === 'cue') renderLines(true);
+  renderNow();
+  if (focus) $('#stage').focus({ preventScroll: true });
 }
 
-function drawOverlay(t: number): void {
-  const root = $('#overlay') as unknown as SVGSVGElement;
-  const tl = loadedTimeline;
-  const nodes: SVGElement[] = [];
-  if (tl && overlays.safe) {
-    for (const z of tl.preset.safe) {
-      nodes.push(
-        svg('rect', {
-          x: z.x,
-          y: z.y,
-          width: z.w,
-          height: z.h,
-          fill: 'rgba(255,74,92,0.16)',
-          stroke: '#ff4a5c',
-          'stroke-dasharray': '12 10',
-          'stroke-width': 3,
-        }),
-      );
-      nodes.push(
-        svg(
-          'text',
-          { x: z.x + 14, y: z.y + 36, fill: '#ff4a5c', 'font-size': 26, 'font-family': 'monospace' },
-          `${tl.preset.label} UI · ${z.name}`,
-        ),
-      );
-    }
-  }
-  if (tl && overlays.stage) {
-    nodes.push(
-      svg('rect', {
-        x: 0,
-        y: tl.preset.stage.y,
-        width: tl.width,
-        height: tl.preset.stage.h,
-        fill: 'none',
-        stroke: '#55dcff',
-        'stroke-width': 3,
-        'stroke-dasharray': '6 8',
-      }),
-    );
-    nodes.push(
-      svg('line', {
-        x1: 0,
-        x2: tl.width,
-        y1: tl.preset.captionsY,
-        y2: tl.preset.captionsY,
-        stroke: '#b8ff3c',
-        'stroke-width': 2,
-        'stroke-dasharray': '4 8',
-      }),
-    );
-  }
-  if (runtime && overlays.boxes) {
-    for (const b of runtime.boxes(t)) {
-      if (!b.visible) continue;
-      nodes.push(
-        svg('rect', {
-          x: b.x,
-          y: b.y,
-          width: b.w,
-          height: b.h,
-          fill: 'none',
-          stroke: '#c792ff',
-          'stroke-width': 3,
-        }),
-      );
-      nodes.push(
-        svg(
-          'text',
-          { x: b.x + 6, y: b.y - 8, fill: '#c792ff', 'font-size': 24, 'font-family': 'monospace' },
-          `${b.id} (${b.component})`,
-        ),
-      );
-    }
-  }
-  if (overlays.time) {
-    nodes.push(svg('rect', { x: 20, y: 1830, width: 330, height: 66, rx: 14, fill: 'rgba(0,0,0,0.7)' }));
-    nodes.push(
-      svg(
-        'text',
-        { x: 40, y: 1876, fill: '#eef1f7', 'font-size': 34, 'font-family': 'monospace' },
-        `${fmt(t)}  f${Math.round(t * (tl?.fps ?? 30))}`,
-      ),
-    );
-  }
-  root.replaceChildren(...nodes);
+// ------------------------------------------------------------------ transport & loop
+function time(): number {
+  return clock.time;
 }
 
-// ---------------------------------------------------------------- transport & loop
 function seek(t: number): void {
-  clock.seek(t);
+  clock.seek(Math.max(0, Math.min(app.duration, t)));
   renderNow();
 }
 
+let lastLive = '';
 function renderNow(): void {
   const t = clock.time;
   runtime?.render(t);
   drawOverlay(t);
-  waves.draw(t, loadedTimeline, marks(), mode);
+  updatePlayhead(t);
   $('#clock').textContent = fmt(t);
-  $('#play').textContent = clock.isPlaying ? '❚❚' : '▶';
+  const play = $('#play');
+  const playing = clock.isPlaying;
+  if (play.dataset.state !== String(playing)) {
+    play.dataset.state = String(playing);
+    play.innerHTML = icon(playing ? 'pause' : 'play', 18);
+  }
   renderLines();
-}
-
-function marks() {
-  return {
-    cues: model.script
-      .filter((l) => model.cues[l.id] !== undefined)
-      .map((l) => ({ id: l.id, t: model.cues[l.id], selected: l.id === model.selected })),
-    words: model.selected ? (model.words[model.selected] ?? []) : [],
-  };
+  // refresh the "on screen now" markers in the layers panel when the visible set changes
+  const live = app.timeline
+    ? app.timeline.scenes
+        .flatMap((s) =>
+          t >= s.start && t < s.end
+            ? [
+                s.id,
+                ...s.elements
+                  .filter((e) => t >= e.enter.t && (!e.exit || t < e.exit.t + e.exit.dur))
+                  .map((e) => e.id),
+              ]
+            : [],
+        )
+        .join(',') + (app.timeline.script.find((l) => t >= l.start && t < l.end)?.id ?? '')
+    : '';
+  if (live !== lastLive) {
+    lastLive = live;
+    renderPanels();
+  }
 }
 
 function loop(): void {
   if (clock.isPlaying) renderNow();
   requestAnimationFrame(loop);
 }
-
 clock.onEnd = () => renderNow();
 
 function setSpeed(r: number): void {
@@ -434,186 +258,844 @@ function setSpeed(r: number): void {
     .forEach((b) => b.classList.toggle('on', Number(b.dataset.speed) === r));
 }
 
-// ---------------------------------------------------------------- keyboard (IR-3)
-window.addEventListener('keydown', (e) => {
-  if ((e.target as HTMLElement).tagName === 'INPUT' && (e.target as HTMLInputElement).type !== 'checkbox')
+function step(frames: number): void {
+  clock.pause();
+  seek(Math.round(clock.time * app.fps + frames) / app.fps);
+}
+
+// ------------------------------------------------------------------ render dialog & outputs
+function renderJob(): void {
+  const j = app.state?.job;
+  const pill = $('#jobPill');
+  const btn = $<HTMLButtonElement>('#renderBtn');
+  if (!j) {
+    pill.hidden = true;
+    btn.disabled = false;
     return;
-  const fps = loadedTimeline?.fps ?? 30;
-  const k = e.key;
-  const help = $('#help');
-  if (k === '?') return void (help.hidden = !help.hidden);
-  if (!help.hidden && k === 'Escape') return void (help.hidden = true);
-  let handled = true;
-  switch (k) {
-    case 'c':
-    case 'C':
-      setMode('cue');
-      break;
-    case 'v':
-    case 'V':
-      setMode('dev');
-      break;
-    case 'k':
-    case 'K':
-    case 'Enter':
-      clock.toggle();
-      break;
-    case 'j':
-    case 'J':
-      seek(clock.time - 1);
-      break;
-    case 'l':
-    case 'L':
-      seek(clock.time + 1);
-      break;
-    case ',':
-      clock.pause();
-      seek(Math.round(clock.time * fps - 1) / fps);
-      break;
-    case '.':
-      clock.pause();
-      seek(Math.round(clock.time * fps + 1) / fps);
-      break;
-    case 'Home':
-      seek(0);
-      break;
-    case 'End':
-      seek(clock.duration);
-      break;
-    case '1':
-      setSpeed(0.5);
-      break;
-    case '2':
-      setSpeed(0.75);
-      break;
-    case '3':
-      setSpeed(1);
-      break;
-    default:
-      handled = mode === 'cue' ? cueKey(e) : devKey(e);
   }
-  if (handled) {
+  pill.hidden = false;
+  if (j.status === 'running') {
+    const pct = j.total ? Math.round((j.done / j.total) * 100) : 0;
+    pill.className = 'jobpill running';
+    pill.innerHTML = `<i style="width:${pct}%"></i><span>${j.phase} ${pct}%${j.eta ? ` · ${Math.ceil(j.eta)} s left` : ''}</span>`;
+    pill.title = 'Rendering — click to cancel';
+    btn.disabled = true;
+  } else {
+    btn.disabled = false;
+    pill.className = `jobpill ${j.status}`;
+    pill.innerHTML = `${icon(j.status === 'done' ? 'check' : 'warn', 13)}<span>${j.status === 'done' ? 'Rendered — open' : j.status === 'cancelled' ? 'Render cancelled' : 'Render failed'}</span>`;
+    pill.title = j.message ?? '';
+  }
+}
+
+let lastJobNotified = 0;
+function onJobEvent(): void {
+  const j = app.state?.job;
+  if (!j || j.status === 'running' || j.finished === lastJobNotified) return;
+  lastJobNotified = j.finished ?? 0;
+  if (j.status === 'done') {
+    toast(j.message ?? 'Rendered', 'ok', 5000);
+    openOutputs();
+  } else if (j.status === 'failed') toast(j.message ?? 'Render failed', 'err', 8000);
+}
+
+$('#jobPill').addEventListener('click', () => {
+  const j = app.state?.job;
+  if (j?.status === 'running') {
+    if (confirm('Cancel the render?')) void app.cancelRender();
+  } else if (j?.status === 'done') openOutputs();
+  else if (j?.message) toast(j.message, 'err', 8000);
+});
+
+function openRenderDialog(): void {
+  if (app.state?.job?.status === 'running') return toast('A render is already running');
+  const dlg = $<HTMLDialogElement>('#renderDlg');
+  const presets = $<HTMLSelectElement>('#rPreset');
+  presets.replaceChildren(
+    h('option', { value: '' }, `Episode setting (${String(app.spec.meta?.preset ?? 'tiktok')})`),
+    ...(app.meta?.presets ?? []).map((p) => h('option', { value: p }, p)),
+  );
+  const silent = $<HTMLInputElement>('#rSilent');
+  silent.checked = !app.state?.voice;
+  $('#rVoiceNote').hidden = Boolean(app.state?.voice);
+  const errors = app.issues.filter((i) => i.level === 'error');
+  $('#rErrors').hidden = !errors.length;
+  $('#rErrors').textContent = errors.length
+    ? `${errors.length} error(s) must be fixed first: ${errors[0].message}`
+    : '';
+  dlg.showModal();
+}
+
+$('#renderForm').addEventListener('submit', (e) => {
+  const dlg = $<HTMLDialogElement>('#renderDlg');
+  if ((e as SubmitEvent).submitter?.getAttribute('value') !== 'ok') return;
+  e.preventDefault();
+  const options = {
+    preset: $<HTMLSelectElement>('#rPreset').value || undefined,
+    shareMb: Number($<HTMLInputElement>('#rShare').value) || undefined,
+    sfx: $<HTMLInputElement>('#rSfx').checked,
+    silent: $<HTMLInputElement>('#rSilent').checked,
+    fast: $<HTMLInputElement>('#rFast').checked,
+  };
+  dlg.close();
+  app.render(options).then(
+    () => toast('Rendering… you can keep editing'),
+    (err: Error) => toast(err.message, 'err', 8000),
+  );
+});
+
+function openOutputs(): void {
+  const outs = app.state?.outputs ?? [];
+  const dlg = $<HTMLDialogElement>('#outputsDlg');
+  const video = $<HTMLVideoElement>('#outVideo');
+  const share = outs.find((o) => o.file.endsWith('.share.mp4')) ?? outs.find((o) => o.file.endsWith('.mp4'));
+  const sheet = outs.find((o) => o.file.endsWith('.sheet.jpg'));
+  video.poster = sheet ? `/episode/out/${encodeURIComponent(sheet.file)}?v=${sheet.mtime}` : '';
+  video.src = share ? `/episode/out/${encodeURIComponent(share.file)}?v=${share.mtime}` : '';
+  const list = $('#outList');
+  list.replaceChildren(
+    ...outs.map((o) =>
+      h(
+        'li',
+        {},
+        h(
+          'a',
+          {
+            href: `/episode/out/${encodeURIComponent(o.file)}?v=${o.mtime}`,
+            target: '_blank',
+            rel: 'noopener',
+            download: o.file,
+          },
+          o.file,
+        ),
+        h('span', { class: 'dim mono' }, `${(o.size / 1048576).toFixed(1)} MB`),
+      ),
+    ),
+  );
+  if (!outs.length) list.append(h('li', { class: 'dim' }, 'Nothing rendered yet.'));
+  dlg.showModal();
+}
+
+// ------------------------------------------------------------------ commands
+const hasEl = () => app.selection?.kind === 'element';
+const hasSel = () => Boolean(app.selection);
+
+register(
+  // playback
+  {
+    id: 'play',
+    title: 'Play / pause',
+    group: 'Playback',
+    keys: ['Space', 'K'],
+    icon: 'play',
+    modes: ['edit', 'dev'],
+    run: () => (clock.toggle(), renderNow()),
+  },
+  {
+    id: 'play-cue',
+    title: 'Play / pause',
+    group: 'Playback',
+    keys: ['K', 'Enter'],
+    icon: 'play',
+    modes: ['cue'],
+    palette: false,
+    run: () => (clock.toggle(), renderNow()),
+  },
+  {
+    id: 'back',
+    title: 'Back 1 second',
+    group: 'Playback',
+    keys: ['J'],
+    icon: 'back',
+    run: () => seek(clock.time - 1),
+  },
+  {
+    id: 'fwd',
+    title: 'Forward 1 second',
+    group: 'Playback',
+    keys: ['L'],
+    icon: 'fwd',
+    run: () => seek(clock.time + 1),
+  },
+  {
+    id: 'prev-frame',
+    title: 'Previous frame',
+    group: 'Playback',
+    keys: [',', 'Alt+ArrowLeft'],
+    icon: 'back',
+    run: () => step(-1),
+  },
+  {
+    id: 'next-frame',
+    title: 'Next frame',
+    group: 'Playback',
+    keys: ['.', 'Alt+ArrowRight'],
+    icon: 'fwd',
+    run: () => step(1),
+  },
+  {
+    id: 'prev-frame-arrow',
+    title: 'Previous frame',
+    group: 'Playback',
+    keys: ['ArrowLeft'],
+    palette: false,
+    modes: ['edit', 'dev'],
+    when: () => !hasEl() || app.mode === 'dev',
+    run: () => step(-1),
+  },
+  {
+    id: 'next-frame-arrow',
+    title: 'Next frame',
+    group: 'Playback',
+    keys: ['ArrowRight'],
+    palette: false,
+    modes: ['edit', 'dev'],
+    when: () => !hasEl() || app.mode === 'dev',
+    run: () => step(1),
+  },
+  { id: 'start', title: 'Go to start', group: 'Playback', keys: ['Home'], icon: 'start', run: () => seek(0) },
+  {
+    id: 'end',
+    title: 'Go to end',
+    group: 'Playback',
+    keys: ['End'],
+    icon: 'end',
+    run: () => seek(app.duration),
+  },
+  { id: 'speed-50', title: 'Speed 0.5×', group: 'Playback', keys: ['1'], run: () => setSpeed(0.5) },
+  { id: 'speed-75', title: 'Speed 0.75×', group: 'Playback', keys: ['2'], run: () => setSpeed(0.75) },
+  { id: 'speed-100', title: 'Speed 1×', group: 'Playback', keys: ['3'], run: () => setSpeed(1) },
+  // edit
+  { id: 'undo', title: 'Undo', group: 'Edit', keys: ['Mod+Z'], icon: 'undo', run: () => void app.undo() },
+  {
+    id: 'redo',
+    title: 'Redo',
+    group: 'Edit',
+    keys: ['Mod+Shift+Z', 'Mod+Y'],
+    icon: 'redo',
+    run: () => void app.undo(true),
+  },
+  {
+    id: 'delete',
+    title: 'Delete',
+    group: 'Edit',
+    keys: ['Delete', 'Backspace'],
+    icon: 'trash',
+    modes: ['edit'],
+    when: hasSel,
+    run: () => void deleteSelection(),
+  },
+  {
+    id: 'duplicate',
+    title: 'Duplicate',
+    group: 'Edit',
+    keys: ['Mod+D'],
+    icon: 'copy',
+    modes: ['edit'],
+    when: hasEl,
+    run: () => void duplicateSelection(),
+  },
+  {
+    id: 'copy',
+    title: 'Copy',
+    group: 'Edit',
+    keys: ['Mod+C'],
+    icon: 'copy',
+    modes: ['edit'],
+    when: hasEl,
+    run: copySelection,
+  },
+  {
+    id: 'paste',
+    title: 'Paste at the playhead',
+    group: 'Edit',
+    keys: ['Mod+V'],
+    icon: 'copy',
+    modes: ['edit'],
+    run: () => void paste(clock.time),
+  },
+  {
+    id: 'forward',
+    title: 'Bring forward',
+    group: 'Edit',
+    keys: ['Mod+]'],
+    icon: 'up',
+    modes: ['edit'],
+    when: hasEl,
+    run: () => void reorder(1),
+  },
+  {
+    id: 'backward',
+    title: 'Send backward',
+    group: 'Edit',
+    keys: ['Mod+['],
+    icon: 'down',
+    modes: ['edit'],
+    when: hasEl,
+    run: () => void reorder(-1),
+  },
+  {
+    id: 'front',
+    title: 'Bring to front',
+    group: 'Edit',
+    keys: ['Mod+Shift+]'],
+    icon: 'up',
+    modes: ['edit'],
+    when: hasEl,
+    run: () => void reorder('top'),
+  },
+  {
+    id: 'back-most',
+    title: 'Send to back',
+    group: 'Edit',
+    keys: ['Mod+Shift+['],
+    icon: 'down',
+    modes: ['edit'],
+    when: hasEl,
+    run: () => void reorder('bottom'),
+  },
+  {
+    id: 'in',
+    title: 'Enter at the playhead',
+    group: 'Edit',
+    keys: ['I'],
+    icon: 'target',
+    modes: ['edit'],
+    when: hasSel,
+    run: () => void setInOut('in', clock.time),
+  },
+  {
+    id: 'out',
+    title: 'Exit at the playhead',
+    group: 'Edit',
+    keys: ['O'],
+    icon: 'target',
+    modes: ['edit'],
+    when: hasEl,
+    run: () => void setInOut('out', clock.time),
+  },
+  {
+    id: 'deselect',
+    title: 'Deselect',
+    group: 'Edit',
+    keys: ['Escape'],
+    modes: ['edit', 'dev'],
+    run: () => app.select(null),
+  },
+  {
+    id: 'next-el',
+    title: 'Select next element',
+    group: 'Edit',
+    keys: ['Tab'],
+    modes: ['edit'],
+    run: () => cycle(1),
+  },
+  {
+    id: 'prev-el',
+    title: 'Select previous element',
+    group: 'Edit',
+    keys: ['Shift+Tab'],
+    modes: ['edit'],
+    run: () => cycle(-1),
+  },
+  {
+    id: 'rename',
+    title: 'Rename',
+    group: 'Edit',
+    keys: ['F2'],
+    modes: ['edit'],
+    when: hasEl,
+    run: () => $<HTMLInputElement>('#inspector .ihead + .frow input')?.focus(),
+  },
+  {
+    id: 'save',
+    title: 'Save (automatic)',
+    group: 'Edit',
+    keys: ['Mod+S'],
+    palette: false,
+    run: () => toast('Every change is saved to episode.yaml automatically', 'ok'),
+  },
+  // insert
+  {
+    id: 'insert',
+    title: 'Insert component…',
+    group: 'Insert',
+    keys: ['A', 'Mod+I'],
+    icon: 'shapes',
+    modes: ['edit'],
+    run: () => openPalette('Insert '),
+  },
+  {
+    id: 'add-scene',
+    title: 'Add scene at the playhead',
+    group: 'Insert',
+    keys: ['N'],
+    icon: 'scene',
+    modes: ['edit'],
+    run: () => void addScene(clock.time),
+  },
+  // view
+  { id: 'fit', title: 'Zoom to fit', group: 'View', keys: ['Shift+1'], icon: 'fit', run: fit },
+  {
+    id: 'zoom-sel',
+    title: 'Zoom to selection',
+    group: 'View',
+    keys: ['Shift+2'],
+    icon: 'target',
+    run: zoomToSelection,
+  },
+  { id: 'zoom-100', title: 'Zoom to 100%', group: 'View', keys: ['Shift+0'], run: zoom100 },
+  {
+    id: 'zoom-in',
+    title: 'Zoom in',
+    group: 'View',
+    keys: ['Mod+='],
+    icon: 'zoomin',
+    run: () => zoomBy(1.25),
+  },
+  {
+    id: 'zoom-out',
+    title: 'Zoom out',
+    group: 'View',
+    keys: ['Mod+-'],
+    icon: 'zoomout',
+    run: () => zoomBy(0.8),
+  },
+  { id: 'tl-in', title: 'Timeline zoom in', group: 'View', keys: ['='], run: () => zoomTimeline(1.5) },
+  { id: 'tl-out', title: 'Timeline zoom out', group: 'View', keys: ['-'], run: () => zoomTimeline(1 / 1.5) },
+  { id: 'tl-fit', title: 'Fit the timeline', group: 'View', keys: ['\\'], run: fitTimeline },
+  {
+    id: 'safe',
+    title: 'Platform safe zones',
+    group: 'View',
+    keys: ['Z'],
+    icon: 'safe',
+    modes: ['edit', 'dev'],
+    run: () => toggleOverlay('safe'),
+  },
+  {
+    id: 'boxes',
+    title: 'Element outlines',
+    group: 'View',
+    keys: ['E'],
+    icon: 'frame',
+    modes: ['edit', 'dev'],
+    run: () => toggleOverlay('boxes'),
+  },
+  {
+    id: 'stage',
+    title: 'Stage & caption guides',
+    group: 'View',
+    keys: ['B'],
+    icon: 'grid',
+    modes: ['edit', 'dev'],
+    run: () => toggleOverlay('stage'),
+  },
+  {
+    id: 'time',
+    title: 'Time readout on the frame',
+    group: 'View',
+    keys: ['T'],
+    modes: ['edit', 'dev'],
+    run: () => toggleOverlay('time'),
+  },
+  {
+    id: 'snap',
+    title: 'Snapping',
+    group: 'View',
+    keys: ['S'],
+    icon: 'magnet',
+    modes: ['edit', 'dev'],
+    run: () => (toggleSnap(), toast(app.snap ? 'Snapping on' : 'Snapping off')),
+  },
+  {
+    id: 'hand',
+    title: 'Hand tool (pan)',
+    group: 'View',
+    keys: ['H'],
+    icon: 'hand',
+    modes: ['edit', 'dev'],
+    run: () => setTool('hand'),
+  },
+  {
+    id: 'move',
+    title: 'Move tool',
+    group: 'View',
+    keys: ['V'],
+    icon: 'cursor',
+    modes: ['edit', 'dev'],
+    run: () => setTool('move'),
+  },
+  // panels & modes
+  {
+    id: 'mode-edit',
+    title: 'Edit mode',
+    group: 'Modes & panels',
+    keys: ['Alt+1'],
+    icon: 'cursor',
+    run: () => setMode('edit'),
+  },
+  {
+    id: 'mode-cue',
+    title: 'Cues mode (mark the voice)',
+    group: 'Modes & panels',
+    keys: ['Alt+2'],
+    icon: 'mic',
+    run: () => setMode('cue'),
+  },
+  {
+    id: 'mode-dev',
+    title: 'Review mode (checks)',
+    group: 'Modes & panels',
+    keys: ['Alt+3'],
+    icon: 'check',
+    run: () => setMode('dev'),
+  },
+  {
+    id: 'tab-layers',
+    title: 'Show layers',
+    group: 'Modes & panels',
+    keys: ['Alt+L'],
+    icon: 'layers',
+    run: () => setTab('layers'),
+  },
+  {
+    id: 'tab-insert',
+    title: 'Show components',
+    group: 'Modes & panels',
+    keys: ['Alt+I'],
+    icon: 'shapes',
+    run: () => setTab('insert'),
+  },
+  {
+    id: 'tab-script',
+    title: 'Show script',
+    group: 'Modes & panels',
+    keys: ['Alt+S'],
+    icon: 'script',
+    run: () => setTab('script'),
+  },
+  {
+    id: 'render',
+    title: 'Render video…',
+    group: 'Export',
+    keys: ['Mod+Enter'],
+    icon: 'render',
+    run: openRenderDialog,
+  },
+  { id: 'outputs', title: 'Open rendered videos', group: 'Export', icon: 'film', run: openOutputs },
+  {
+    id: 'palette',
+    title: 'Command palette',
+    group: 'Help',
+    keys: ['Mod+K', 'Mod+Shift+P'],
+    icon: 'search',
+    palette: false,
+    run: () => openPalette(),
+  },
+  { id: 'help', title: 'Keyboard shortcuts', group: 'Help', keys: ['?'], icon: 'keyboard', run: openHelp },
+  { id: 'tour', title: 'Show the quick tour', group: 'Help', icon: 'help', run: () => showTour(0) },
+);
+
+function toggleOverlay(k: keyof typeof app.overlays): void {
+  app.overlays[k] = !app.overlays[k];
+  syncOverlayButtons();
+  renderNow();
+}
+
+function syncOverlayButtons(): void {
+  document
+    .querySelectorAll<HTMLButtonElement>('[data-ov]')
+    .forEach((b) => b.classList.toggle('on', app.overlays[b.dataset.ov as keyof typeof app.overlays]));
+}
+
+function setTool(t: 'move' | 'hand'): void {
+  app.tool = t;
+  document
+    .querySelectorAll<HTMLButtonElement>('[data-tool]')
+    .forEach((b) => b.classList.toggle('on', b.dataset.tool === t));
+  $('#stage').style.cursor = t === 'hand' ? 'grab' : '';
+}
+
+/** Tab / Shift+Tab through the elements of the scene at the playhead. */
+function cycle(d: number): void {
+  const si = app.selection?.kind === 'element' ? app.selection.scene : app.sceneIndexAt(clock.time);
+  const n = app.scenes[si]?.elements?.length ?? 0;
+  if (!n) return;
+  const cur = app.selection?.kind === 'element' ? app.selection.index : d > 0 ? -1 : n;
+  app.select({ kind: 'element', scene: si, index: (cur + d + n) % n });
+}
+
+// ------------------------------------------------------------------ keyboard
+window.addEventListener('keydown', (e) => {
+  const t = e.target as HTMLElement;
+  if (document.querySelector('dialog[open]')) return; // dialogs handle their own keys (Esc closes)
+  const typing = t.matches(
+    'input:not([type=checkbox]):not([type=range]), textarea, select, [contenteditable]',
+  );
+  if (typing) return;
+  if (app.mode === 'cue' && cueKey(e, audio)) {
     e.preventDefault();
     renderNow();
+    return;
   }
-});
-
-function cueKey(e: KeyboardEvent): boolean {
-  const step = e.shiftKey ? 0.01 : 0.05;
-  switch (e.key) {
-    case ' ':
-      changed(model.mark(clock.time, audio));
-      return true;
-    case 'Backspace':
-      changed(model.undo());
-      return true;
-    case 'ArrowLeft':
-      changed(model.nudge(-step));
-      return true;
-    case 'ArrowRight':
-      changed(model.nudge(step));
-      return true;
-    case 'ArrowUp':
-    case 'ArrowDown': {
-      const ids = model.script.map((l) => l.id);
-      const cur = model.selected ? ids.indexOf(model.selected) : e.key === 'ArrowUp' ? ids.length : -1;
-      const next = Math.max(0, Math.min(ids.length - 1, cur + (e.key === 'ArrowUp' ? -1 : 1)));
-      model.selected = ids[next] ?? null;
-      model.wordMode = false;
-      renderLines(true);
-      return true;
+  // arrow-key nudge of the selected element
+  if (app.mode === 'edit' && hasEl() && !e.altKey && !e.metaKey && !e.ctrlKey && e.key.startsWith('Arrow')) {
+    const d = e.shiftKey ? 10 : 1;
+    const dx = e.key === 'ArrowLeft' ? -d : e.key === 'ArrowRight' ? d : 0;
+    const dy = e.key === 'ArrowUp' ? -d : e.key === 'ArrowDown' ? d : 0;
+    if (nudge(dx, dy)) {
+      e.preventDefault();
+      return;
     }
-    case 'Escape':
-      model.selected = null;
-      model.wordMode = false;
-      renderLines(true);
-      return true;
-    case 's':
-    case 'S':
-      changed(model.snapSelected(audio));
-      return true;
-    case 'a':
-    case 'A':
-      model.autoSnap = !model.autoSnap;
-      $<HTMLInputElement>('#autoSnap').checked = model.autoSnap;
-      return true;
-    case 'w':
-    case 'W':
-      if (model.startWordMode()) {
-        const v = model.selected ? model.cues[model.selected] : undefined;
-        if (v !== undefined) seek(Math.max(0, v - 0.5));
-        renderLines(true);
-      }
-      return true;
-    case 'g':
-    case 'G':
-      if (model.selected && model.cues[model.selected] !== undefined) seek(model.cues[model.selected]);
-      return true;
   }
-  return false;
-}
-
-function devKey(e: KeyboardEvent): boolean {
-  const toggle = (key: keyof typeof overlays) => {
-    overlays[key] = !overlays[key];
-    syncToggles();
-    return true;
-  };
-  switch (e.key) {
-    case ' ':
-      clock.toggle();
-      return true;
-    case 'z':
-    case 'Z':
-      return toggle('safe');
-    case 'b':
-    case 'B':
-      return toggle('stage');
-    case 'e':
-    case 'E':
-      return toggle('boxes');
-    case 't':
-    case 'T':
-      return toggle('time');
-  }
-  return false;
-}
-
-// ---------------------------------------------------------------- helpers & boot
-function fmt(t: number): string {
-  const m = Math.floor(t / 60);
-  const s = t - m * 60;
-  return `${m}:${s.toFixed(2).padStart(5, '0')}`;
-}
-
-function esc(s: string): string {
-  return s.replace(
-    /[&<>"']/g,
-    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!,
-  );
-}
-
-$('#play').addEventListener('click', () => {
-  clock.toggle();
-  renderNow();
+  if (handleKey(e)) renderNow();
 });
-$('#helpBtn').addEventListener('click', () => ($('#help').hidden = false));
-$('#help').addEventListener('click', (e) => {
-  if (e.target === $('#help')) $('#help').hidden = true;
-});
-$<HTMLInputElement>('#autoSnap').addEventListener(
-  'change',
-  (e) => (model.autoSnap = (e.target as HTMLInputElement).checked),
+
+// ------------------------------------------------------------------ cross-module events
+document.addEventListener(
+  'rf:insert',
+  (e) => void insertElement((e as CustomEvent<string>).detail, { time: clock.time }),
 );
+document.addEventListener('rf:goto', (e) => {
+  const s = (e as CustomEvent<NonNullable<Selection>>).detail;
+  app.select(s);
+  let t: number | undefined;
+  if (s.kind === 'scene') t = app.compiledScene(s.scene)?.start;
+  if (s.kind === 'element') {
+    const el = app.compiledElement(s.scene, s.index);
+    if (el) t = el.enter.t + el.enter.dur;
+  }
+  if (s.kind === 'line') t = app.timeline?.script[s.index]?.start;
+  if (t !== undefined) {
+    seek(t);
+    revealTime(t);
+  }
+});
+
+// ------------------------------------------------------------------ context menus
+$('#stage').addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  if (app.mode !== 'edit') return;
+  openContextMenu(
+    e.clientX,
+    e.clientY,
+    hasEl()
+      ? [
+          'duplicate',
+          'copy',
+          'paste',
+          '-',
+          'forward',
+          'backward',
+          'front',
+          'back-most',
+          '-',
+          'in',
+          'out',
+          'zoom-sel',
+          '-',
+          'delete',
+        ]
+      : ['paste', 'insert', 'add-scene', '-', 'fit', 'safe', 'boxes', 'stage'],
+  );
+});
+$('#left').addEventListener('contextmenu', (e) => {
+  if (!(e.target as HTMLElement).closest('.trow')) return;
+  e.preventDefault();
+  (e.target as HTMLElement).closest<HTMLElement>('.trow')?.click();
+  openContextMenu(
+    e.clientX,
+    e.clientY,
+    hasEl()
+      ? ['duplicate', 'copy', 'paste', '-', 'forward', 'backward', '-', 'rename', 'delete']
+      : ['add-scene', 'paste', '-', 'in', 'delete'],
+  );
+});
+$('#timeline').addEventListener('contextmenu', (e) => {
+  if (!(e.target as HTMLElement).closest('.clip')) return;
+  e.preventDefault();
+  openContextMenu(
+    e.clientX,
+    e.clientY,
+    hasEl() ? ['in', 'out', '-', 'duplicate', 'delete'] : ['in', 'delete'],
+  );
+});
+
+// ------------------------------------------------------------------ resizable panels
+function splitter(
+  id: string,
+  cssVar: string,
+  axis: 'x' | 'y',
+  invert: boolean,
+  min: number,
+  max: number,
+): void {
+  const el = $(id);
+  const key = `rf-${cssVar}`;
+  try {
+    const v = localStorage.getItem(key);
+    if (v) document.documentElement.style.setProperty(`--${cssVar}`, v);
+  } catch {
+    /* storage unavailable */
+  }
+  el.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    el.setPointerCapture(e.pointerId);
+    const start = axis === 'x' ? e.clientX : e.clientY;
+    const cur = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(`--${cssVar}`));
+    document.body.classList.add('resizing');
+    const mv = (ev: PointerEvent) => {
+      const d = (axis === 'x' ? ev.clientX : ev.clientY) - start;
+      const v = Math.max(min, Math.min(max, cur + (invert ? -d : d)));
+      document.documentElement.style.setProperty(`--${cssVar}`, `${v}px`);
+    };
+    const up = () => {
+      el.removeEventListener('pointermove', mv);
+      el.removeEventListener('pointerup', up);
+      document.body.classList.remove('resizing');
+      try {
+        localStorage.setItem(
+          key,
+          getComputedStyle(document.documentElement).getPropertyValue(`--${cssVar}`).trim(),
+        );
+      } catch {
+        /* storage unavailable */
+      }
+    };
+    el.addEventListener('pointermove', mv);
+    el.addEventListener('pointerup', up);
+  });
+}
+
+// ------------------------------------------------------------------ onboarding
+const TOUR = [
+  [
+    'Welcome to the ReelForge editor',
+    'Your episode is on the canvas. Click anything to select it, drag to move it, double-click text to edit it in place.',
+  ],
+  [
+    'Layers, components and script',
+    'The left panel lists every scene and element. “Insert” has 21 animated components: click one, or drag it onto the canvas.',
+  ],
+  [
+    'Inspector',
+    'Every property of the selection is on the right: text, colors, size, animation, effects. Times can be anchored to a spoken word.',
+  ],
+  [
+    'Timeline',
+    'Drag clips to change when things appear. They snap to the words in your recording. Press I / O to set in and out points at the playhead.',
+  ],
+  [
+    'Shortcuts everywhere',
+    'Press ⌘K / Ctrl+K to search every command, ? for all shortcuts. Every change is saved to episode.yaml and can be undone.',
+  ],
+];
+
+function showTour(i: number): void {
+  const box = $('#tour');
+  if (i >= TOUR.length) {
+    box.hidden = true;
+    try {
+      localStorage.setItem('rf-tour', 'done');
+    } catch {
+      /* storage unavailable */
+    }
+    return;
+  }
+  box.hidden = false;
+  box.querySelector('h4')!.textContent = TOUR[i][0];
+  box.querySelector('p')!.textContent = TOUR[i][1];
+  box.querySelector('.steps')!.textContent = `${i + 1} / ${TOUR.length}`;
+  box.querySelector<HTMLButtonElement>('.next')!.textContent =
+    i === TOUR.length - 1 ? 'Start editing' : 'Next';
+  box.querySelector<HTMLButtonElement>('.next')!.onclick = () => showTour(i + 1);
+  box.querySelector<HTMLButtonElement>('.skip')!.onclick = () => showTour(TOUR.length);
+  box.dataset.step = String(i);
+}
+
+function maybeOnboard(): void {
+  try {
+    if (localStorage.getItem('rf-tour') !== 'done' && !navigator.webdriver) showTour(0);
+  } catch {
+    /* storage unavailable */
+  }
+}
+
+// ------------------------------------------------------------------ wiring & boot
+$('#play').addEventListener('click', () => (clock.toggle(), renderNow()));
+$('#startBtn').addEventListener('click', () => seek(0));
+$('#endBtn').addEventListener('click', () => seek(app.duration));
+$('#backBtn').addEventListener('click', () => step(-1));
+$('#fwdBtn').addEventListener('click', () => step(1));
+$('#undoBtn').addEventListener('click', () => void app.undo());
+$('#redoBtn').addEventListener('click', () => void app.undo(true));
+$('#paletteBtn').addEventListener('click', () => openPalette());
+$('#helpBtn').addEventListener('click', openHelp);
+$('#renderBtn').addEventListener('click', openRenderDialog);
+$('#issuesPill').addEventListener('click', () => setMode('dev'));
+$('#fitBtn').addEventListener('click', fit);
+$('#zoomLabel').addEventListener('click', zoom100);
 document
-  .querySelectorAll<HTMLButtonElement>('#tabs button')
-  .forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode as 'cue' | 'dev')));
+  .querySelectorAll<HTMLButtonElement>('[data-ov]')
+  .forEach((b) =>
+    b.addEventListener('click', () => toggleOverlay(b.dataset.ov as keyof typeof app.overlays)),
+  );
+document
+  .querySelectorAll<HTMLButtonElement>('[data-tool]')
+  .forEach((b) => b.addEventListener('click', () => setTool(b.dataset.tool as 'move' | 'hand')));
+document
+  .querySelectorAll<HTMLButtonElement>('#modes button')
+  .forEach((b) => b.addEventListener('click', () => setMode(b.dataset.mode as Mode)));
 document
   .querySelectorAll<HTMLButtonElement>('#speed button')
   .forEach((b) => b.addEventListener('click', () => setSpeed(Number(b.dataset.speed))));
+document.querySelectorAll<HTMLDialogElement>('dialog').forEach((d) =>
+  d.addEventListener('click', (e) => {
+    if (e.target === d) d.close();
+  }),
+);
+document
+  .querySelectorAll<HTMLButtonElement>('[data-close]')
+  .forEach((b) => b.addEventListener('click', () => b.closest('dialog')?.close()));
+$<HTMLDialogElement>('#outputsDlg').addEventListener('close', () => $<HTMLVideoElement>('#outVideo').pause());
 
-setMode(mode);
+initCanvas({
+  stage: $('#stage'),
+  viewport: $('#viewport'),
+  iframe,
+  overlay: $('#overlay') as unknown as SVGSVGElement,
+  runtime: () => runtime,
+  time,
+  redraw: renderNow,
+});
+initTimeline({ root: $('#timeline'), time, seek, redraw: renderNow, playing: () => clock.isPlaying });
+initPanels({ time, seek });
+initInspector({ time, seek, setMode });
+initCuePanel({ time, seek, redraw: renderNow });
+initReview();
+splitter('#splitL', 'left-w', 'x', false, 200, 520);
+splitter('#splitR', 'right-w', 'x', true, 260, 560);
+splitter('#splitB', 'timeline-h', 'y', true, 150, 620);
+syncOverlayButtons();
+setTool('move');
 setSpeed(1);
-layout();
+
+const prevJob = { status: '' };
+setInterval(() => {
+  const s = app.state?.job?.status ?? '';
+  if (s !== prevJob.status) {
+    prevJob.status = s;
+    onJobEvent();
+  }
+}, 300);
+
+fetch('/api/meta')
+  .then((r) => r.json())
+  .then((m) => {
+    app.meta = m;
+    renderAll();
+  })
+  .catch(() => toast('Could not load the component catalog', 'err'));
 connect();
 requestAnimationFrame(loop);

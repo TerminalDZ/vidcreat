@@ -22,7 +22,8 @@
     "@reelforge/core": "workspace:*",
     "@reelforge/renderer": "workspace:*",
     "@reelforge/runtime": "workspace:*",
-    "ws": "8.21.3"
+    "ws": "8.21.3",
+    "yaml": "2.8.4"
   },
   "devDependencies": {
     "@types/ws": "8.18.1",

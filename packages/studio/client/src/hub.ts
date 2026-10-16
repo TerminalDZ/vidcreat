@@ -183,10 +183,10 @@ function fillCard(card: HTMLElement, ep: Episode): void {
       <div class="job"></div>
       <div class="actions-row">
         <button class="btn sm" data-act="voice" title="Upload or replace the voice recording">Upload voice</button>
-        <button class="btn sm" data-act="cue" title="Open the cue marker">Mark cues</button>
-        <button class="btn sm" data-act="dev" title="Live preview with hot reload">Preview</button>
+        <button class="btn sm primary" data-act="edit" title="Open the visual editor: canvas, layers, inspector and timeline">Open editor</button>
+        <button class="btn sm" data-act="cue" title="Mark when each line starts in your recording">Mark cues</button>
         <button class="btn sm" data-act="validate">Validate</button>
-        <button class="btn sm primary" data-act="render" ${running ? 'disabled' : ''}>Render</button>
+        <button class="btn sm" data-act="render" ${running ? 'disabled' : ''}>Render</button>
         <button class="btn sm ghost" data-act="folder" title="Open the episode folder">Folder</button>
       </div>
     </div>`;
@@ -250,6 +250,7 @@ document.addEventListener('click', async (e) => {
   currentEp = ep;
   try {
     switch (act) {
+      case 'edit':
       case 'cue':
       case 'dev': {
         const win = window.open('about:blank', '_blank');

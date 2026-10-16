@@ -1,43 +1,61 @@
 /**
- * Studio server (SRS §8): 127.0.0.1 only, serves the project folder read-only, a WebSocket for
- * change events and a single write endpoint `PUT /cues` (IR-1, IR-2, NFR-9).
+ * Studio server (SRS §8): the visual editor, cue marker and preview for one episode.
+ * 127.0.0.1 only with same-origin checks; writes are limited to episode.yaml (structured edits),
+ * cues.json and SVG assets of this episode, all JSON-only (IR-1, IR-2, NFR-9).
  */
-import { existsSync, readFileSync, watch, type FSWatcher } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, watch, type FSWatcher } from 'node:fs';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   compileEpisode,
+  COMPONENTS,
   cuesSchema,
+  ENTER_ANIMS,
+  episodeJsonSchema,
+  EXIT_ANIMS,
+  FX_KINDS,
+  ICONS_LIST,
+  listResources,
   readCues,
   sha1,
-  writeCues,
   type CompileResult,
   type EpisodePaths,
   type Issue,
   type Timeline,
 } from '@reelforge/core';
-import type { PcmAudio } from '@reelforge/audio';
+import { SOUNDS, type PcmAudio } from '@reelforge/audio';
 import { RUNTIME_DIR } from '@reelforge/runtime';
 import { WebSocketServer, type WebSocket } from 'ws';
+import { parseDocument } from 'yaml';
+import { applyOps, EditError, History, parseOps } from './edit.js';
 import { listen, readBody, safeJoin, sendFile } from './http.js';
-export { startHub, type Hub, type HubOptions, type EpisodeSummary, type Job } from './hub.js';
+import { RenderBusyError, RenderRunner, type Job, type RenderOptions } from './jobs.js';
+export { startHub, type Hub, type HubOptions, type EpisodeSummary } from './hub.js';
+export { applyOps, History, type EditOp } from './edit.js';
+export { RenderRunner, type Job, type RenderOptions } from './jobs.js';
+
+export type StudioMode = 'edit' | 'cue' | 'dev';
 
 const CLIENT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'client');
 
 export interface StudioOptions {
   paths: EpisodePaths;
-  mode: 'cue' | 'dev';
+  mode: StudioMode;
   port?: number;
   preset?: string;
   decode?: (file: string) => PcmAudio;
   /** Headless V-9/V-10 measuring (runs in the background after each compile). */
   measure?: (tl: Timeline) => Promise<Issue[]>;
   log?: (msg: string) => void;
+  /** Shared render queue (the dashboard passes its own so only one render runs at a time). */
+  renderer?: RenderRunner;
+  /** Key of this episode in the renderer's jobs (defaults to the episode id). */
+  renderKey?: string;
 }
 
 export interface StudioState {
-  mode: 'cue' | 'dev';
+  mode: StudioMode;
   id: string;
   title: string;
   script: { id: string; text: string }[];
@@ -48,6 +66,12 @@ export interface StudioState {
   voice: { url: string; duration: number } | null;
   compiledAt: number;
   compileMs: number;
+  /** episode.yaml as data (last version that parsed), for the editor's layers and inspector. */
+  spec: Record<string, unknown> | null;
+  history: { undo: number; redo: number; undoLabel?: string; redoLabel?: string };
+  job: Job | null;
+  outputs: { file: string; size: number; mtime: number }[];
+  file: string;
 }
 
 export interface Studio {
@@ -67,6 +91,30 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
   let watchers: FSWatcher[] = [];
   let measureTimer: NodeJS.Timeout | undefined;
   let measureSeq = 0;
+
+  const history = new History();
+  const renderer = opts.renderer ?? new RenderRunner({ decode: opts.decode, log });
+  const renderKey = opts.renderKey ?? paths.id;
+  let lastSpec: Record<string, unknown> | null = null;
+  const readSpec = () => {
+    try {
+      const doc = parseDocument(readFileSync(paths.yaml, 'utf8'));
+      if (!doc.errors.length) lastSpec = (doc.toJS() as Record<string, unknown>) ?? null;
+    } catch {
+      /* keep the last good spec */
+    }
+    return lastSpec;
+  };
+  const outputs = () =>
+    existsSync(paths.out)
+      ? readdirSync(paths.out)
+          .filter((f) => /\.(mp4|srt|jpg|png|md)$/.test(f) && !f.startsWith('.'))
+          .map((f) => {
+            const st = statSync(path.join(paths.out, f));
+            return { file: f, size: st.size, mtime: st.mtimeMs };
+          })
+          .sort((a, b) => b.mtime - a.mtime)
+      : [];
 
   const voiceInfo = () => {
     const v = result?.voice;
@@ -93,6 +141,11 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
       voice: voiceInfo() ?? state?.voice ?? null,
       compiledAt: Date.now(),
       compileMs: Math.round(performance.now() - t0),
+      spec: readSpec(),
+      history: history.counts,
+      job: renderer.job?.key === renderKey ? renderer.job : null,
+      outputs: outputs(),
+      file: paths.yaml,
     };
     if (state.error) state.timeline = lastGood;
     scheduleMeasure();
@@ -174,10 +227,15 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
       const p = url.pathname;
       res.setHeader('x-content-type-options', 'nosniff');
       if (req.method === 'PUT' && p === '/cues') return await putCues(req, res);
+      if (req.method === 'PUT' && p === '/api/asset') return await putAsset(req, res, url);
+      if (req.method === 'POST' && p.startsWith('/api/')) return await post(req, res, p);
       if (req.method !== 'GET' && req.method !== 'HEAD') {
         res.writeHead(405, { allow: 'GET, HEAD' }).end();
         return;
       }
+      if (p === '/api/meta') return json(res, 200, meta());
+      if (p.startsWith('/episode/out/'))
+        return sendFile(req, res, safeJoin(paths.out, decodeURIComponent(p.slice('/episode/out/'.length))));
       if (p === '/api/state') {
         res.writeHead(200, {
           'content-type': 'application/json; charset=utf-8',
@@ -188,7 +246,11 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
       }
       if (p.startsWith('/episode/voice')) return sendFile(req, res, result.voice?.file);
       if (p.startsWith('/episode/assets/'))
-        return sendFile(req, res, safeJoin(paths.assets, p.slice('/episode/assets/'.length)));
+        return sendFile(
+          req,
+          res,
+          safeJoin(paths.assets, decodeURIComponent(p.slice('/episode/assets/'.length))),
+        );
       if (p.startsWith('/runtime/'))
         return sendFile(req, res, safeJoin(RUNTIME_DIR, p.slice('/runtime/'.length)));
       const rel = p === '/' ? 'index.html' : p.slice(1);
@@ -199,6 +261,100 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
       res.end('Internal error');
     }
   });
+
+  const json = (res: ServerResponse, status: number, body: unknown) => {
+    res
+      .writeHead(status, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' })
+      .end(JSON.stringify(body));
+  };
+
+  let metaCache: object | null = null;
+  const meta = () =>
+    (metaCache ??= {
+      components: Object.values(COMPONENTS).map((c) => ({
+        name: c.name,
+        description: c.description,
+        size: c.size,
+        layer: c.layer ?? 'base',
+        fill: Boolean(c.fill),
+        endpoints: c.endpoints ?? [],
+        enter: c.enter ?? 'pop',
+      })),
+      schemas: (episodeJsonSchema() as { 'x-components': Record<string, unknown> })['x-components'],
+      enterAnims: ENTER_ANIMS,
+      exitAnims: EXIT_ANIMS,
+      fxKinds: FX_KINDS,
+      icons: ICONS_LIST,
+      sounds: SOUNDS,
+      themes: listResources('theme', paths.root),
+      presets: listResources('preset', paths.root),
+    });
+
+  const listAssets = () =>
+    existsSync(paths.assets) ? readdirSync(paths.assets).filter((f) => /\.svg$/i.test(f)) : [];
+
+  const refresh = () => {
+    compile();
+    broadcast();
+  };
+
+  async function post(req: IncomingMessage, res: ServerResponse, p: string) {
+    if (!String(req.headers['content-type'] ?? '').startsWith('application/json'))
+      return json(res, 415, { error: 'Expected application/json' });
+    let body: Record<string, unknown>;
+    try {
+      body = JSON.parse((await readBody(req)) || '{}') as Record<string, unknown>;
+    } catch {
+      return json(res, 400, { error: 'Invalid JSON body' });
+    }
+    try {
+      switch (p) {
+        case '/api/edit': {
+          const ops = parseOps(body);
+          const label = typeof body.label === 'string' ? body.label.slice(0, 80) : 'Edit';
+          const text = applyOps(readFileSync(paths.yaml, 'utf8'), ops);
+          history.write(paths.yaml, text, label);
+          refresh();
+          return json(res, 200, { ok: true, history: history.counts });
+        }
+        case '/api/undo':
+        case '/api/redo': {
+          const label = p === '/api/undo' ? history.undo() : history.redo();
+          refresh();
+          return json(res, 200, { ok: true, label, history: history.counts });
+        }
+        case '/api/assets':
+          return json(res, 200, { assets: listAssets() });
+        case '/api/render': {
+          const job = renderer.start(renderKey, paths, (body.options ?? {}) as RenderOptions);
+          return json(res, 202, { job });
+        }
+        case '/api/render/cancel':
+          if (renderer.job?.key === renderKey) renderer.cancel();
+          return json(res, 200, { ok: true });
+        default:
+          return json(res, 404, { error: 'Unknown endpoint' });
+      }
+    } catch (e) {
+      if (e instanceof EditError) return json(res, e.status, { error: e.message });
+      if (e instanceof RenderBusyError) return json(res, 409, { error: e.message });
+      throw e;
+    }
+  }
+
+  /** Stores an SVG in the episode's assets/ folder (for icon src). */
+  async function putAsset(req: IncomingMessage, res: ServerResponse, url: URL) {
+    const name = path.basename(url.searchParams.get('name') ?? '').replace(/[^\w.-]/g, '_');
+    if (!/^[\w-][\w.-]{0,80}\.svg$/i.test(name))
+      return json(res, 415, { error: 'Only .svg files can be added' });
+    const text = await readBody(req, 2 << 20);
+    if (!/<svg[\s>]/i.test(text) || /<script|\son\w+\s*=|javascript:/i.test(text))
+      return json(res, 422, { error: 'Not a plain SVG file (scripts are not allowed)' });
+    mkdirSync(paths.assets, { recursive: true });
+    history.write(path.join(paths.assets, name), text, `Add ${name}`);
+    refresh();
+    return json(res, 200, { ok: true, file: `assets/${name}`, assets: listAssets() });
+  }
 
   async function putCues(req: IncomingMessage, res: ServerResponse) {
     let body: unknown;
@@ -240,7 +396,7 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
       updated: new Date().toISOString(),
       draft: undefined,
     };
-    writeCues(paths.cues, data);
+    history.write(paths.cues, `${JSON.stringify(data, null, 2)}\n`, 'Edit cues');
     compile();
     broadcast();
     res
@@ -262,6 +418,12 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
       ws.send(JSON.stringify({ type: 'state', state }));
     });
   });
+  const unsubscribe = renderer.subscribe((j) => {
+    if (j.key !== renderKey) return;
+    state = { ...state, job: j, outputs: j.status === 'running' ? state.outputs : outputs() };
+    const msg = JSON.stringify({ type: 'job', job: j, outputs: state.outputs });
+    for (const c of clients) if (c.readyState === c.OPEN) c.send(msg);
+  });
   const broadcast = () => {
     const msg = JSON.stringify({ type: 'state', state });
     for (const c of clients) if (c.readyState === c.OPEN) c.send(msg);
@@ -277,6 +439,7 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
     close: async () => {
       clearTimeout(debounce);
       clearTimeout(measureTimer);
+      unsubscribe();
       for (const w of watchers) w.close();
       for (const c of clients) c.terminate();
       wss.close();

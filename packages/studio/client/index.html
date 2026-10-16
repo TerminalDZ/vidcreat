@@ -6,134 +6,125 @@
     <title>ReelForge Studio</title>
     <link rel="stylesheet" href="./src/style.css" />
   </head>
-  <body>
+  <body data-mode="edit">
     <header id="top">
-      <div class="brand"><i></i>ReelForge <span id="ep"></span></div>
-      <nav id="tabs">
-        <button data-mode="cue" title="Cue marker (C)">Cue</button>
-        <button data-mode="dev" title="Preview (V)">Preview</button>
+      <div class="brand" title="ReelForge Studio"><i></i><span>ReelForge</span></div>
+      <div class="doc">
+        <b id="epTitle">Loading…</b>
+        <span id="epId" class="mono"></span>
+      </div>
+      <nav id="modes" role="tablist" aria-label="Mode">
+        <button role="tab" data-mode="edit" title="Edit: canvas, layers, inspector (Alt+1)" data-icon="cursor" data-size="15">Edit</button>
+        <button role="tab" data-mode="cue" title="Cues: mark when each line starts in your recording (Alt+2)" data-icon="mic" data-size="15">Cues</button>
+        <button role="tab" data-mode="dev" title="Review: checks, safe zones and overflow (Alt+3)" data-icon="check" data-size="15">Review</button>
       </nav>
+      <div class="hist">
+        <button class="tbtn" id="undoBtn" data-icon="undo" aria-label="Undo" disabled></button>
+        <button class="tbtn" id="redoBtn" data-icon="redo" aria-label="Redo" disabled></button>
+      </div>
       <div class="spacer"></div>
-      <div id="speed" class="seg" title="Playback speed (1/2/3)">
-        <button data-speed="0.5">0.5×</button><button data-speed="0.75">0.75×</button
-        ><button data-speed="1">1×</button>
-      </div>
-      <div id="clock" class="mono">0:00.00</div>
-      <div id="status" class="mono"></div>
-      <button id="helpBtn" title="Shortcuts (?)">?</button>
-    </header>
-    <main>
-      <section id="stage">
-        <div id="frame">
-          <iframe id="runtime" title="ReelForge runtime" src="/runtime/runtime.html"></iframe>
-          <svg id="overlay" viewBox="0 0 1080 1920" preserveAspectRatio="none"></svg>
-          <div id="errorBox" hidden></div>
-        </div>
-      </section>
-      <aside id="panel">
-        <div id="cuePanel">
-          <div class="panelHead">
-            <b>Script</b>
-            <span id="cueStats" class="mono dim"></span>
-            <label class="toggle" title="Auto snap to onset (A)"
-              ><input type="checkbox" id="autoSnap" /> snap</label
-            >
-          </div>
-          <ol id="lines"></ol>
-          <p class="hint">
-            Space: mark next line · click a line to re-mark it · ←/→ nudge · Backspace undo · W word mode
-          </p>
-        </div>
-        <div id="devPanel">
-          <div class="panelHead">
-            <b>Lint</b>
-            <span id="lintStats" class="mono dim"></span>
-          </div>
-          <div id="toggles">
-            <label class="toggle"
-              ><input type="checkbox" data-ov="safe" checked /> safe zones <kbd>Z</kbd></label
-            >
-            <label class="toggle"><input type="checkbox" data-ov="stage" /> stage <kbd>B</kbd></label>
-            <label class="toggle"><input type="checkbox" data-ov="boxes" /> boxes <kbd>E</kbd></label>
-            <label class="toggle"><input type="checkbox" data-ov="time" checked /> time <kbd>T</kbd></label>
-          </div>
-          <ul id="issues"></ul>
-        </div>
-      </aside>
-    </main>
-    <footer id="bottom">
       <div id="transport">
-        <button id="play" title="Play/pause (K, Enter)">▶</button>
-        <span class="mono dim" id="dur"></span>
-      </div>
-      <canvas id="zoom" height="120"></canvas>
-      <canvas id="overview" height="74"></canvas>
-    </footer>
-    <div id="help" hidden>
-      <div class="card">
-        <h2>Shortcuts</h2>
-        <div class="cols">
-          <section>
-            <h3>Everywhere</h3>
-            <dl>
-              <dt>C / V</dt>
-              <dd>Cue / Preview mode</dd>
-              <dt>K, Enter</dt>
-              <dd>Play / pause</dd>
-              <dt>J / L</dt>
-              <dd>Back / forward 1 s</dd>
-              <dt>, / .</dt>
-              <dd>Previous / next frame</dd>
-              <dt>Home / End</dt>
-              <dd>Start / end</dd>
-              <dt>1 2 3</dt>
-              <dd>Speed 0.5× 0.75× 1×</dd>
-              <dt>?</dt>
-              <dd>This help</dd>
-            </dl>
-          </section>
-          <section>
-            <h3>Cue mode</h3>
-            <dl>
-              <dt>Space</dt>
-              <dd>Mark next line (or the selected line)</dd>
-              <dt>Backspace</dt>
-              <dd>Undo last mark</dd>
-              <dt>Click / ↑ ↓</dt>
-              <dd>Select a line to re-mark</dd>
-              <dt>← / →</dt>
-              <dd>Nudge selected cue 50 ms (Shift 10 ms)</dd>
-              <dt>S</dt>
-              <dd>Snap selected cue to onset</dd>
-              <dt>A</dt>
-              <dd>Toggle auto-snap</dd>
-              <dt>W</dt>
-              <dd>Word mode for the selected line</dd>
-              <dt>G</dt>
-              <dd>Go to the selected cue</dd>
-              <dt>Esc</dt>
-              <dd>Clear selection</dd>
-            </dl>
-          </section>
-          <section>
-            <h3>Preview mode</h3>
-            <dl>
-              <dt>Space</dt>
-              <dd>Play / pause</dd>
-              <dt>Z</dt>
-              <dd>Safe zones</dd>
-              <dt>B</dt>
-              <dd>Stage bounds</dd>
-              <dt>E</dt>
-              <dd>Element boxes</dd>
-              <dt>T</dt>
-              <dd>Time readout</dd>
-            </dl>
-          </section>
+        <button class="tbtn" id="startBtn" title="Go to start (Home)" data-icon="start" aria-label="Go to start"></button>
+        <button class="tbtn" id="backBtn" title="Previous frame (,)" data-icon="back" aria-label="Previous frame"></button>
+        <button id="play" title="Play / pause (Space)" aria-label="Play or pause"></button>
+        <button class="tbtn" id="fwdBtn" title="Next frame (.)" data-icon="fwd" aria-label="Next frame"></button>
+        <button class="tbtn" id="endBtn" title="Go to end (End)" data-icon="end" aria-label="Go to end"></button>
+        <div class="tc"><span id="clock" class="mono">0:00.00</span><span class="dim mono"> / </span><span id="dur" class="dim mono">0:00.00</span></div>
+        <div id="speed" class="seg" title="Playback speed (1 / 2 / 3)">
+          <button data-speed="0.5">0.5×</button><button data-speed="0.75">0.75×</button><button data-speed="1">1×</button>
         </div>
-        <p class="dim">Edit episode.yaml in your editor: the preview reloads on save.</p>
       </div>
+      <div class="spacer"></div>
+      <span id="status" class="status"></span>
+      <button id="jobPill" class="jobpill" hidden></button>
+      <button id="issuesPill" class="pill" title="Review the checks (Alt+3)"></button>
+      <button id="paletteBtn" class="search-btn" title="Search every command (⌘K / Ctrl+K)" data-icon="search" data-size="14"><span>Search</span><kbd>⌘K</kbd></button>
+      <button class="tbtn" id="helpBtn" title="Keyboard shortcuts (?)" data-icon="keyboard" aria-label="Keyboard shortcuts"></button>
+      <button id="renderBtn" class="btn primary" title="Render the video (⌘/Ctrl+Enter)" data-icon="render" data-size="15">Render</button>
+    </header>
+
+    <div id="work">
+      <aside id="left" aria-label="Layers, components and script"></aside>
+      <div class="split v" id="splitL" role="separator" aria-orientation="vertical"></div>
+      <section id="stage" tabindex="0" aria-label="Canvas">
+        <div id="viewport">
+          <div id="frame">
+            <iframe id="runtime" title="ReelForge runtime" src="/runtime/runtime.html" tabindex="-1"></iframe>
+            <svg id="overlay" viewBox="0 0 1080 1920" preserveAspectRatio="none"></svg>
+          </div>
+        </div>
+        <div class="canvas-tools" role="toolbar" aria-label="Canvas tools">
+          <button class="tbtn" data-tool="move" title="Move (V)" data-icon="cursor" aria-label="Move tool"></button>
+          <button class="tbtn" data-tool="hand" title="Hand: pan the canvas (H, or hold Space)" data-icon="hand" aria-label="Hand tool"></button>
+          <span class="sep"></span>
+          <button class="tbtn" data-ov="safe" title="Platform safe zones (Z)" data-icon="safe" aria-label="Safe zones"></button>
+          <button class="tbtn" data-ov="stage" title="Stage &amp; caption guides (B)" data-icon="grid" aria-label="Stage guides"></button>
+          <button class="tbtn" data-ov="boxes" title="Element outlines (E)" data-icon="frame" aria-label="Element outlines"></button>
+          <span class="sep"></span>
+          <button class="tbtn" id="fitBtn" title="Zoom to fit (Shift+1)" data-icon="fit" aria-label="Zoom to fit"></button>
+          <button class="zoom mono" id="zoomLabel" title="Click for 100% (Shift+0) · ⌘/Ctrl + wheel to zoom">100%</button>
+        </div>
+        <div id="errorBox" hidden></div>
+      </section>
+      <div class="split v" id="splitR" role="separator" aria-orientation="vertical"></div>
+      <aside id="right" aria-label="Inspector">
+        <div id="inspector"></div>
+        <div id="cuePanel"></div>
+        <div id="reviewPanel"></div>
+      </aside>
     </div>
+    <div class="split h" id="splitB" role="separator" aria-orientation="horizontal"></div>
+    <footer id="timeline" aria-label="Timeline"></footer>
+
+    <dialog id="renderDlg" aria-labelledby="renderTitle">
+      <form id="renderForm" method="dialog">
+        <h3 id="renderTitle">Render video</h3>
+        <p class="note">Creates a master MP4, a share MP4 sized for upload, SRT captions, a contact sheet and publish.md in the episode's <code>out/</code> folder. You can keep editing while it renders.</p>
+        <label>Platform<select id="rPreset"></select></label>
+        <label>Share file size limit (MB)<input id="rShare" type="number" min="5" max="500" placeholder="28" /></label>
+        <label class="check"><input type="checkbox" id="rSfx" checked /> Sound effects</label>
+        <label class="check"><input type="checkbox" id="rSilent" /> Silent (no voice recording)</label>
+        <p id="rVoiceNote" class="note warn" hidden>No voice recording yet: the video will be silent, timed with estimated cues.</p>
+        <label class="check"><input type="checkbox" id="rFast" /> Fast draft (lower quality, quicker)</label>
+        <p id="rErrors" class="note err" hidden></p>
+        <div class="actions">
+          <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+          <button class="btn primary" value="ok">Render</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="outputsDlg" class="outputs" aria-label="Rendered videos">
+      <div class="out-grid">
+        <video id="outVideo" controls playsinline preload="metadata"></video>
+        <div>
+          <h3>Rendered files</h3>
+          <ul id="outList"></ul>
+          <p class="note">Upload the <b>.share.mp4</b>; the caption, hashtags and pinned comment are in <b>publish.md</b>.</p>
+          <div class="actions"><button class="btn" data-close>Close</button></div>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="helpDlg" class="help" aria-label="Keyboard shortcuts">
+      <div class="help-top"><h2>Keyboard shortcuts</h2><button class="btn ghost sm" data-close>Close</button></div>
+      <div class="help-body"></div>
+    </dialog>
+
+    <dialog id="palette" aria-label="Command palette">
+      <div class="pal-in" data-icon="search"><input type="text" placeholder="Search commands, components, scenes, elements, lines…" aria-label="Search" /></div>
+      <div class="results" role="listbox"></div>
+      <div class="pal-foot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>Enter</kbd> run</span><span><kbd>Esc</kbd> close</span></div>
+    </dialog>
+
+    <div id="ctxmenu" role="menu" hidden></div>
+    <div id="tour" hidden>
+      <span class="steps"></span>
+      <h4></h4>
+      <p></p>
+      <div class="actions"><button class="btn ghost sm skip">Skip</button><button class="btn primary sm next">Next</button></div>
+    </div>
+    <div id="toasts" aria-live="polite"></div>
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>

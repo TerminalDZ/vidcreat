@@ -1,7 +1,22 @@
 import type { Issue, Timeline } from '@reelforge/core';
 
+export interface Job {
+  id: number;
+  key: string;
+  status: 'running' | 'done' | 'failed' | 'cancelled';
+  phase: string;
+  done: number;
+  total: number;
+  fps?: number;
+  eta?: number;
+  started: number;
+  finished?: number;
+  message?: string;
+  issues?: Issue[];
+}
+
 export interface StudioState {
-  mode: 'cue' | 'dev';
+  mode: 'edit' | 'cue' | 'dev';
   id: string;
   title: string;
   script: { id: string; text: string }[];
@@ -12,6 +27,11 @@ export interface StudioState {
   voice: { url: string; duration: number } | null;
   compiledAt: number;
   compileMs: number;
+  spec: Record<string, unknown> | null;
+  history: { undo: number; redo: number; undoLabel?: string; redoLabel?: string };
+  job: Job | null;
+  outputs: { file: string; size: number; mtime: number }[];
+  file: string;
 }
 
 export interface RuntimeApi {
