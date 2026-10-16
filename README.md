@@ -5,17 +5,22 @@ Instagram Reels and YouTube Shorts. Animated diagrams, code that types itself, r
 stamps, word-by-word Arabic captions with correctly mixed English terms, procedural sound effects and
 platform-ready encoding.
 
+- **A real editor.** Canvas with smart guides, layers, a schema-driven inspector for every property,
+  a multi-track timeline that snaps to your words, undo/redo, ⌘K command palette and shortcuts.
 - **Offline, no running costs.** No network after install, no subscription, no per-video fees.
-- **No AI.** No speech recognition, no TTS, no generative models. Timing comes from cues you mark.
+- **No generated media.** No speech recognition, no TTS, no generative models in the engine. Timing comes from cues you mark.
+- **AI-ready (optional).** `reelforge mcp` lets Claude, Cursor, Copilot, Codex and Gemini build and check episodes; see [AGENTS.md](AGENTS.md).
 - **Deterministic.** The same inputs always give the same frames (`render(t)` is a pure function).
-- **Arabic first.** RTL captions with English terms, `الـ client` kept together, punctuation on the right side.
+- **English and Arabic.** LTR and RTL word-by-word captions; Arabic with English terms keeps `الـ client` together.
 
 | Command                                    | What it does                                                                                                    |
 | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| `reelforge studio`                         | the project dashboard: create, upload voice, mark cues, preview, validate, render, play outputs                 |
-| `reelforge new <id>`                       | create `episodes/<id>/episode.yaml` from a commented template                                                   |
-| `reelforge cue <id>`                       | studio: mark the start of each script line while listening (writes `cues.json`)                                 |
-| `reelforge dev <id>`                       | studio: live preview synced to the audio, safe-zone overlay, lint panel, hot reload                             |
+| `reelforge studio`                         | the project dashboard: create, upload voice, open the editor, validate, render, play outputs                    |
+| `reelforge new <id> [--lang en\|ar]`       | create `episodes/<id>/episode.yaml` from a commented template                                                   |
+| `reelforge edit <id>`                      | the visual editor: canvas, layers, inspector, timeline (writes `episode.yaml`, keeps comments)                  |
+| `reelforge cue <id>`                       | the editor in Cues mode: mark the start of each script line while listening (writes `cues.json`)                |
+| `reelforge dev <id>`                       | the editor in Review mode: checks, safe zones, element outlines                                                 |
+| `reelforge mcp`                            | Model Context Protocol server for AI agents                                                                     |
 | `reelforge validate <id>`                  | schema, cues, timing, overlap, safe zones, text overflow (V-1…V-13)                                             |
 | `reelforge render <id>`                    | `out/<id>.master.mp4`, `out/<id>.share.mp4`, `.srt`, `.sheet.jpg`, `publish.md` (`--all` renders every episode) |
 | `reelforge snap <id> <t…>`                 | PNG frames at times (or `l7`, `l7:'word'`) plus a contact sheet; `--cover` writes `out/<id>.cover.png`          |
@@ -25,10 +30,10 @@ platform-ready encoding.
 
 ## Screenshots
 
-![Studio preview](docs/screenshots/03-studio-preview-safe-zones.jpg)
+![The ReelForge editor](docs/screenshots/01-editor-overview.jpg)
 
-More in [docs/screenshots](docs/screenshots/README.md): cue marker, word mode, lint panel, error overlay,
-every Season 1 episode, the component gallery and the CLI.
+More in [docs/screenshots](docs/screenshots/README.md): smart guides, timeline, command palette, Cues and
+Review modes, every Season 1 episode, the component gallery and the CLI.
 
 ## Install
 
@@ -50,25 +55,24 @@ downloads the pinned Chromium used for rendering and runs `reelforge doctor`. Th
 ## Tutorial: a 30-second episode
 
 ```bash
-./reelforge new ep10 --series "SYSTEM DESIGN"
+./reelforge new ep10 --series "SYSTEM DESIGN"     # --lang ar for an Arabic voice-over
+./reelforge edit ep10
 ```
 
-1. **Write the script.** Open `episodes/ep10/episode.yaml`. Put one spoken sentence per `script` line.
-2. **Record** `episodes/ep10/voice.wav` with any recorder (no recording yet? `./reelforge cue ep10 --draft`
-   writes estimated cues so you can preview anyway).
-3. **Mark cues.** `./reelforge cue ep10` opens the studio. Press **Space** at the start of each line
-   (1 / 2 / 3 switch to 0.5× / 0.75× / 1×). **Backspace** undoes, **←/→** nudge the selected cue,
-   click a line to re-mark it, **W** marks individual words. Every change is saved to `cues.json`.
-4. **Describe scenes** with components (see [docs/components.md](docs/components.md)) and make
-   elements enter on the words that name them: `enter: { at: "l3:'Idempotency'" }`.
-5. **Preview** with `./reelforge dev ep10`. Save the YAML and the preview reloads in place.
-   **Z** shows the platform safe zones, **E** element boxes, **?** all shortcuts.
-6. **Validate** with `./reelforge validate ep10`. Each issue has `file:line:col` and a fix hint.
-7. **Render** with `./reelforge render ep10`, then upload `out/ep10.share.mp4` with the caption from
-   `out/publish.md`.
+1. **Write the script** in the editor's **Script** tab: one spoken sentence per line.
+2. **Design scenes.** **Insert** a component (or drag it onto the canvas), move and resize it, edit its
+   properties in the inspector, and make it enter on the word that names it (target button, or drag its
+   clip on the timeline: clips snap to words). Everything is saved to `episode.yaml`.
+3. **Record** `episodes/ep10/voice.wav` with any recorder (the dashboard's **Upload voice** converts
+   MP3/M4A/OGG/FLAC). Until then, estimated cues give realistic timing.
+4. **Mark cues** in **Cues** mode (**Alt+2**): press **Space** at the start of each line
+   (1 / 2 / 3 switch to 0.5× / 0.75× / 1×). **Backspace** undoes, **←/→** nudge, **W** marks words.
+5. **Review** (**Alt+3**): every issue has a fix hint; **Z** shows the platform safe zones.
+6. **Render** (**⌘/Ctrl+Enter**), then upload `out/ep10.share.mp4` with the caption from `out/publish.md`.
 
-Try it on the bundled examples: `./reelforge dev examples/season1/ep01` (they ship with draft cues;
-record a `voice.wav` and re-mark to render them, or `./reelforge render examples/season1/ep01 --silent`).
+Prefer text? `episode.yaml` is plain YAML with a JSON Schema for autocompletion; edits in your text editor
+and in the visual editor stay in sync. Try the bundled examples: `./reelforge edit examples/season1/ep01`
+(English) or `examples/season1-arabic/ep01` (Arabic); render them with `--silent` before recording.
 
 ## Render options
 
@@ -96,11 +100,12 @@ packages/
   core/      schema, time expressions, captions, themes, presets, compiler, lint
   runtime/   browser page: pure render(t), series chrome, 21 components
   renderer/  Chromium workers, ffmpeg pipeline, measuring pass, doctor
-  studio/    localhost server + cue marker / preview client (Vite)
-  cli/       the `reelforge` command
+  studio/    localhost servers: dashboard and the editor (canvas, inspector, timeline, cues, review)
+  cli/       the `reelforge` command and the MCP server
 themes/      default, season1, workshop
 presets/     tiktok, reels, shorts (editable)
-examples/season1/ep01…ep09
+examples/season1/          English example series (ep01…ep09)
+examples/season1-arabic/   the same series in Arabic
 fixtures/    mini (integration), golden frames, seeded lint bugs
 docs/        PRD, SRS, authoring guide, component reference, ADRs
 ```

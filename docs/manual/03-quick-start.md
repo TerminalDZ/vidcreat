@@ -4,58 +4,55 @@ This walk-through takes about 15 minutes for a 30-second episode.
 
 ## 1. Create an episode
 
-Open the dashboard (`start.bat` / `./start.sh`) and click **+ New episode**. Give it an id such as `ep10`,
-a title and your series name. ReelForge creates `episodes/ep10/episode.yaml` from a commented template.
+Open the dashboard (`start.bat` / `./start.sh`) and click **+ New episode**. Give it an id such as
+`ep10`, a title, your series name and the language of your voice-over. Choose **English** or
+**Arabic**; Arabic sentences can mix in English terms. ReelForge creates
+`episodes/ep10/episode.yaml` and opens the **editor**.
 
 ## 2. Write the script
 
-Open `episodes/ep10/episode.yaml` in any text editor (VS Code is recommended: the template links the
-JSON Schema, so you get autocompletion and inline errors). Put **one spoken sentence per line**:
+In the editor, open the **Script** tab on the left. Write **one spoken sentence per line**:
 
 ```yaml
 script:
-  - text: 'عمرك دفعت حاجة أونلاين، والنت فصل؟'
-  - text: 'المشكلة دي اسمها Duplicate Charge'
-  - text: 'والحل اسمه الـ Idempotency key'
+  - text: 'Ever paid online and your connection dropped?'
+  - text: 'That problem is called a Duplicate Charge.'
+  - text: 'The fix is an Idempotency key.'
 ```
 
-## 3. Record
+Keep sentences short. Line 1 is your hook.
 
-Record yourself reading the script with any app (phone, Audacity, OBS…). Keep a short pause between
-sentences. In the dashboard click **Upload voice** and choose the file — WAV, MP3, M4A, OGG, OPUS or FLAC.
-It is converted and saved as `voice.wav`.
+## 3. Design the scenes
 
-> Not ready to record? Click **Draft cues**: ReelForge estimates timing from the text so you can design and
-> preview first.
+Click **Insert** and pick a component. For example, add a **title** and type
+`**Duplicate** Charge` (words between `**` get the accent color). Then drag it into place on the
+canvas. In the inspector, put the playhead on the word _Duplicate_ and click the **target** button
+next to **Enter at**. The title now appears exactly when you say that word.
 
-## 4. Mark the cues
+Repeat for each idea: nodes and arrows for systems, code that types itself, counters, tables,
+checklists, stamps. Drag clips on the timeline to retime them; they snap to your words.
 
-Click **Mark cues**. Play the recording and press **Space** at the start of each sentence. That's it —
-see [Recording and cues](#recording-and-cues) for nudging, re-marking and word-level marks.
+> Not recorded yet? That's fine. ReelForge writes estimated (draft) cues, so the preview already
+> plays with realistic timing.
 
-## 5. Describe what appears
+## 4. Record
 
-Add scenes and elements to `episode.yaml`. Each element appears **on the word that names it**:
+Record yourself reading the script with any app (phone, Audacity, OBS…). Leave a short pause
+between sentences. In the dashboard, click **Upload voice** and choose the file (WAV, MP3, M4A,
+OGG, OPUS or FLAC). It is converted and saved as `voice.wav`.
 
-```yaml
-scenes:
-  - id: hook
-    at: l1
-    glow: red
-    elements:
-      - use: title
-        props: { text: '**Duplicate** Charge' }
-        place: { x: 60, y: 200, w: 960, h: 260 }
-        enter: { at: "l2:'Duplicate'", anim: pop }
-```
+## 5. Mark the cues
 
-## 6. Preview
+In the editor, switch to **Cues** (**Alt+2**). Play the recording and press **Space** at the start
+of each sentence. See [Recording and cues](#recording-and-cues) for nudging, re-marking and
+word-level marks. Every animation follows your real timing automatically.
 
-Click **Preview**. The video plays in sync with your voice and reloads every time you save the YAML.
-Press **Z** to show the platform safe zones and **?** for all shortcuts.
+## 6. Review and render
 
-## 7. Validate and render
+Switch to **Review** (**Alt+3**). It lists any problem with a fix hint, such as text that
+overflows or an element under the platform buttons. Fix the problems, then click **Render**.
+When rendering finishes, watch the result and upload `out/ep10.share.mp4` with the caption from
+`out/publish.md`.
 
-Click **Validate** to list any problem with its line number and a fix hint, then **Render**. When it
-finishes, the card shows **Master**, **Share**, **Captions**, **Contact sheet** and **publish.md**: click
-Share to watch it, then upload it with the caption from `publish.md`.
+> Prefer working with an AI assistant? See [AI agents & MCP](#ai-agents--mcp). An assistant can
+> write the script, build the scenes and check the frames for you.

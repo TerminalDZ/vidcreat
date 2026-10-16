@@ -822,7 +822,6 @@ body:not([data-mode='dev']) #reviewPanel {
 }
 .ihead b {
   font-size: 14px;
-  text-transform: capitalize;
 }
 .ihead small {
   color: var(--dim);
@@ -867,6 +866,9 @@ body:not([data-mode='dev']) #reviewPanel {
 }
 .sec-body {
   padding: 0 0 10px;
+}
+.sec-body > .btn:not(.block) {
+  margin: 6px 14px 2px;
 }
 .frow {
   display: grid;
@@ -1380,8 +1382,8 @@ select.finput {
 }
 .tl-chapter {
   position: absolute;
-  top: 0;
-  height: 100%;
+  top: 12px;
+  height: 14px;
   padding: 1px 6px 0;
   border-left: 2px solid var(--amber);
   color: var(--amber);
@@ -1867,7 +1869,7 @@ dialog.help {
 #toasts {
   position: fixed;
   left: 50%;
-  bottom: calc(var(--timeline-h) + 18px);
+  top: 62px;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;

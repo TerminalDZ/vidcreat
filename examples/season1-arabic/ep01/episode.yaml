@@ -1,0 +1,399 @@
+# Season 1 · Episode 1 — Idempotency
+meta:
+  id: ep01
+  series: 'SYSTEM DESIGN'
+  title: 'Idempotency'
+  episode: 1
+  preset: tiktok
+  theme: season1
+  lang: ar-EG
+  publish:
+    cover: 'اتخصم منك مرتين؟'
+    caption: |
+      النت فصل وانت بتدفع… والفلوس اتخصمت مرتين 😱
+      الحل اسمه Idempotency-Key، وفي فخ ناس كتير بتقع فيه.
+      احفظ الفيديو قبل أول payment API تكتبه.
+    hashtags: ['#systemdesign', '#idempotency', '#backend', '#برمجة', '#مبرمجين', '#تعلم_البرمجة']
+    pinned: 'اكتب race في الكومنتات عشان الحلقة الجاية عن Race Conditions 👇'
+
+audio:
+  voice: voice.wav
+  sfx: auto
+  sfx_gain_db: -16
+
+script:
+  - text: 'عمرك دفعت أونلاين، والنت فصل، واتخصم منك مرتين؟'
+  - text: 'دوست Pay، والـ request راح للـ server.'
+  - text: 'الـ server خصم الفلوس، بس الـ response ضاع في السكة.'
+  - text: 'التطبيق شاف timeout، فعمل retry أوتوماتيك.'
+  - text: 'والـ server خصم تاني، فاتخصم منك مرتين.'
+  - text: 'المشكلة دي اسمها Duplicate Charge.'
+  - text: 'والسبب إن الـ server مش فاكر إنه شاف الطلب ده قبل كده.'
+  - text: 'طب الحل؟ نخلي العملية Idempotent.'
+  - text: 'يعني تنفذها مرة أو عشرة، والنتيجة واحدة.'
+  - text: 'الـ client يولّد Idempotency-Key مع كل عملية دفع.'
+  - text: 'ويبعته في الـ header مع الـ request.'
+  - text: 'الـ server يدور على الـ key في جدول عنده.'
+  - text: 'لو مش موجود، ينفذ الدفع ويحفظ الـ response.'
+  - text: 'لو موجود، يرجع نفس الـ response من غير ما يخصم.'
+  - text: 'بس خلي بالك، هنا في فخ ناس كتير بتقع فيه.'
+  - text: 'إنك تولّد key جديد مع كل retry.'
+  - text: 'كده كل retry شكله طلب جديد، والخصم يتكرر.'
+  - text: 'الـ key لازم يتولد مرة واحدة، قبل أول محاولة.'
+  - text: 'وكمان اتنين requests بنفس الـ key ممكن يوصلوا سوا.'
+  - text: 'فاحمي الـ key بـ UNIQUE constraint في الـ database.'
+  - text: 'ومتنساش TTL، عشان الجدول ميكبرش للأبد.'
+  - text: 'Stripe وكل الـ payment APIs الكبيرة شغالة كده.'
+  - text: 'الحلقة الجاية: اتنين بيسحبوا من نفس الرصيد في نفس اللحظة.'
+  - text: 'اكتب race في الكومنتات لو عايزها.'
+
+chapters:
+  - { at: l1, label: '01 · THE PROBLEM' }
+  - { at: l8, label: '02 · THE FIX' }
+  - { at: l15, label: '03 · THE TRAP' }
+  - { at: l19, label: '04 · PRODUCTION' }
+
+scenes:
+  # ── 01 · hook: the phone that charged twice ──────────────────────────────
+  - id: hook
+    at: l1
+    glow: red
+    elements:
+      - use: phone
+        id: ph
+        props:
+          title: 'Checkout'
+          item: 'Annual plan'
+          amount: '$49.00'
+          button: 'Pay $49'
+          taps: [{ at: "l1:'دفعت'" }]
+          notifications:
+            - { title: 'Bank', text: 'Charged $49.00', icon: card }
+            - { title: 'Bank', text: 'Charged $49 again', icon: card }
+        place: { x: 320, y: 40, w: 440, h: 900 }
+        enter: { at: l1, anim: rise, dur: 0.6 }
+        states:
+          - { at: "l1:'دفعت'+0.2", set: { loading: true } }
+          - { at: "l1:'فصل'", set: { offline: true } }
+          - { at: "l1:'مرتين'", set: { notifications: 2 } }
+        fx:
+          - { at: "l1:'مرتين'", do: shake, amp: 22 }
+          - { at: "l1:'مرتين'", do: flash, color: red }
+
+  # ── what actually happened on the wire ───────────────────────────────────
+  - id: wire
+    at: l2
+    glow: cyan
+    elements:
+      - use: node
+        id: client
+        props: { title: 'Client', sub: 'mobile app', icon: phone }
+        place: { x: 60, y: 60, w: 340, h: 170 }
+        enter: { at: "l2:'Pay'", anim: pop }
+        states:
+          - { at: "l4:'timeout'", set: { status: warn, sub: 'timeout…' } }
+      - use: node
+        id: server
+        props: { title: 'Server', sub: 'POST /pay', icon: server, color: violet }
+        place: { x: 680, y: 60, w: 340, h: 170 }
+        enter: { at: "l2:'server'", anim: pop }
+        states:
+          - { at: "l3:'خصم'", set: { status: ok, sub: 'charged $49' } }
+          - { at: "l5:'تاني'", set: { status: err, sub: 'charged again!' } }
+      - use: arrow
+        id: req
+        props:
+          from: client
+          to: server
+          label: 'POST /pay'
+          color: cyan
+          packets:
+            - { at: "l2:'request'", dur: 0.9 }
+            - { at: "l3:'response'", dur: 0.9, reverse: true, color: lime, label: '200' }
+            - { at: "l4:'retry'", dur: 0.9, color: amber, label: 'retry' }
+        enter: { at: "l2:'request'", anim: draw }
+      - use: chip
+        id: lost
+        props: { text: 'response lost', color: red, icon: wifi-off, variant: outline }
+        place: { x: 60, y: 330, w: 440, h: 90 }
+        enter: { at: "l3:'ضاع'", anim: pop }
+      - use: chip
+        id: tmo
+        props: { text: 'timeout', color: amber, icon: clock }
+        place: { x: 580, y: 330, w: 440, h: 90 }
+        enter: { at: "l4:'timeout'", anim: pop }
+      - use: counter
+        id: charged
+        props:
+          keyframes: [{ at: "l3:'خصم'", value: 49 }, { at: "l5:'تاني'", value: 98, dur: 0.8 }]
+          prefix: '$'
+          decimals: 2
+          label: 'charged'
+          color: ink
+        place: { x: 120, y: 500, w: 800, h: 300 }
+        enter: { at: "l3:'خصم'", anim: rise }
+        fx:
+          - { at: "l5:'مرتين'", do: shake }
+      - use: stamp
+        id: x2
+        props: { text: '×2', color: red, size: 130 }
+        place: { x: 560, y: 680, w: 360, h: 240 }
+        enter: { at: "l5:'مرتين'" }
+
+  # ── naming it ────────────────────────────────────────────────────────────
+  - id: name
+    at: l6
+    glow: red
+    elements:
+      - use: label
+        id: lbl_bug
+        props: { text: 'the bug', dot: true, color: red }
+        place: { x: 60, y: 60, w: 600, h: 60 }
+        enter: { at: "l6:'المشكلة'", anim: fade }
+      - use: title
+        id: dup
+        props: { text: '**Duplicate** Charge', accent: red, sub: 'same payment, processed twice' }
+        place: { x: 60, y: 140, w: 960, h: 260 }
+        enter: { at: "l6:'Duplicate'", anim: pop }
+      - use: table
+        id: log
+        props:
+          columns: ['request', 'amount', 'result']
+          widths: [2, 1, 1]
+          rows:
+            - { cells: ['POST /pay', '$49', { text: 'charged', color: lime }], at: "l7:'server'" }
+            - {
+                cells: ['POST /pay', '$49', { text: 'charged', color: red }],
+                at: "l7:'شاف'",
+                highlight: "l7:'قبل'",
+                color: red,
+              }
+        place: { x: 70, y: 470, w: 860, h: 300 }
+        enter: { at: "l7:'server'", anim: rise }
+      - use: icon
+        id: forgot
+        props: { name: bubble, size: 110, color: dim }
+        place: { x: 440, y: 820, w: 140, h: 140 }
+        enter: { at: "l7:'فاكر'", anim: pop }
+
+  # ── idempotent ───────────────────────────────────────────────────────────
+  - id: idem
+    at: l8
+    glow: lime
+    elements:
+      - use: label
+        id: lbl_fix
+        props: { text: 'the fix', dot: true, color: lime }
+        place: { x: 60, y: 40, w: 600, h: 60 }
+        enter: { at: "l8:'الحل؟'", anim: fade }
+      - use: title
+        id: idem_t
+        props: { text: '**Idempotent**', size: 130, sub: 'f(f(x)) = f(x)' }
+        place: { x: 60, y: 120, w: 960, h: 300 }
+        enter: { at: "l8:'Idempotent'", anim: pop }
+      - use: chip
+        id: once
+        props: { text: 'pay() × 1', color: cyan, variant: outline, size: 40 }
+        place: { x: 80, y: 500, w: 400, h: 100 }
+        enter: { at: "l9:'مرة'", anim: pop }
+      - use: chip
+        id: ten
+        props: { text: 'pay() × 10', color: violet, variant: outline, size: 40 }
+        place: { x: 600, y: 500, w: 400, h: 100 }
+        enter: { at: "l9:'عشرة'", anim: pop }
+      - use: chip
+        id: same
+        props: { text: '= charged once', color: lime, icon: check, variant: solid, size: 46 }
+        place: { x: 170, y: 700, w: 700, h: 120 }
+        enter: { at: "l9:'واحدة'", anim: pop }
+
+  # ── the key ──────────────────────────────────────────────────────────────
+  - id: key
+    at: l10
+    glow: lime
+    elements:
+      - use: code
+        id: req_code
+        props:
+          title: 'request'
+          lang: http
+          fontSize: 36
+          cps: 50
+          lines:
+            - { text: 'POST /payments', at: "l10:'client'" }
+            - { text: 'Idempotency-Key: 7f3a-91c2', color: lime, at: "l10:'Idempotency-Key'" }
+            - { text: '{ "amount": 49 }', at: "l11:'request'" }
+          highlight: [{ line: 2, at: "l11:'header'", color: lime }]
+        place: { x: 40, y: 40, w: 1000, h: 300 }
+        enter: { at: "l10:'client'", anim: rise }
+      - use: table
+        id: keys
+        props:
+          columns: ['idempotency_key', 'status', 'response']
+          widths: [2, 1, 1.4]
+          fontSize: 26
+          rows:
+            - {
+                cells: ['7f3a-91c2', { text: 'done', color: lime }, '200 charged'],
+                at: "l13:'يحفظ'",
+                highlight: "l14:'نفس'",
+              }
+        place: { x: 70, y: 400, w: 860, h: 260 }
+        enter: { at: "l12:'جدول'", anim: rise }
+      - use: chip
+        id: miss
+        props: { text: 'new → pay + save', color: cyan, icon: db, size: 30 }
+        place: { x: 70, y: 720, w: 420, h: 84 }
+        enter: { at: "l13:'مش'", anim: pop }
+      - use: chip
+        id: hit
+        props: { text: 'found → replay', color: lime, icon: refresh, size: 30 }
+        place: { x: 510, y: 720, w: 420, h: 84 }
+        enter: { at: "l14:'موجود'", anim: pop }
+      - use: chip
+        id: nocharge
+        props: { text: 'no second charge', color: lime, icon: shield, variant: solid, size: 34 }
+        place: { x: 220, y: 850, w: 600, h: 96 }
+        enter: { at: "l14:'يخصم'", anim: pop }
+
+  # ── 03 · the trap ────────────────────────────────────────────────────────
+  - id: trap
+    at: l15
+    glow: amber
+    elements:
+      - use: icon
+        id: warn
+        props: { name: warn, size: 220, color: amber, ring: true, pulse: true }
+        place: { x: 390, y: 300, w: 300, h: 300 }
+        enter: { at: l15, anim: pop }
+        exit: { at: "l15:'فخ'", anim: fade, dur: 0.2 }
+      - use: trap
+        id: tr
+        props: { sub: 'a new key on every retry', at: "l15:'فخ'", until: 'l16' }
+      - use: code
+        id: bad
+        props:
+          title: '❌ wrong'
+          fontSize: 32
+          cps: 50
+          lines:
+            - 'retry(() =>'
+            - '  pay({ key: uuid() }))'
+          highlight: [{ line: 2, at: "l17:'جديد'", color: red }]
+        place: { x: 40, y: 60, w: 1000, h: 260 }
+        enter: { at: "l16:'key'", anim: rise }
+      - use: stamp
+        id: again
+        props: { text: '×2', color: red, size: 120 }
+        place: { x: 700, y: 260, w: 300, h: 180 }
+        enter: { at: "l17:'يتكرر'" }
+      - use: code
+        id: good
+        props:
+          title: '✅ right'
+          fontSize: 32
+          cps: 50
+          lines:
+            - 'const key = uuid()'
+            - 'retry(() => pay({ key }))'
+          highlight: [{ line: 1, at: "l18:'واحدة'", color: lime }]
+        place: { x: 40, y: 480, w: 900, h: 260 }
+        enter: { at: "l18:'key'", anim: rise }
+      - use: chip
+        id: before
+        props: { text: 'once, before attempt #1', color: lime, icon: key, size: 32 }
+        place: { x: 140, y: 800, w: 700, h: 90 }
+        enter: { at: "l18:'قبل'", anim: pop }
+
+  # ── 04 · production: concurrent duplicates ───────────────────────────────
+  - id: concurrent
+    at: l19
+    glow: violet
+    elements:
+      - use: lanes
+        id: race
+        props:
+          fontSize: 28
+          lanes:
+            - title: 'Request A'
+              color: cyan
+              steps:
+                - { text: 'INSERT key 7f3a', at: "l19:'requests'" }
+                - { text: 'charge $49', at: "l20:'UNIQUE'", mark: ok }
+            - title: 'Request B'
+              color: violet
+              steps:
+                - { text: 'INSERT key 7f3a', at: "l19:'سوا'" }
+                - { text: 'duplicate key → 409', at: "l20:'constraint'", mark: err }
+        place: { x: 60, y: 40, w: 960, h: 520 }
+        enter: { at: "l19:'requests'", anim: rise }
+      - use: code
+        id: uniq
+        props:
+          lang: sql
+          fontSize: 28
+          cps: 60
+          numbers: false
+          lines:
+            - 'CREATE UNIQUE INDEX'
+            - '  ON payments (idempotency_key);'
+        place: { x: 40, y: 620, w: 900, h: 220 }
+        enter: { at: "l20:'UNIQUE'", anim: rise }
+
+  - id: ttl
+    at: l21
+    glow: cyan
+    elements:
+      - use: label
+        id: lbl_ttl
+        props: { text: 'key lifetime', dot: true, color: cyan }
+        place: { x: 60, y: 60, w: 600, h: 60 }
+        enter: { at: "l21:'TTL'", anim: fade }
+      - use: timeline
+        id: life
+        props:
+          start: '0h'
+          end: '24h'
+          markers:
+            - { pos: 0.08, label: 'saved', at: "l21:'TTL'" }
+            - { pos: 0.5, label: 'retries OK', at: "l21:'الجدول'", color: lime }
+            - { pos: 0.9, label: 'expired', sub: 'deleted', at: "l21:'للأبد'", color: amber }
+          cursor:
+            - { at: "l21:'TTL'", pos: 0 }
+            - { at: 'l21.end', pos: 1, dur: 1.6 }
+        place: { x: 60, y: 140, w: 960, h: 280 }
+        enter: { at: "l21:'TTL'", anim: rise }
+      - use: icon
+        id: shield
+        props: { name: shield, size: 120, color: lime, ring: true }
+        place: { x: 440, y: 470, w: 200, h: 200 }
+        enter: { at: "l22:'Stripe'", anim: pop }
+      - use: chip
+        id: stripe
+        props: { text: 'Stripe', color: violet, icon: card, size: 36 }
+        place: { x: 60, y: 760, w: 260, h: 96 }
+        enter: { at: "l22:'Stripe'", anim: pop }
+      - use: chip
+        id: paypal
+        props: { text: 'PayPal', color: cyan, icon: card, size: 36 }
+        place: { x: 360, y: 760, w: 260, h: 96 }
+        enter: { at: "l22:'payment'", anim: pop }
+      - use: chip
+        id: adyen
+        props: { text: 'Adyen', color: lime, icon: card, size: 36 }
+        place: { x: 660, y: 760, w: 260, h: 96 }
+        enter: { at: "l22:'APIs'", anim: pop }
+
+  # ── CTA ──────────────────────────────────────────────────────────────────
+  - id: cta
+    at: l23
+    glow: lime
+    elements:
+      - use: cta
+        id: next
+        props: { next: 'Race Conditions', keyword: 'race', prompt: 'اكتب في الكومنتات', at: "l24:'race'" }
+        place: { x: 90, y: 160, w: 850, h: 600 }
+        enter: { at: "l23:'الجاية'", anim: rise }
+      - use: particles
+        id: conf
+        props: { kind: confetti, count: 80, at: "l24:'الكومنتات'", colors: [lime, cyan, violet, amber] }

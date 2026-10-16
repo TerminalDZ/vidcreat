@@ -1,0 +1,17 @@
+# ReelForge
+
+> Local tool that turns a voice recording and one episode.yaml into finished 1080×1920 vertical explainer videos (TikTok, Reels, Shorts): 21 animated components timed to spoken words, Arabic-first and English captions, sound effects, mastered audio and platform-ready MP4s. AI agents drive it through the `reelforge mcp` server.
+
+## For agents
+- [AGENTS.md](AGENTS.md): workflow, episode.yaml essentials, layout rules, quality checklist, code guide
+- [MCP setup for every client](docs/manual/15-ai-agents.md): Claude Code/Desktop, Cursor, VS Code Copilot, Windsurf, Codex, Gemini CLI, Cline
+
+## Reference
+- [Authoring guide](docs/authoring.md): spec, time expressions, placement, animation, validation rules
+- [Component reference](docs/components.md): every component's props and defaults
+- [Command line](docs/manual/11-cli.md)
+- [JSON Schema](schema/episode.schema.json): `reelforge schema` writes it
+
+## Examples
+- [examples/english](examples/english): an English series
+- [examples/season1](examples/season1): an Arabic series with English terms

@@ -1,41 +1,53 @@
-<h2>ReelForge - Voice + YAML to Finished Vertical Explainer Videos</h2>
+<h2>ReelForge - Your Voice to Finished Vertical Explainer Videos</h2>
 <p>
   ReelForge turns a <strong>voice recording</strong> and one simple text file into a <strong>polished vertical explainer video</strong>
   (1080×1920, 30 fps) ready to publish on short-video platforms such as TikTok, Instagram Reels and YouTube Shorts.
   You get animated diagrams, code that types itself, word-by-word captions, sound effects, mastered audio and
-  platform-ready MP4 files. You don't need a video editor, keyframes, a subscription or AI.
+  platform-ready MP4 files. It is designed in a visual editor that feels like Figma and Premiere, but much simpler.
+  There are no keyframes and no subscription.
 </p>
 <p>
-  You write your script one sentence per line and describe what appears on screen and <strong>on which word</strong>.
+  You write your script one sentence per line and decide what appears on screen and <strong>on which word</strong>.
   ReelForge animates everything exactly when you say it. If you re-record one sentence, everything after it stays in sync.
 </p>
 
 <h3>Who is it for?</h3>
 <ul>
   <li>Developers and educators who make technical explainer series (system design, programming, DevOps, data).</li>
-  <li>Arabic creators who mix English terms into their speech. Right-to-left captions keep the English words in the correct order.</li>
+  <li>English and Arabic creators. Arabic captions are right-to-left and keep mixed-in English terms in the correct order.</li>
   <li>Agencies and teams producing consistent, branded short videos at scale.</li>
   <li>Trainers and course authors who turn lessons into short clips.</li>
 </ul>
 
 <h3>How it works</h3>
 <ol>
-  <li><strong>Create</strong> an episode in the dashboard (or with <code>reelforge new ep10</code>).</li>
-  <li><strong>Write</strong> the script and the scenes in <code>episode.yaml</code>. VS Code autocompletion is included.</li>
+  <li><strong>Create</strong> an episode in the dashboard, in English or Arabic.</li>
+  <li><strong>Design</strong> it in the visual editor. Drop components on the canvas, edit every property in the inspector and drag clips on the timeline. Clips snap to the words you speak.</li>
   <li><strong>Record</strong> your voice with any recorder, then upload WAV, MP3, M4A, AAC, OGG, FLAC, WebM or Opus.</li>
   <li><strong>Mark cues</strong> by pressing Space at the start of each sentence while you listen.</li>
-  <li><strong>Preview</strong> the real frame synced to your voice. It reloads every time you save.</li>
+  <li><strong>Review</strong> the real frame synced to your voice. Every check lists a fix hint.</li>
   <li><strong>Validate and render.</strong> You get a master MP4, a share MP4 sized for upload, SRT captions, a contact sheet and a ready-to-paste caption.</li>
 </ol>
 
 <h3>Key features</h3>
 <ul>
-  <li><strong>Project dashboard</strong> (runs in your browser, on your computer only): create episodes, upload recordings, mark cues, preview, validate, render with live progress, then play and open the results.</li>
+  <li><strong>Visual editor</strong>
+    <ul>
+      <li><strong>Canvas:</strong> zoom and pan, selection, drag and resize with smart guides, arrow-key nudging, and double-click to edit text in place.</li>
+      <li><strong>Panels:</strong> a layers panel with drag-to-reorder, and a component library with drag-and-drop.</li>
+      <li><strong>Inspector:</strong> every property of every component, with scrubbable numbers, theme color swatches, effects and states.</li>
+      <li><strong>Timeline:</strong> multi-track, in the style of Premiere, with scenes, script cues, layers, the voice waveform and sound effects.</li>
+      <li><strong>Everywhere:</strong> unlimited undo and redo, a ⌘K command palette, right-click menus, keyboard shortcuts for everything, and a first-run tour.</li>
+    </ul>
+  </li>
+  <li><strong>Timed to your words</strong>: the timeline snaps to the words in your recording. A title set to appear on “Idempotency” stays on that word even after you re-record.</li>
+  <li><strong>AI-ready (optional)</strong>: a built-in MCP server lets AI assistants write scripts, build scenes, check rendered frames and render for you. It works with Claude, Cursor, GitHub Copilot, Codex, Gemini CLI, Windsurf and others. Instruction files (<code>AGENTS.md</code>, <code>CLAUDE.md</code>, <code>GEMINI.md</code> and more) and ready-made configs are included.</li>
+  <li><strong>Project dashboard</strong> (runs in your browser, on your computer only): create episodes, upload recordings, open the editor, validate, render with live progress, then play and open the results.</li>
   <li><strong>Cue marker</strong>: listen at 0.5×, 0.75× or 1× speed. Nudge cues by 10 or 50 ms, re-mark any line, set word-level marks, snap to voice onsets, undo, and everything saves automatically.</li>
-  <li><strong>Live preview</strong>: the exact 1080×1920 frame, synced to your audio, with safe-zone overlays for each platform, element outlines, a lint panel and an error overlay that points to the YAML line.</li>
+  <li><strong>Review mode</strong>: the exact 1080×1920 frame, synced to your audio, with safe-zone overlays for each platform, element outlines and every check one click away.</li>
   <li><strong>21 animated components</strong>: title, label, code, node, arrow with moving packets, chip, stamp, table, lanes, checklist, counter, meter, timeline, grid, token bucket, phone mock-up, quote, particles, “trap” interstitial, call-to-action and icons.</li>
   <li><strong>Word-timed animation</strong>: make any element enter, change or leave on a specific spoken word, for example <code>at: "l3:'Idempotency'"</code>.</li>
-  <li><strong>Arabic-first captions</strong>: word-by-word karaoke highlight, right-to-left text with English terms in the correct order, Arabic prefixes kept attached to English words, and punctuation on the correct side. English-only captions work too.</li>
+  <li><strong>English and Arabic captions</strong>: word-by-word karaoke highlight. Arabic captions run right to left, keep English terms in the correct order and attach Arabic prefixes to English words.</li>
   <li><strong>Professional audio</strong>: procedural sound effects on hits and transitions, voice mastered to −14 LUFS with two-pass loudness normalisation, effects ducked under the voice, and a true-peak limiter.</li>
   <li><strong>Platform-ready output</strong>: an H.264 master (CRF 18), a share file that fits the size you choose, SRT subtitles, a contact sheet, a cover frame and a publish.md with caption, hashtags and pinned comment. Every output is checked with ffprobe after encoding.</li>
   <li><strong>13 validation rules</strong> covering schema, timing, overlaps, off-screen elements, platform UI zones, text overflow and caption length. Each issue reports file:line:column and a fix hint.</li>
@@ -50,16 +62,19 @@
 <ul>
   <li>Full, unminified TypeScript source code (strict mode, monorepo of 6 packages) plus a prebuilt build, ready to run</li>
   <li>One-click installers and launchers for Windows, macOS and Linux</li>
-  <li>9 complete example episodes (an Arabic system-design series) with draft cues</li>
+  <li>9 complete example episodes in English (a “System Design” series), plus the same series in Arabic</li>
   <li>3 themes and 3 editable platform presets</li>
-  <li>Offline HTML documentation in English: installation, quick start, dashboard, recording and cues, preview, themes, rendering, command line, troubleshooting and FAQ, component reference, and screenshots</li>
+  <li>Offline HTML documentation in English: installation, quick start, the editor, recording and cues, themes, rendering, command line, AI agents and MCP setup, troubleshooting and FAQ, a component reference, and screenshots</li>
+  <li>MCP server and instruction files for AI assistants</li>
   <li>A JSON Schema for editor autocompletion</li>
-  <li>98 automated tests</li>
+  <li>117 automated tests</li>
 </ul>
 
 <h3>Command line</h3>
 <pre>
 reelforge studio            open the project dashboard
+reelforge edit &lt;id&gt;         the visual editor
+reelforge mcp               MCP server for AI assistants
 reelforge new &lt;id&gt;          create an episode from a commented template
 reelforge cue &lt;id&gt;          mark cues while listening
 reelforge dev &lt;id&gt;          live preview with hot reload
@@ -83,7 +98,7 @@ reelforge doctor --fix      check and fix Node.js, FFmpeg, Chromium and fonts
 <h3>Please note</h3>
 <ul>
   <li>ReelForge is a <strong>desktop tool that runs on your computer</strong>. It is not a website script, and you don't need a web server or hosting.</li>
-  <li>It does <strong>not</strong> generate voices, scripts or visuals with AI. You record your own voice and describe your scenes in a simple YAML file.</li>
+  <li>The video engine does <strong>not</strong> generate voices or visuals with AI. You record your own voice and design your scenes yourself. Using an AI assistant through MCP is optional and needs your own AI subscription.</li>
   <li>Voice recordings are <strong>not included</strong>. The example episodes come with draft cues so you can preview and render them silently, or record your own voice.</li>
   <li>The preview images and demo video were made entirely with ReelForge and the bundled example episodes. All fonts used in the previews are included.</li>
   <li>The videos you create are yours to use, including commercially.</li>

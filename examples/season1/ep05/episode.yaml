@@ -6,16 +6,16 @@ meta:
   episode: 5
   preset: tiktok
   theme: season1
-  lang: ar-EG
+  lang: en-US
   publish:
-    cover: 'الـ retry بتاعك هو اللي وقّع السيرفر'
+    cover: 'Your retry logic took down the server'
     caption: |
-      الـ server وقع خمس ثواني... والـ clients بتوعك خلّوها ساعة.
-      الحلقة دي عن الـ Retry Storm وإزاي تعمل retry صح:
+      The server was down for five seconds... your clients turned it into an hour.
+      This one's about the Retry Storm and how to retry the right way:
       Exponential Backoff + Jitter + Circuit Breaker + Idempotency
     hashtags:
-      ['#systemdesign', '#backend', '#distributedsystems', '#softwareengineering', '#برمجة', '#مبرمجين']
-    pinned: 'إنت بتعمل retry إزاي في الكود بتاعك؟ قولنا في الكومنتات 👇'
+      ['#systemdesign', '#backend', '#distributedsystems', '#softwareengineering', '#programming', '#coding']
+    pinned: 'How do you handle retries in your code? Tell us in the comments 👇'
 
 audio:
   voice: voice.wav
@@ -23,47 +23,47 @@ audio:
   sfx_gain_db: -16
 
 script:
-  - text: 'الـ API وقعت خمس ثواني، وبعدها فضلت واقعة ساعة كاملة!'
-    break: ['وبعدها']
-  - text: 'ليه؟ لأن الـ clients بتوعك هما اللي قتلوها.'
-  - text: 'خلينا نبدأ من الأول.'
-  - text: 'الـ request فشل بسبب timeout، فبتعمل retry.'
-  - text: 'ده طبيعي، الشبكة بتهنّج والـ errors المؤقتة بتحصل.'
-    break: ['الشبكة']
-  - text: 'بس المشكلة لما تعمل retry على طول من غير ما تستنى.'
-    break: ['على']
-  - text: 'تخيل عشرة آلاف client، كل واحد بيعمل retry تلات مرات.'
-    break: ['كل']
-  - text: 'يبقى الـ server بيستقبل تلاتين ألف request وهو تعبان.'
-    break: ['تلاتين']
-  - text: 'ده اسمه Retry Storm، والـ server عمره ما هيقوم.'
-    break: ['والـ']
-  - text: 'والفخ إنك تقول: هستنى ثانية ثابتة بين كل retry.'
-    break: ['هستنى']
-  - text: 'كده كل الـ clients هيرجعوا مع بعض في نفس الثانية.'
-    break: ['هيرجعوا']
-  - text: 'الحل اسمه Exponential Backoff.'
-  - text: 'أول retry بعد ثانية، وبعدين اتنين، وبعدين أربعة، وبعدين تمانية.'
-    break: ['وبعدين']
-  - text: 'كل مرة بتضاعف وقت الانتظار، فالـ server ياخد نفسه.'
-    break: ['فالـ']
-  - text: 'بس لسه فيه مشكلة: الكل بيرجع في نفس اللحظات.'
-    break: ['الكل']
-  - text: 'فبتضيف Jitter، يعني وقت random صغير على كل انتظار.'
-    break: ['يعني']
-  - text: 'كده الـ retries بتتفرّق بدل ما تيجي موجة واحدة.'
-    break: ['بدل']
-  - text: 'وحط حد أقصى: max retries و max delay.'
+  - text: 'The API went down for five seconds, then stayed down for a whole hour!'
+    break: ['then']
+  - text: 'Why? Because your own clients are the ones who killed it.'
+  - text: "Let's start from the beginning."
+  - text: 'A request fails with a timeout, so you retry.'
+  - text: "That's normal. Networks glitch and temporary errors happen."
+    break: ['Networks']
+  - text: 'The problem is when you retry instantly, without waiting at all.'
+    break: ['instantly']
+  - text: 'Picture ten thousand clients, each one retrying three times.'
+    break: ['each']
+  - text: "Now the server is taking thirty thousand requests while it's struggling."
+    break: ['thirty']
+  - text: "That's a Retry Storm, and the server never gets back up."
+    break: ['and']
+  - text: 'And the trap? Waiting one fixed second between every retry.'
+    break: ['Waiting']
+  - text: 'Now all the clients come back at once, in the exact same second.'
+    break: ['come']
+  - text: 'The fix is called Exponential Backoff.'
+  - text: 'First retry after one second, then two, then four, then eight.'
+    break: ['then']
+  - text: 'Each time you double the wait, so the server can catch its breath.'
+    break: ['so']
+  - text: "But there's still a problem: everyone comes back at the same moments."
+    break: ['everyone']
+  - text: 'So you add Jitter, a random extra delay on top of every wait.'
+    break: ['a']
+  - text: 'Now the retries spread out instead of hitting in one big wave.'
+    break: ['instead']
+  - text: 'And set hard limits: max retries and max delay.'
     break: ['max']
-  - text: 'ولو الـ server لسه واقع، Circuit Breaker يوقف المحاولات.'
-    break: ['Circuit']
-  - text: 'وآخر حاجة: الـ retry آمن بس لو الـ request Idempotent.'
-    break: ['آمن']
-  - text: 'يعني لو اتنفذ مرتين، النتيجة متتغيرش.'
-  - text: 'غير كده، الـ retry ممكن يخصم الفلوس مرتين.'
-  - text: 'الحلقة الجاية عن الـ Deadlocks، لما اتنين يستنوا بعض للأبد.'
-    break: ['لما']
-  - text: 'اكتب deadlock في الكومنتات عشان توصلك.'
+  - text: 'If the server is still down, a Circuit Breaker stops all retries.'
+    break: ['a']
+  - text: 'One last thing: a retry is only safe if the request is Idempotent.'
+    break: ['only']
+  - text: 'Meaning if it runs twice, the result stays the same.'
+  - text: 'Otherwise, that retry could charge your customer twice.'
+  - text: 'Next episode: Deadlocks, when two things wait on each other forever.'
+    break: ['when']
+  - text: "Comment deadlock so you don't miss it."
 
 chapters:
   - { at: l1, label: '01 · THE PROBLEM' }
@@ -76,7 +76,7 @@ scenes:
   # ── 01 · hook ──────────────────────────────────────────────────────────────
   - id: hook
     at: l1
-    glow: [{ at: l1, color: amber }, { at: "l1:'ساعة'", color: red }]
+    glow: [{ at: l1, color: amber }, { at: "l1:'hour'", color: red }]
     elements:
       - use: label
         id: hk_lbl
@@ -89,7 +89,7 @@ scenes:
         place: { x: 190, y: 110, w: 700, h: 200 }
         enter: { at: "l1:'API'", anim: pop }
         fx:
-          - { at: "l1:'وقعت'", do: shake, amp: 18 }
+          - { at: "l1:'down'", do: shake, amp: 18 }
       - use: timeline
         id: hk_outage
         props:
@@ -97,13 +97,13 @@ scenes:
           end: '1h'
           color: red
           markers:
-            - { pos: 0.1, label: '5s', sub: 'blip', color: amber, at: "l1:'خمس'" }
-            - { pos: 0.88, label: '1h', sub: 'still down', color: red, at: "l1:'ساعة'" }
+            - { pos: 0.1, label: '5s', sub: 'blip', color: amber, at: "l1:'five'" }
+            - { pos: 0.88, label: '1h', sub: 'still down', color: red, at: "l1:'hour'" }
           cursor:
-            - { at: "l1:'خمس'", pos: 0.1 }
-            - { at: "l1:'ساعة'", pos: 0.88, dur: 0.8 }
+            - { at: "l1:'five'", pos: 0.1 }
+            - { at: "l1:'hour'", pos: 0.88, dur: 0.8 }
         place: { x: 60, y: 360, w: 960, h: 240 }
-        enter: { at: "l1:'خمس'", anim: rise }
+        enter: { at: "l1:'five'", anim: rise }
       - use: icon
         id: hk_users
         props: { name: users, size: 120, color: red, ring: true }
@@ -113,7 +113,7 @@ scenes:
         id: hk_kill
         props: { text: 'killed by its own clients', color: red, variant: outline, size: 36 }
         place: { x: 250, y: 720, w: 640, h: 100 }
-        enter: { at: "l2:'قتلوها.'", anim: stamp }
+        enter: { at: "l2:'killed'", anim: stamp }
 
   # ── basics: why we retry ───────────────────────────────────────────────────
   - id: basics
@@ -129,10 +129,10 @@ scenes:
         id: bs_server
         props: { title: 'Server', sub: 'POST /order', icon: server, color: violet }
         place: { x: 720, y: 50, w: 320, h: 170 }
-        enter: { at: "l3:'الأول.'", anim: pop }
+        enter: { at: "l3:'beginning'", anim: pop }
         states:
-          - { at: "l4:'timeout،'", set: { status: err, sub: 'timeout' } }
-          - { at: "l4:'retry.'", set: { status: busy, sub: 'retrying…' } }
+          - { at: "l4:'timeout'", set: { status: err, sub: 'timeout' } }
+          - { at: "l4:'retry'", set: { status: busy, sub: 'retrying…' } }
       - use: arrow
         id: bs_req
         props:
@@ -142,7 +142,7 @@ scenes:
           label: 'request'
           packets:
             - { at: "l4:'request'", dur: 0.7 }
-            - { at: "l4:'retry.'", dur: 0.7, color: amber, label: 'retry' }
+            - { at: "l4:'retry'", dur: 0.7, color: amber, label: 'retry' }
         enter: { at: "l4:'request'", anim: draw }
       - use: chip
         id: bs_transient
@@ -158,7 +158,7 @@ scenes:
             - '  try { return await call(); }'
             - '  catch { /* retry now! */ }'
             - '}'
-          highlight: [{ line: 3, at: "l6:'تستنى.'", color: red }]
+          highlight: [{ line: 3, at: "l6:'waiting'", color: red }]
           cps: 80
           fontSize: 34
         place: { x: 40, y: 440, w: 880, h: 330 }
@@ -173,26 +173,26 @@ scenes:
         id: st_rps
         props:
           keyframes:
-            [{ at: "l7:'عشرة'", value: 10000, dur: 0.8 }, { at: "l8:'تلاتين'", value: 30000, dur: 0.8 }]
+            [{ at: "l7:'ten'", value: 10000, dur: 0.8 }, { at: "l8:'thirty'", value: 30000, dur: 0.8 }]
           suffix: ' req'
           label: 'hitting the server'
           size: 130
         place: { x: 90, y: 0, w: 900, h: 260 }
-        enter: { at: "l7:'عشرة'", anim: pop }
+        enter: { at: "l7:'ten'", anim: pop }
       - use: chip
         id: st_x3
         props: { text: '× 3 retries each', color: amber, icon: refresh, size: 36 }
         place: { x: 240, y: 290, w: 600, h: 96 }
-        enter: { at: "l7:'تلات'", anim: pop }
+        enter: { at: "l7:'three'", anim: pop }
       - use: node
         id: st_server
         props: { title: 'Server', sub: 'recovering…', icon: server, color: violet, status: warn }
         place: { x: 240, y: 440, w: 600, h: 180 }
         enter: { at: "l8:'server'", anim: pop }
         states:
-          - { at: "l8:'تعبان.'", set: { status: err, sub: 'overloaded' } }
+          - { at: "l8:'struggling'", set: { status: err, sub: 'overloaded' } }
         fx:
-          - { at: "l8:'تعبان.'", do: shake, amp: 22 }
+          - { at: "l8:'struggling'", do: shake, amp: 22 }
       - use: particles
         id: st_herd
         props:
@@ -201,7 +201,7 @@ scenes:
             from: { x: 540, y: 1000 },
             to: st_server.bottom,
             count: 160,
-            at: "l8:'request'",
+            at: "l8:'requests'",
             dur: 1.8,
             color: amber,
             spread: 360,
@@ -219,12 +219,12 @@ scenes:
     elements:
       - use: trap
         id: tp_trap
-        props: { sub: 'a fixed 1s delay?', at: l10, until: "l10:'هستنى'" }
+        props: { sub: 'a fixed 1s delay?', at: l10, until: "l10:'Waiting'" }
       - use: title
         id: tp_title
         props: { text: 'Fixed **1s** delay', size: 90, accent: amber }
         place: { x: 40, y: 20, w: 1000, h: 180 }
-        enter: { at: "l10:'ثانية'", anim: pop }
+        enter: { at: "l10:'second'", anim: pop }
       - use: timeline
         id: tp_fixed
         props:
@@ -232,16 +232,16 @@ scenes:
           end: '4s'
           color: amber
           markers:
-            - { pos: 0.25, label: '1s', sub: '10k', color: red, at: "l10:'retry.'" }
+            - { pos: 0.25, label: '1s', sub: '10k', color: red, at: "l10:'retry'" }
             - { pos: 0.5, label: '2s', sub: '10k', color: red, at: "l11:'clients'" }
-            - { pos: 0.75, label: '3s', sub: '10k', color: red, at: "l11:'بعض'" }
+            - { pos: 0.75, label: '3s', sub: '10k', color: red, at: "l11:'once'" }
         place: { x: 60, y: 250, w: 960, h: 260 }
-        enter: { at: "l10:'retry.'", anim: rise }
+        enter: { at: "l10:'retry'", anim: rise }
       - use: chip
         id: tp_wave
         props: { text: 'synchronized waves', color: red, icon: warn, size: 40 }
         place: { x: 140, y: 600, w: 680, h: 110 }
-        enter: { at: "l11:'نفس'", anim: stamp }
+        enter: { at: "l11:'same'", anim: stamp }
 
   # ── 04 · the fix: exponential backoff ──────────────────────────────────────
   - id: backoff
@@ -260,13 +260,13 @@ scenes:
           end: '16s'
           color: lime
           markers:
-            - { pos: 0.0625, label: '1s', at: "l13:'ثانية،'" }
-            - { pos: 0.1875, label: '+2s', at: "l13:'اتنين،'" }
-            - { pos: 0.4375, label: '+4s', at: "l13:'أربعة،'" }
-            - { pos: 0.9, label: '+8s', color: cyan, at: "l13:'تمانية.'" }
+            - { pos: 0.0625, label: '1s', at: "l13:'second'" }
+            - { pos: 0.1875, label: '+2s', at: "l13:'two'" }
+            - { pos: 0.4375, label: '+4s', at: "l13:'four'" }
+            - { pos: 0.9, label: '+8s', color: cyan, at: "l13:'eight'" }
           cursor:
             - { at: "l13:'retry'", pos: 0 }
-            - { at: "l13:'تمانية.'+0.3", pos: 0.9, dur: 0.6 }
+            - { at: "l13:'eight'+0.3", pos: 0.9, dur: 0.6 }
         place: { x: 60, y: 220, w: 960, h: 260 }
         enter: { at: "l13:'retry'", anim: rise }
       - use: code
@@ -275,16 +275,16 @@ scenes:
           title: 'backoff.ts'
           lines:
             - 'delay = base * 2 ** attempt;'
-          highlight: [{ line: 1, at: "l14:'بتضاعف'+0.8", color: lime }]
+          highlight: [{ line: 1, at: "l14:'double'+0.8", color: lime }]
           cps: 40
           fontSize: 36
         place: { x: 40, y: 540, w: 880, h: 180 }
-        enter: { at: "l14:'بتضاعف'", anim: rise }
+        enter: { at: "l14:'double'", anim: rise }
       - use: chip
         id: bo_breathe
         props: { text: 'server gets room to recover', color: lime, icon: server, size: 34 }
         place: { x: 40, y: 780, w: 760, h: 96 }
-        enter: { at: "l14:'نفسه.'", anim: pop }
+        enter: { at: "l14:'breath'", anim: pop }
 
   # ── + jitter ───────────────────────────────────────────────────────────────
   - id: jitter
@@ -295,7 +295,7 @@ scenes:
         id: jt_title
         props: { text: '+ **Jitter**', size: 100, accent: cyan }
         place: { x: 40, y: 0, w: 1000, h: 170 }
-        enter: { at: "l16:'Jitter،'", anim: pop }
+        enter: { at: "l16:'Jitter'", anim: pop }
       - use: table
         id: jt_table
         props:
@@ -304,19 +304,19 @@ scenes:
           accent: cyan
           fontSize: 36
           rows:
-            - { cells: ['client A', '4.0s', '4.0s'], at: "l15:'نفس'", strike: "l16:'Jitter،'" }
-            - { cells: ['client B', '4.0s', '4.0s'], at: "l15:'نفس'+0.25", strike: "l16:'Jitter،'+0.1" }
-            - { cells: ['client C', '4.0s', '4.0s'], at: "l15:'اللحظات.'", strike: "l16:'Jitter،'+0.2" }
+            - { cells: ['client A', '4.0s', '4.0s'], at: "l15:'same'", strike: "l16:'Jitter'" }
+            - { cells: ['client B', '4.0s', '4.0s'], at: "l15:'same'+0.25", strike: "l16:'Jitter'+0.1" }
+            - { cells: ['client C', '4.0s', '4.0s'], at: "l15:'moments'", strike: "l16:'Jitter'+0.2" }
             - { cells: ['client A', '4.0s', { text: '4.3s', color: cyan }], at: "l16:'random'" }
-            - { cells: ['client B', '4.0s', { text: '3.6s', color: cyan }], at: "l16:'صغير'" }
-            - { cells: ['client C', '4.0s', { text: '4.8s', color: cyan }], at: "l16:'انتظار.'" }
+            - { cells: ['client B', '4.0s', { text: '3.6s', color: cyan }], at: "l16:'delay'" }
+            - { cells: ['client C', '4.0s', { text: '4.8s', color: cyan }], at: "l16:'wait'" }
         place: { x: 40, y: 190, w: 1000, h: 430 }
-        enter: { at: "l15:'مشكلة:'", anim: rise }
+        enter: { at: "l15:'problem'", anim: rise }
       - use: chip
         id: jt_spread
         props: { text: 'spread out, not one wave', color: lime, icon: check, size: 36 }
         place: { x: 40, y: 740, w: 760, h: 100 }
-        enter: { at: "l17:'بتتفرّق'", anim: pop }
+        enter: { at: "l17:'spread'", anim: pop }
 
   # ── guard rails: limits + circuit breaker ──────────────────────────────────
   - id: limits
@@ -340,14 +340,14 @@ scenes:
         place: { x: 190, y: 480, w: 700, h: 190 }
         enter: { at: "l19:'Circuit'", anim: pop }
         states:
-          - { at: "l19:'يوقف'", set: { status: err, sub: 'OPEN · fail fast' } }
+          - { at: "l19:'stops'", set: { status: err, sub: 'OPEN · fail fast' } }
         fx:
-          - { at: "l19:'يوقف'", do: flash, color: red }
+          - { at: "l19:'stops'", do: flash, color: red }
       - use: chip
         id: lm_stop
         props: { text: 'no calls until healthy', color: red, icon: x, variant: outline, size: 34 }
         place: { x: 190, y: 740, w: 700, h: 96 }
-        enter: { at: "l19:'المحاولات.'", anim: rise }
+        enter: { at: "l19:'retries'", anim: rise }
 
   # ── retries need idempotency ───────────────────────────────────────────────
   - id: idem
@@ -363,17 +363,17 @@ scenes:
         id: id_safe
         props: { text: 'SET balance = 100  →  same result', color: lime, icon: check, size: 34 }
         place: { x: 40, y: 250, w: 1000, h: 100 }
-        enter: { at: "l21:'مرتين،'", anim: slide-l }
+        enter: { at: "l21:'twice'", anim: slide-l }
       - use: chip
         id: id_bad
         props: { text: 'charge $49  →  charged twice', color: red, icon: card, size: 34 }
         place: { x: 40, y: 400, w: 1000, h: 100 }
-        enter: { at: "l22:'يخصم'", anim: slide-l }
+        enter: { at: "l22:'charge'", anim: slide-l }
       - use: stamp
         id: id_x2
         props: { text: '×2', color: red, size: 150 }
         place: { x: 290, y: 580, w: 500, h: 280 }
-        enter: { at: "l22:'مرتين.'" }
+        enter: { at: "l22:'twice'" }
 
   # ── 05 · next episode ──────────────────────────────────────────────────────
   - id: cta
@@ -382,9 +382,9 @@ scenes:
     elements:
       - use: cta
         id: cta_next
-        props: { next: 'Deadlocks', keyword: 'deadlock', prompt: 'اكتب في الكومنتات', at: "l24:'deadlock'" }
+        props: { next: 'Deadlocks', keyword: 'deadlock', prompt: 'Comment below', at: "l24:'deadlock'" }
         place: { x: 40, y: 140, w: 880, h: 620 }
-        enter: { at: "l23:'الجاية'", anim: rise }
+        enter: { at: "l23:'Next'", anim: rise }
       - use: particles
         id: cta_conf
-        props: { kind: confetti, count: 80, at: "l24:'توصلك.'", colors: [lime, cyan, violet, amber] }
+        props: { kind: confetti, count: 80, at: "l24:'miss'", colors: [lime, cyan, violet, amber] }

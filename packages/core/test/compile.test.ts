@@ -371,13 +371,17 @@ describe('themes, presets, cues, outputs', () => {
   });
 });
 
-describe('Season 1 examples (F17, SRS §12.1 regression)', () => {
-  const dir = path.join(ROOT, 'examples/season1');
-  const eps = existsSync(dir)
-    ? readdirSync(dir).filter((d) => existsSync(path.join(dir, d, 'episode.yaml')))
-    : [];
+describe('Season 1 examples, English and Arabic (F17, SRS §12.1 regression)', () => {
+  const eps = ['examples/season1', 'examples/season1-arabic'].flatMap((d) => {
+    const dir = path.join(ROOT, d);
+    return existsSync(dir)
+      ? readdirSync(dir)
+          .filter((e) => existsSync(path.join(dir, e, 'episode.yaml')))
+          .map((e) => `${d}/${e}`)
+      : [];
+  });
   it.each(eps)('%s compiles and validates with zero errors', (ep) => {
-    const r = compileEpisode(episodePaths(path.join(dir, ep), ROOT));
+    const r = compileEpisode(episodePaths(path.join(ROOT, ep), ROOT));
     expect(r.issues.filter((i) => i.level === 'error')).toEqual([]);
     expect(r.issues.filter((i) => i.level === 'warn' && i.rule !== 'V-4')).toEqual([]);
   });

@@ -64,6 +64,13 @@
           <label>Series <input name="series" placeholder="SYSTEM DESIGN" /></label>
           <label class="narrow">Episode # <input name="episode" type="number" min="1" value="1" /></label>
         </div>
+        <label
+          >Language of the voice-over
+          <select name="lang">
+            <option value="en">English (left to right)</option>
+            <option value="ar">Arabic (right to left, English terms supported)</option>
+          </select></label
+        >
         <p class="err" id="newErr"></p>
         <div class="actions">
           <button value="cancel" class="btn ghost" formnovalidate>Cancel</button>

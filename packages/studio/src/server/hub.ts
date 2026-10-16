@@ -261,7 +261,13 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
   });
 
   // ------------------------------------------------------------------ actions
-  const createEpisode = (body: { id?: string; series?: string; title?: string; episode?: number }) => {
+  const createEpisode = (body: {
+    id?: string;
+    series?: string;
+    title?: string;
+    episode?: number;
+    lang?: string;
+  }) => {
     const id = String(body.id ?? '').trim();
     if (!SLUG.test(id))
       throw new HttpError(422, 'The id must be a slug: letters, digits, "-" and "_" (e.g. ep10)');
@@ -272,6 +278,7 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
     let yaml = episodeTemplate(id, {
       series: body.series?.trim() || undefined,
       episode: Number(body.episode) || 1,
+      lang: body.lang === 'ar' ? 'ar' : 'en',
     });
     if (body.title?.trim())
       yaml = yaml.replace('title: "My topic"', `title: ${JSON.stringify(body.title.trim())}`);

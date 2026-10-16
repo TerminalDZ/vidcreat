@@ -17,8 +17,8 @@ chips:
 | Button           | What it does                                                                                                       |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------ |
 | **Upload voice** | Choose a recording; it is converted to `voice.wav` (48 kHz)                                                        |
-| **Mark cues**    | Opens the cue marker for this episode in a new tab                                                                 |
-| **Preview**      | Opens the live preview in a new tab                                                                                |
+| **Open editor**  | Opens the visual editor for this episode in a new tab (see [The editor](#the-editor))                              |
+| **Mark cues**    | Opens the editor in Cues mode, ready to mark when each sentence starts                                             |
 | **Validate**     | Runs every check, including the headless text-overflow and caption checks                                          |
 | **Render**       | Choose the platform preset, share size, SFX and speed; progress, FPS and ETA appear live; **Cancel** stops cleanly |
 | **Folder**       | Opens the episode folder in your file manager                                                                      |

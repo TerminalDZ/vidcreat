@@ -21,7 +21,7 @@ meta:
   episode: 10
   preset: tiktok # tiktok | reels | shorts (presets/*.preset.yaml)
   theme: season1 # themes/<name>.theme.yaml, or a relative path
-  lang: ar-EG
+  lang: en-US # en-US (left to right) · ar-EG (right to left, English terms supported)
   publish: { cover: '…', caption: '…', hashtags: ['#systemdesign'], pinned: '…' }
 
 audio:
@@ -32,10 +32,10 @@ audio:
   extra: [{ at: "l9:'boom'", sound: hit, gain_db: -3 }]
 
 script: # one spoken sentence per line; ids default to l1, l2, …
-  - text: 'عمرك دفعت حاجة أونلاين، والنت فصل؟'
+  - text: 'Ever paid online and your connection dropped?'
   - id: twice
-    text: 'اتخصم منك مرتين'
-    break: ['مرتين'] # force a caption break before this word
+    text: 'And you got charged twice.'
+    break: ['twice'] # force a caption break before this word
     caption: auto # auto | none | "custom caption text"
 
 chapters:
@@ -55,10 +55,10 @@ scenes:
         enter: { at: l1, anim: rise, dur: 0.6 }
         exit: { at: l3, anim: fade }
         states:
-          - { at: "l1:'فصل'", set: { offline: true } }
+          - { at: "l1:'dropped'", set: { offline: true } }
         fx:
-          - { at: "twice:'مرتين'", do: shake, amp: 22 }
-          - { at: "twice:'مرتين'", do: flash, color: red }
+          - { at: "twice:'twice'", do: shake, amp: 22 }
+          - { at: "twice:'twice'", do: flash, color: red }
 ```
 
 ## 2. Time expressions
@@ -69,15 +69,19 @@ scenes:
 | `l7`                              | cue start of line `l7`                                                      |
 | `l7.end`                          | start of the next line − 0.15 s                                             |
 | `l7:'timeout'`                    | first word matching "timeout" (punctuation, tatweel and diacritics ignored) |
-| `l7:'الاتنين'#2`                  | second match                                                                |
+| `l7:'request'#2`                  | second match                                                                |
 | `l7:"Conway's"`                   | use double quotes when the word contains `'`                                |
 | `l7:'Duplicate Charge'`           | a multi-word phrase (time of its first word)                                |
 | `l7.3`                            | the 4th word (0-based)                                                      |
 | `@hook`, `@hook.end`              | a scene's start / end                                                       |
 | any of the above `+0.4` / `-0.2`  | offset in seconds                                                           |
 
-Word times come from your manual word marks (cue marker, word mode) or are estimated by letter count
-within the line. Every expression is validated; errors name the closest valid alternative.
+Word times come from your manual word marks (Cues mode, word mode) or are estimated by letter count
+within the line. Every expression is validated; errors name the closest valid alternative. In the
+editor you rarely type these: the **target** button and timeline snapping write them for you.
+
+Arabic works the same way: `l7:'مرتين'` anchors to an Arabic word, and English terms inside Arabic
+sentences (`الـ client`) are matched as written.
 
 ## 3. Placing elements
 
@@ -93,7 +97,8 @@ Stage coordinates: 1080 wide × 1000 high, origin at the top-left of the stage (
 - `size: { w, h }` overrides the default size inside helpers.
 - `layer: overlay` puts an element on top and exempts it from the overlap rule (V-8).
 
-Keep content out of the platform UI: the studio's **Z** overlay shows the safe zones of the preset.
+Keep content out of the platform UI: the editor's **Z** overlay shows the safe zones of the preset. In the
+editor you can simply drag and resize elements; it writes `place` for you.
 
 ## 4. Animations
 

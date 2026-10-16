@@ -8,10 +8,10 @@ into the upload form.
 ## 1. Item name (≤ 100 characters, English only, Title Case, no trademarks, no hype words)
 
 ```
-ReelForge - Vertical Explainer Video Generator with Animated Captions
+ReelForge - Vertical Explainer Video Editor and Generator with Animated Captions
 ```
 
-(69 characters.) Platform names (TikTok, Reels, Shorts) are kept out of the title, tags and preview images.
+(80 characters.) Platform names (TikTok, Reels, Shorts) are kept out of the title, tags and preview images.
 Envato rejects third-party trademarks in metadata. They appear only once in the description, with a
 trademark notice.
 
@@ -23,15 +23,15 @@ trademark notice.
 ## 3. Key features (shown in search results: up to 3, ≤ 45 characters each, no caps or special characters)
 
 ```
-Voice and YAML to finished vertical videos
-Word by word Arabic and English captions
-Offline renderer for Windows macOS Linux
+Visual editor timed to your spoken words
+English and Arabic word by word captions
+AI agent ready with a built in MCP server
 ```
 
 ## 4. Short pitch (for the first line of the description, social posts and the YouTube video)
 
 ```
-Turn a voice recording and one YAML file into animated vertical explainer videos with word-by-word captions, sound effects and platform-ready MP4s. Runs offline. No AI, no subscription.
+Design animated vertical explainer videos in a visual editor that times everything to your own voice: word-by-word captions, sound effects and platform-ready MP4s. Runs offline. No subscription.
 ```
 
 ## 5. Description
@@ -43,7 +43,7 @@ sections. Envato does not host description images.
 ## 6. Tags (code items: maximum 15, lowercase, no trademarks, no username, no other authors' item names)
 
 ```
-video generator, explainer video, vertical video, short video, social media video, animated captions, subtitles, arabic, rtl, motion graphics, animation, video maker, typescript, ffmpeg, nodejs
+video editor, video generator, explainer video, vertical video, short video, animated captions, subtitles, motion graphics, video maker, timeline editor, arabic, mcp, ai agent, typescript, nodejs
 ```
 
 ## 7. Attributes
@@ -85,19 +85,20 @@ video generator, explainer video, vertical video, short video, social media vide
 Hello, and thank you for reviewing ReelForge.
 
 ReelForge is a desktop tool built on Node.js. It is not a website script and needs no server or hosting.
-It turns a voice recording and a YAML scene file into a finished 1080×1920 vertical video. Rendering runs
-in headless Chromium (Playwright) and encoding in FFmpeg.
+It turns a voice recording into a finished 1080×1920 vertical video designed in a browser-based visual
+editor (canvas, inspector, timeline) served on 127.0.0.1. Rendering runs in headless Chromium (Playwright)
+and encoding in FFmpeg. An optional MCP server lets AI assistants drive it; no AI is needed to use it.
 
 How to test it quickly (about 5 minutes):
 1. Unzip, then run install.bat (Windows) or ./install.sh (macOS/Linux). The installer checks Node.js 22,
    offers to install FFmpeg, installs dependencies, downloads Chromium and runs "reelforge doctor".
 2. Run start.bat, ReelForge.command or ./start.sh. The dashboard opens at http://127.0.0.1:4310.
-3. Click Render on any example episode (tick "Silent" because no voice recording is included) and play
-   the result in the dashboard.
+3. Click "Open editor" on any example episode to try the editor, or click Render (tick "Silent" because no
+   voice recording is included) and play the result in the dashboard.
 The documentation is in documentation/index.html.
 
 Notes:
-- Full, unminified TypeScript source is included next to the prebuilt dist; 98 automated tests run with "pnpm test".
+- Full, unminified TypeScript source is included next to the prebuilt dist; 117 automated tests run with "pnpm test".
 - All preview images and the demo video were made with ReelForge and the included examples; nothing in them
   is missing from the download.
 - Bundled fonts are SIL OFL 1.1 and npm dependencies are MIT/ISC/Apache-2.0. Credits are in

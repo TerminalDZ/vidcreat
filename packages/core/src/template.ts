@@ -1,10 +1,39 @@
 /** Template for `reelforge new <id>` (FR-CLI-1). */
-export function episodeTemplate(id: string, opts: { series?: string; episode?: number } = {}): string {
+export function episodeTemplate(
+  id: string,
+  opts: { series?: string; episode?: number; lang?: 'en' | 'ar' } = {},
+): string {
   const series = opts.series ?? 'SYSTEM DESIGN';
+  const ar = opts.lang === 'ar';
+  const t = ar
+    ? {
+        lang: 'ar-EG',
+        cover: 'عنوان الغلاف',
+        caption: 'وصف الحلقة هنا.',
+        tags: '["#systemdesign", "#برمجة"]',
+        pinned: 'اكتب سؤالك في الكومنتات',
+        lines: [
+          'عمرك دفعت حاجة أونلاين، والنت فصل؟',
+          'المشكلة دي اسمها Duplicate Charge',
+          'والحل اسمه الـ Idempotency key',
+        ],
+      }
+    : {
+        lang: 'en-US',
+        cover: 'Charged twice?',
+        caption: 'Describe the episode here.',
+        tags: '["#systemdesign", "#programming"]',
+        pinned: 'Ask your question in the comments',
+        lines: [
+          'Ever paid online and your connection dropped?',
+          'That problem is called a Duplicate Charge.',
+          'The fix is an Idempotency key.',
+        ],
+      };
   return `# yaml-language-server: $schema=../../schema/episode.schema.json
 # ReelForge episode spec. Docs: docs/authoring.md · components: docs/components.md
-# Workflow: write the script → record voice.wav → \`reelforge cue ${id}\` → describe scenes →
-#           \`reelforge dev ${id}\` → \`reelforge validate ${id}\` → \`reelforge render ${id}\`
+# Workflow: write the script → record voice.wav → \`reelforge cue ${id}\` → design scenes in
+#           \`reelforge edit ${id}\` (or here) → \`reelforge validate ${id}\` → \`reelforge render ${id}\`
 
 meta:
   id: ${id}
@@ -13,13 +42,13 @@ meta:
   episode: ${opts.episode ?? 1}
   preset: tiktok          # tiktok | reels | shorts
   theme: default          # themes/<name>.theme.yaml
-  lang: ar-EG
+  lang: ${t.lang}           # en-US, ar-EG, … (sets the caption direction)
   publish:
-    cover: "عنوان الغلاف"
+    cover: "${t.cover}"
     caption: |
-      وصف الحلقة هنا.
-    hashtags: ["#systemdesign", "#برمجة"]
-    pinned: "اكتب سؤالك في الكومنتات"
+      ${t.caption}
+    hashtags: ${t.tags}
+    pinned: "${t.pinned}"
 
 audio:
   voice: voice.wav
@@ -28,9 +57,7 @@ audio:
 
 # One entry per spoken sentence. Ids default to l1, l2, …
 script:
-  - text: "عمرك دفعت حاجة أونلاين، والنت فصل؟"
-  - text: "المشكلة دي اسمها Duplicate Charge"
-  - text: "والحل اسمه الـ Idempotency key"
+${t.lines.map((l) => `  - text: "${l}"`).join('\n')}
 
 chapters:
   - { at: l1, label: "01 · THE PROBLEM" }

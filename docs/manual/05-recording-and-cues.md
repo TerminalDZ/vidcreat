@@ -9,12 +9,15 @@
 - Re-recording later? Upload the new take: ReelForge warns that the voice changed so you can re-check the
   cues.
 
-## The cue marker
+## Cues mode
 
 A **cue** is the moment a script line starts. Everything in the episode is timed relative to cues, so a
 re-recorded line only needs its cue moved — every animation follows.
 
-![Cue marker](assets/01-studio-cue-marker.jpg)
+Open the editor and switch to **Cues** (**Alt+2**), or click **Mark cues** on the dashboard. The script
+is listed on the right, the playhead and waveform are on the timeline.
+
+![Cues mode](assets/07-editor-cues.jpg)
 
 | Key                           | Action                                                              |
 | ----------------------------- | ------------------------------------------------------------------- |
@@ -29,11 +32,13 @@ re-recorded line only needs its cue moved — every animation follows.
 | **W**                         | Word mode: mark each word of the selected line with Space           |
 | **J / L**, **, / .**          | Back / forward 1 s, previous / next frame                           |
 
-Every change is saved instantly to `cues.json`. Lines out of order are shown in red.
+Every change is saved instantly to `cues.json` and can be undone with **⌘/Ctrl+Z**. Lines out of order
+are shown in red. You can also drag a line's clip on the **Script** track of the timeline, in Edit or
+Cues mode.
 
 ## Word mode
 
 By default ReelForge estimates when each word starts from its length. For precise hits (a stamp landing
-exactly on “مرتين”), select the line, press **W**, play, and press **Space** on each word.
+exactly on “twice”), select the line, press **W**, play, and press **Space** on each word.
 
-![Word mode](assets/02-studio-cue-word-mode.jpg)
+![Word mode](assets/08-editor-cues-word-mode.jpg)

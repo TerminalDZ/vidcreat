@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "reelforge": {
+      "command": "node",
+      "args": ["${workspaceFolder}/packages/cli/bin/reelforge.js", "mcp", "--root", "${workspaceFolder}"]
+    }
+  }
+}

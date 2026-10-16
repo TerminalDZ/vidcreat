@@ -1,0 +1,389 @@
+meta:
+  id: ep08
+  series: 'SYSTEM DESIGN'
+  title: 'Double-entry Ledger'
+  episode: 8
+  preset: tiktok
+  theme: season1
+  lang: ar-EG
+  publish:
+    cover: 'رصيدك 500 ولا 300؟'
+    caption: |
+      لو الـ balance عندك column بتعمله UPDATE، انت بتلعب بالنار.
+      البنوك حلت المشكلة دي من 500 سنة: Double-entry ledger.
+      append-only، والـ balance مجرد SUM.
+    hashtags: ['#systemdesign', '#fintech', '#database', '#backend', '#برمجة', '#مبرمجين']
+    pinned: 'اكتب breaker في الكومنتات عشان حلقة الـ Circuit Breaker توصلك'
+
+audio:
+  voice: voice.wav
+  sfx: auto
+  sfx_gain_db: -16
+
+script:
+  - text: 'رصيدك في الـ app بيقول 500، والبنك بيقول 300.'
+  - text: 'مين فيهم صح؟ ولا الاتنين غلط؟'
+    break: ['ولا']
+  - text: 'أغلب الـ systems بتخزن الـ balance في column واحد.'
+  - text: 'وكل عملية بتعمل UPDATE على الرقم ده.'
+  - text: 'اتنين requests في نفس اللحظة، وواحد فيهم ضاع.'
+  - text: 'والأسوأ، مفيش أي history تقولك إيه اللي حصل.'
+  - text: 'البنوك حلت المشكلة دي من أكتر من خمسمية سنة.'
+  - text: 'اسمها Double-entry bookkeeping.'
+  - text: 'كل transaction بتتسجل كـ entries في جدول ledger.'
+  - text: 'entry فيها debit، و entry فيها credit.'
+  - text: 'أحمد بيحول 100 لسارة؟ سطرين، مش UPDATE.'
+  - text: 'debit من أحمد 100، و credit لسارة 100.'
+  - text: 'ومجموع الـ debits لازم يساوي مجموع الـ credits.'
+  - text: 'لو مش متساويين، يبقى فيه bug وهتعرفه فورا.'
+    break: ['يبقى']
+  - text: 'بس خلي بالك من الفخ ده.'
+  - text: 'متعملش UPDATE على entry قديمة عشان تصلحها.'
+  - text: 'الـ ledger لازم يكون append-only، لا UPDATE ولا DELETE.'
+  - text: 'غلطت؟ اعمل reversing entry تلغي الأثر.'
+    break: ['اعمل']
+  - text: 'طب والـ balance؟ ده مجرد SUM على الـ entries.'
+  - text: 'تقدر تعمله cache، بس الحقيقة دايما في الـ ledger.'
+  - text: "وافتكر Conway's law وانت بتصمم."
+    break: ['وانت']
+  - text: 'الـ ledger بيتكلم نفس لغة الـ finance team.'
+  - text: 'وكمان بياخد audit trail كامل ببلاش.'
+  - text: 'الحلقة الجاية آخر حلقة في الموسم: Circuit Breaker.'
+  - text: 'اكتب breaker في الكومنتات عشان توصلك.'
+
+chapters:
+  - { at: l1, label: '01 · THE PROBLEM' }
+  - { at: l7, label: '02 · DOUBLE ENTRY' }
+  - { at: l15, label: '03 · THE TRAP' }
+  - { at: l19, label: '04 · THE PAYOFF' }
+
+scenes:
+  # ─── hook ────────────────────────────────────────────────
+  - id: hook
+    at: l1
+    glow: red
+    elements:
+      - use: counter
+        id: app_bal
+        props:
+          {
+            keyframes: [{ at: "l1:'500'", value: 500, dur: 0.6 }],
+            prefix: '$',
+            label: 'in the app',
+            color: lime,
+            size: 150,
+          }
+        place: { x: 40, y: 80, w: 480, h: 300 }
+        enter: { at: "l1:'app'", anim: pop }
+      - use: counter
+        id: bank_bal
+        props:
+          {
+            keyframes: [{ at: "l1:'300'", value: 300, dur: 0.6 }],
+            prefix: '$',
+            label: 'at the bank',
+            color: red,
+            size: 150,
+          }
+        place: { x: 560, y: 80, w: 480, h: 300 }
+        enter: { at: "l1:'والبنك'", anim: pop }
+        fx:
+          - { at: "l1:'300'+0.6", do: shake, amp: 16 }
+      - use: title
+        id: who
+        props: { text: "who's **right**?", size: 110, accent: amber }
+        place: { x: 60, y: 470, w: 860, h: 200 }
+        enter: { at: "l2:'صح؟'", anim: pop }
+      - use: stamp
+        id: both
+        props: { text: 'BOTH WRONG?', color: red, size: 84 }
+        place: { x: 150, y: 720, w: 700, h: 180 }
+        enter: { at: "l2:'غلط؟'", anim: stamp }
+
+  # ─── the balance column ─────────────────────────────────
+  - id: column
+    at: l3
+    glow: amber
+    elements:
+      - use: table
+        id: accounts
+        props:
+          columns: ['account', 'balance']
+          widths: [1, 1]
+          fontSize: 34
+          rows:
+            - { cells: ['ahmed', '500'], at: "l3:'balance'" }
+            - { cells: ['sara', '0'], at: "l3:'column'" }
+        place: { x: 140, y: 40, w: 800, h: 260 }
+        enter: { at: "l3:'systems'", anim: rise }
+      - use: code
+        id: upd
+        props:
+          title: 'transfer.sql'
+          lang: sql
+          fontSize: 30
+          cps: 70
+          lines:
+            - { text: 'UPDATE accounts', at: "l4:'UPDATE'" }
+            - '  SET balance = balance - 100'
+            - "  WHERE id = 'ahmed';"
+          highlight:
+            - { line: 2, at: "l4:'الرقم'", color: amber }
+        place: { x: 60, y: 380, w: 860, h: 300 }
+        enter: { at: 'l4', anim: rise }
+
+  # ─── lost update ─────────────────────────────────────────
+  - id: race
+    at: l5
+    glow: red
+    elements:
+      - use: lanes
+        id: lanes
+        props:
+          fontSize: 28
+          lanes:
+            - title: 'Request A'
+              color: cyan
+              steps:
+                - { text: 'read 500', at: "l5:'requests'" }
+                - { text: 'write 400', at: "l5:'اللحظة'" }
+            - title: 'Request B'
+              color: violet
+              steps:
+                - { text: 'read 500', at: "l5:'requests'+0.35" }
+                - { text: 'write 450', at: "l5:'ضاع'", mark: err }
+        place: { x: 40, y: 20, w: 1000, h: 520 }
+        enter: { at: 'l5', anim: rise }
+      - use: chip
+        id: lost
+        props: { text: '-100 lost update', color: red, icon: x, size: 38 }
+        place: { x: 140, y: 590, w: 640, h: 100 }
+        enter: { at: "l5:'ضاع'+0.3", anim: pop }
+      - use: chip
+        id: nohist
+        props: { text: 'history: null', color: amber, icon: clock, variant: outline, size: 38 }
+        place: { x: 140, y: 740, w: 640, h: 100 }
+        enter: { at: "l6:'history'", anim: pop }
+
+  # ─── the idea ────────────────────────────────────────────
+  - id: idea
+    at: l7
+    glow: violet
+    elements:
+      - use: timeline
+        id: years
+        props:
+          start: '1494'
+          end: 'today'
+          color: violet
+          markers:
+            - { pos: 0.1, label: 'Pacioli', sub: 'Venice', at: "l7:'البنوك'" }
+            - { pos: 0.88, label: 'your app', color: lime, at: "l7:'سنة'" }
+          cursor:
+            - { at: "l7:'البنوك'", pos: 0.1, dur: 0 }
+            - { at: "l7:'خمسمية'", pos: 0.88, dur: 1.0 }
+        place: { x: 60, y: 60, w: 960, h: 240 }
+        enter: { at: "l7:'البنوك'", anim: rise }
+      - use: title
+        id: de
+        props: { text: "**Double-entry**\nbookkeeping", size: 104, accent: violet }
+        place: { x: 60, y: 400, w: 860, h: 300 }
+        enter: { at: "l8:'Double-entry'", anim: pop }
+
+  # ─── the ledger ──────────────────────────────────────────
+  - id: ledger
+    at: l9
+    glow: lime
+    elements:
+      - use: table
+        id: book
+        props:
+          columns: ['tx', 'account', 'debit', 'credit']
+          widths: [0.8, 1.6, 1.2, 1.2]
+          fontSize: 30
+          rows:
+            - { cells: ['T1', 'cash', '500', ''], at: "l9:'entries'" }
+            - { cells: ['T1', 'ahmed', '', '500'], at: "l9:'ledger'" }
+            - {
+                cells: ['T2', 'ahmed', { text: '100', color: amber }, ''],
+                at: "l12:'debit'",
+                highlight: true,
+              }
+            - { cells: ['T2', 'sara', '', { text: '100', color: lime }], at: "l12:'credit'", highlight: true }
+        place: { x: 40, y: 20, w: 1000, h: 420 }
+        enter: { at: "l9:'transaction'", anim: rise }
+      - use: chip
+        id: two_rows
+        props: { text: '2 rows, 0 UPDATEs', color: cyan, icon: check, size: 34 }
+        place: { x: 240, y: 470, w: 600, h: 90 }
+        enter: { at: "l11:'سطرين'", anim: pop }
+        exit: { at: 'l13', anim: fade }
+      - use: counter
+        id: sum_d
+        props:
+          {
+            keyframes: [{ at: "l9:'entries'", value: 500 }, { at: "l12:'debit'", value: 600 }],
+            label: 'Σ debit',
+            color: amber,
+            size: 120,
+          }
+        place: { x: 40, y: 600, w: 430, h: 240 }
+        enter: { at: "l13:'الـ'", anim: pop }
+      - use: counter
+        id: sum_c
+        props:
+          {
+            keyframes: [{ at: "l9:'ledger'", value: 500 }, { at: "l12:'credit'", value: 600 }],
+            label: 'Σ credit',
+            color: lime,
+            size: 120,
+          }
+        place: { x: 490, y: 600, w: 430, h: 240 }
+        enter: { at: "l13:'مجموع'", anim: pop }
+        fx:
+          - { at: "l13:'يساوي'", do: pulse, color: lime }
+      - use: chip
+        id: balanced
+        props: { text: 'balanced', color: lime, icon: shield, variant: solid, size: 32 }
+        place: { x: 330, y: 480, w: 420, h: 80 }
+        enter: { at: "l14:'bug'", anim: pop }
+
+  # ─── the trap ────────────────────────────────────────────
+  - id: trap
+    at: l15
+    glow: amber
+    elements:
+      - use: trap
+        id: tr
+        props: { sub: 'editing history', at: l15, until: 'l16-0.1' }
+      - use: chip
+        id: no_update
+        props: { text: 'UPDATE', color: red, icon: x, variant: outline, size: 40 }
+        place: { x: 80, y: 40, w: 420, h: 110 }
+        enter: { at: "l16:'UPDATE'", anim: pop }
+        states:
+          - { at: "l17:'UPDATE'", set: { strike: true } }
+      - use: chip
+        id: no_delete
+        props: { text: 'DELETE', color: red, icon: x, variant: outline, size: 40 }
+        place: { x: 580, y: 40, w: 420, h: 110 }
+        enter: { at: "l17:'DELETE'", anim: pop }
+        states:
+          - { at: "l17:'DELETE'+0.4", set: { strike: true } }
+      - use: title
+        id: ao
+        props: { text: '**append-only**', size: 110 }
+        place: { x: 60, y: 200, w: 960, h: 180 }
+        enter: { at: "l17:'append-only'", anim: pop }
+      - use: table
+        id: reversal
+        props:
+          columns: ['tx', 'account', 'debit', 'credit']
+          widths: [0.8, 1.6, 1.2, 1.2]
+          fontSize: 28
+          accent: amber
+          rows:
+            - { cells: ['T2', 'ahmed', '100', ''], color: dim }
+            - { cells: ['T2', 'sara', '', '100'], color: dim }
+            - {
+                cells: ['T3', 'sara', { text: '100', color: amber }, ''],
+                at: "l18:'reversing'",
+                highlight: true,
+              }
+            - { cells: ['T3', 'ahmed', '', { text: '100', color: amber }], at: "l18:'تلغي'", highlight: true }
+        place: { x: 40, y: 440, w: 880, h: 400 }
+        enter: { at: 'l18', anim: rise }
+
+  # ─── balance = SUM ───────────────────────────────────────
+  - id: sum
+    at: l19
+    glow: cyan
+    elements:
+      - use: code
+        id: q
+        props:
+          title: 'balance.sql'
+          lang: sql
+          fontSize: 30
+          cps: 70
+          lines:
+            - { text: 'SELECT SUM(credit) - SUM(debit)', at: "l19:'SUM'" }
+            - 'FROM ledger'
+            - "WHERE account = 'sara';"
+        place: { x: 60, y: 30, w: 960, h: 290 }
+        enter: { at: "l19:'balance؟'", anim: rise }
+      - use: counter
+        id: sara
+        props:
+          {
+            keyframes:
+              [{ at: "l19:'entries'", value: 0, dur: 0 }, { at: "l19:'entries'+0.2", value: 100, dur: 0.6 }],
+            prefix: '$',
+            label: 'sara · derived',
+            color: cyan,
+            size: 150,
+          }
+        place: { x: 200, y: 360, w: 680, h: 280 }
+        enter: { at: "l19:'entries'", anim: pop }
+      - use: node
+        id: cache
+        props: { title: 'cache', sub: 'fast, disposable', icon: bolt, color: amber }
+        place: { x: 40, y: 690, w: 380, h: 170 }
+        enter: { at: "l20:'cache'", anim: pop }
+      - use: node
+        id: truth
+        props: { title: 'ledger', sub: 'source of truth', icon: db, color: lime, status: ok }
+        place: { x: 540, y: 690, w: 380, h: 170 }
+        enter: { at: "l20:'الحقيقة'", anim: pop }
+      - use: arrow
+        id: derive
+        props: { from: truth.left, to: cache.right, color: dim, dashed: true }
+        enter: { at: "l20:'الحقيقة'+0.3", anim: draw }
+
+  # ─── conway + audit ──────────────────────────────────────
+  - id: conway
+    at: l21
+    glow: violet
+    elements:
+      - use: quote
+        id: cq
+        props:
+          text: 'Organizations design systems that mirror their own communication structure.'
+          author: 'Melvin Conway'
+          highlight: ['mirror']
+          cps: 55
+          size: 50
+          color: violet
+        place: { x: 60, y: 40, w: 960, h: 380 }
+        enter: { at: 'l21.1', anim: rise }
+      - use: checklist
+        id: audit
+        props:
+          title: 'audit trail for free'
+          fontSize: 34
+          items:
+            - { text: 'every change recorded', at: "l23:'audit'" }
+            - { text: 'who, when, and why', at: "l23:'كامل'" }
+            - { text: 'replay any balance', at: "l23:'ببلاش'" }
+        place: { x: 60, y: 540, w: 860, h: 340 }
+        enter: { at: "l22:'finance'", anim: rise }
+
+  # ─── cta ─────────────────────────────────────────────────
+  - id: cta
+    at: l24
+    glow: lime
+    elements:
+      - use: label
+        id: finale
+        props: { text: 'next: season finale', dot: true, color: amber }
+        place: { x: 60, y: 40, w: 600, h: 60 }
+        enter: { at: "l24:'آخر'", anim: fade }
+      - use: cta
+        id: next
+        props:
+          { next: 'Circuit Breaker', keyword: 'breaker', prompt: 'اكتب في الكومنتات', at: "l25:'breaker'" }
+        place: { x: 60, y: 140, w: 860, h: 600 }
+        enter: { at: "l24:'الجاية'", anim: rise }
+      - use: particles
+        id: conf
+        props: { kind: confetti, count: 80, at: "l25:'توصلك'", colors: [lime, cyan, violet, amber] }

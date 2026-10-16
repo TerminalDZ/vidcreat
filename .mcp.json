@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "reelforge": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["packages/cli/bin/reelforge.js", "mcp"]
+    }
+  }
+}

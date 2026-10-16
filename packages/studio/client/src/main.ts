@@ -1099,3 +1099,5 @@ fetch('/api/meta')
   .catch(() => toast('Could not load the component catalog', 'err'));
 connect();
 requestAnimationFrame(loop);
+// Automation hook (screenshots, tests, browser agents): seek and read the playhead.
+(window as unknown as { reelforgeStudio: object }).reelforgeStudio = { seek, time, setMode, fit };

@@ -98,7 +98,8 @@ function printIssues(issues: Issue[], g: Globals): void {
 
 // ------------------------------------------------------------------ commands
 
-async function cmdNew(id: string, o: { series?: string; episode?: number }, g: Globals) {
+async function cmdNew(id: string, o: { series?: string; episode?: number; lang?: string }, g: Globals) {
+  if (o.lang && !['en', 'ar'].includes(o.lang)) throw new CliError('--lang must be "en" or "ar"', 2);
   if (!/^[a-z0-9][a-z0-9_-]*$/i.test(id))
     throw new CliError('Episode id must be a slug (letters, digits, "-" and "_")', 2);
   const root = projectRoot(g.root);
@@ -108,7 +109,7 @@ async function cmdNew(id: string, o: { series?: string; episode?: number }, g: G
   mkdirSync(path.join(dir, 'assets'), { recursive: true });
   writeFileSync(
     path.join(dir, 'episode.yaml'),
-    episodeTemplate(id, { series: o.series, episode: o.episode }),
+    episodeTemplate(id, { series: o.series, episode: o.episode, lang: o.lang === 'ar' ? 'ar' : 'en' }),
   );
   const schemaFile = path.join(root, 'schema', 'episode.schema.json');
   if (!existsSync(schemaFile)) {
@@ -118,7 +119,9 @@ async function cmdNew(id: string, o: { series?: string; episode?: number }, g: G
   out(g, { ok: true, dir }, () => {
     console.log(`${c.green('✓')} created ${path.relative(process.cwd(), dir) || dir}/episode.yaml`);
     console.log(
-      c.dim(`next: write the script, record voice.wav into that folder, then \`reelforge cue ${id}\``),
+      c.dim(
+        `next: \`reelforge edit ${id}\` to design it, record voice.wav into that folder, then \`reelforge cue ${id}\``,
+      ),
     );
   });
 }
@@ -566,6 +569,7 @@ export function buildProgram(): Command {
     .argument('<id>', 'episode id (slug)')
     .option('--series <name>', 'series name shown in the header')
     .option('--episode <n>', 'episode number', posInt('--episode'))
+    .option('--lang <en|ar>', 'language of the template script (default en)')
     .action((id, o, cmd) => cmdNew(id, o, globals(cmd)));
 
   program
@@ -663,6 +667,16 @@ export function buildProgram(): Command {
     .requiredOption('--accent <hex>', 'accent color, e.g. #b8ff3c')
     .option('--out <file>', 'output file')
     .action((name, o, cmd) => cmdThemeNew(name, o, globals(cmd)));
+
+  program
+    .command('mcp')
+    .description(
+      'run the Model Context Protocol server on stdio (for AI agents: Claude, Cursor, Copilot, Codex, Gemini…)',
+    )
+    .action(async (_o, cmd) => {
+      const { startMcp } = await import('./mcp.js');
+      await startMcp({ root: projectRoot(globals(cmd).root), version: VERSION });
+    });
 
   program
     .command('schema')

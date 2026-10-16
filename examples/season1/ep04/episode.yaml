@@ -6,15 +6,15 @@ meta:
   episode: 4
   preset: tiktok
   theme: season1
-  lang: ar-EG
+  lang: en-US
   publish:
-    cover: 'key واحد وقّع الـ database كلها؟'
+    cover: 'One key took down the whole database?'
     caption: |
-      الـ cache المفروض يحمي الـ database... إزاي يبقى هو السبب إنها تقع؟
-      الحلقة دي عن الـ Cache Stampede (Thundering Herd)
-      والحل: Request Coalescing و Jittered TTL
-    hashtags: ['#systemdesign', '#caching', '#backend', '#softwareengineering', '#برمجة', '#مبرمجين']
-    pinned: 'عمرك شفت الـ DB بتقع بسبب الـ cache؟ احكيلنا في الكومنتات 👇'
+      Your cache is supposed to protect the database... so how does it end up killing it?
+      This one's about the Cache Stampede (a.k.a. Thundering Herd)
+      and the fix: Request Coalescing + Jittered TTL
+    hashtags: ['#systemdesign', '#caching', '#backend', '#softwareengineering', '#programming', '#coding']
+    pinned: 'Ever seen a DB go down because of the cache? Tell us in the comments 👇'
 
 audio:
   voice: voice.wav
@@ -22,42 +22,41 @@ audio:
   sfx_gain_db: -16
 
 script:
-  - text: 'الموقع كان شغال تمام، وفجأة الـ database وقعت!'
-  - text: 'والسبب؟ key واحد في الـ cache خلص الـ TTL بتاعه.'
-  - text: 'تعالى نفهم إيه اللي حصل بالظبط.'
-  - text: 'الـ cache ده طبقة سريعة قدام الـ database.'
-  - text: 'أي request بيسأل الـ cache الأول، ولو لقى الداتا يبقى Hit.'
-    break: ['ولو']
-  - text: 'ولو ملقاش، يبقى Miss ويروح يسأل الـ database.'
-  - text: 'وكل key ليه TTL، يعني مدة صلاحية وبعدها يتمسح.'
-    break: ['يعني']
-  - text: 'تخيل الـ homepage عليها عشرة آلاف request في الثانية.'
-    break: ['عليها']
-  - text: 'وكلهم بيقروا نفس الـ key من الـ cache.'
-  - text: 'وفجأة الـ TTL خلص، والـ key اتمسح.'
-  - text: 'العشرة آلاف request عملوا Miss في نفس اللحظة.'
-    break: ['عملوا']
-  - text: 'وكلهم جريوا على الـ database مع بعض.'
-  - text: 'ده اسمه Cache Stampede، أو Thundering Herd.'
-  - text: 'الـ database بتستحمل ألف query بس، فطبيعي وقعت.'
-    break: ['بس،']
-  - text: 'والفخ هنا إن ناس كتير تقول: نكبّر الـ TTL وخلاص.'
-    break: ['تقول:']
-  - text: 'بس كده انت بتأجل المشكلة، مش بتحلها.'
-  - text: 'وزي ما Phil Karlton قال زمان عن الـ cache invalidation.'
-    break: ['قال']
-  - text: 'الحل الأول اسمه Request Coalescing.'
-  - text: 'أول request بس هو اللي يروح للـ database.'
-  - text: 'والباقي يستنوا نفس النتيجة بدل ما يضربوا الـ DB.'
-    break: ['بدل']
-  - text: 'الحل التاني اسمه Jittered TTL.'
-  - text: 'يعني تزوّد على الـ TTL رقم random صغير.'
-  - text: 'فالـ keys متخلصش كلها في نفس اللحظة.'
-  - text: 'ولو عايز تبقى pro، اعمل refresh قبل الـ TTL ما يخلص.'
-    break: ['اعمل']
-  - text: 'الحلقة الجاية عن الـ Retries والـ Exponential Backoff.'
-    break: ['والـ']
-  - text: 'اكتب backoff في الكومنتات عشان توصلك.'
+  - text: 'The site was running just fine, and then the database went down!'
+  - text: 'The cause? One single key in the cache hit its TTL.'
+  - text: "Let's break down exactly what happened."
+  - text: 'The cache is a fast layer sitting in front of the database.'
+  - text: "Every request checks the cache first. If the data's there, it's a Hit."
+    break: ['If']
+  - text: "If it's not, that's a Miss, and it goes straight to the database."
+  - text: 'Every key has a TTL, its time to live, then it gets deleted.'
+    break: ['its']
+  - text: 'Picture the homepage getting ten thousand requests per second.'
+    break: ['getting']
+  - text: "And they're all reading the same key from the cache."
+  - text: 'Then suddenly the TTL runs out, and the key is gone.'
+  - text: 'All ten thousand requests miss at the exact same moment.'
+    break: ['miss']
+  - text: 'And every single one of them rushes the database at once.'
+  - text: "That's called a Cache Stampede, or the Thundering Herd."
+  - text: 'The database can only handle a thousand queries, so of course it crashed.'
+    break: ['so']
+  - text: "And here's the trap: tons of people say, just raise the TTL."
+    break: ['tons']
+  - text: "But that only delays the problem. It's not a fix."
+  - text: 'Like Phil Karlton said years ago about cache invalidation.'
+    break: ['about']
+  - text: 'Fix number one is called Request Coalescing.'
+  - text: 'Only the first request actually goes to the database.'
+  - text: 'The rest wait for that same result instead of hammering the DB.'
+    break: ['instead']
+  - text: 'Fix number two is called Jittered TTL.'
+  - text: 'Take the TTL and add a few random seconds on top.'
+  - text: "So the keys don't all expire at the same moment."
+  - text: 'And if you want to go pro, refresh before the TTL runs out.'
+    break: ['refresh']
+  - text: 'Next episode: Retries and Exponential Backoff.'
+  - text: "Comment backoff so you don't miss it."
 
 chapters:
   - { at: l1, label: '01 · THE PROBLEM' }
@@ -70,7 +69,7 @@ scenes:
   # ── 01 · hook: the DB falls over ───────────────────────────────────────────
   - id: hook
     at: l1
-    glow: [{ at: l1, color: cyan }, { at: "l1:'وقعت'", color: red }]
+    glow: [{ at: l1, color: cyan }, { at: "l1:'down'", color: red }]
     elements:
       - use: label
         id: hook_lbl
@@ -83,10 +82,10 @@ scenes:
         place: { x: 240, y: 130, w: 600, h: 200 }
         enter: { at: "l1:'database'", anim: pop }
         states:
-          - { at: "l1:'وقعت'", set: { status: err, sub: 'DOWN' } }
+          - { at: "l1:'down'", set: { status: err, sub: 'DOWN' } }
         fx:
-          - { at: "l1:'وقعت'", do: shake, amp: 24 }
-          - { at: "l1:'وقعت'", do: flash, color: red }
+          - { at: "l1:'down'", do: shake, amp: 24 }
+          - { at: "l1:'down'", do: flash, color: red }
       - use: meter
         id: hook_load
         props:
@@ -94,7 +93,7 @@ scenes:
           unit: '%'
           max: 150
           threshold: 100
-          keyframes: [{ at: "l1:'database'", value: 35 }, { at: "l1:'وقعت'", value: 148, dur: 0.4 }]
+          keyframes: [{ at: "l1:'database'", value: 35 }, { at: "l1:'down'", value: 148, dur: 0.4 }]
         place: { x: 60, y: 390, w: 960, h: 180 }
         enter: { at: "l1:'database'+0.2", anim: rise }
       - use: icon
@@ -109,7 +108,7 @@ scenes:
         enter: { at: "l2:'TTL'", anim: slide-l }
       - use: title
         id: hook_q
-        props: { text: 'إيه اللي **حصل**؟', size: 76 }
+        props: { text: 'What **happened**?', size: 76 }
         place: { x: 60, y: 830, w: 860, h: 170 }
         enter: { at: l3, anim: rise }
 
@@ -147,7 +146,7 @@ scenes:
             dashed: true,
             packet: { at: "l6:'database'", dur: 0.7, color: red },
           }
-        enter: { at: "l6:'ويروح'", anim: draw }
+        enter: { at: "l6:'goes'", anim: draw }
       - use: chip
         id: b_hit
         props: { text: 'Cache Hit · 1ms', color: lime, icon: check }
@@ -166,12 +165,12 @@ scenes:
           color: cyan
           markers:
             - { pos: 0.06, label: 'SET', sub: 'key: home', at: "l7:'key'" }
-            - { pos: 0.92, label: 'EXPIRE', color: red, at: "l7:'يتمسح.'" }
+            - { pos: 0.92, label: 'EXPIRE', color: red, at: "l7:'deleted'" }
           cursor:
-            - { at: "l7:'TTL،'", pos: 0.06 }
-            - { at: "l7:'يتمسح.'", pos: 0.92, dur: 1.6 }
+            - { at: "l7:'TTL'", pos: 0.06 }
+            - { at: "l7:'deleted'", pos: 0.92, dur: 1.6 }
         place: { x: 60, y: 520, w: 860, h: 260 }
-        enter: { at: "l7:'TTL،'", anim: rise }
+        enter: { at: "l7:'TTL'", anim: rise }
 
   # ── 02 · the herd ──────────────────────────────────────────────────────────
   - id: herd
@@ -181,7 +180,7 @@ scenes:
       - use: counter
         id: h_rps
         props:
-          keyframes: [{ at: "l8:'عشرة'", value: 10000, dur: 1.0 }]
+          keyframes: [{ at: "l8:'ten'", value: 10000, dur: 1.0 }]
           suffix: ' req/s'
           label: 'GET /home'
           color: ink
@@ -192,11 +191,11 @@ scenes:
         id: h_cache
         props: { title: 'Cache', sub: 'key: home ✓', icon: bolt, color: lime, status: ok }
         place: { x: 60, y: 320, w: 440, h: 180 }
-        enter: { at: "l9:'cache.'", anim: pop }
+        enter: { at: "l9:'cache'", anim: pop }
         states:
-          - { at: "l10:'اتمسح.'", set: { status: err, sub: 'key: home ✗' } }
+          - { at: "l10:'gone'", set: { status: err, sub: 'key: home ✗' } }
         fx:
-          - { at: "l10:'اتمسح.'", do: glitch }
+          - { at: "l10:'gone'", do: glitch }
       - use: chip
         id: h_miss
         props: { text: 'Miss × 10,000', color: red, icon: x, size: 40 }
@@ -208,9 +207,9 @@ scenes:
         place: { x: 240, y: 720, w: 600, h: 190 }
         enter: { at: "l12:'database'", anim: pop }
         states:
-          - { at: "l12:'بعض.'", set: { status: err, sub: 'overloaded' } }
+          - { at: "l12:'once'", set: { status: err, sub: 'overloaded' } }
         fx:
-          - { at: "l12:'بعض.'", do: shake, amp: 20 }
+          - { at: "l12:'once'", do: shake, amp: 20 }
       - use: particles
         id: h_herd
         props:
@@ -219,7 +218,7 @@ scenes:
             from: h_cache.bottom,
             to: h_db.top,
             count: 140,
-            at: "l12:'جريوا'",
+            at: "l12:'rushes'",
             dur: 1.8,
             color: red,
             spread: 220,
@@ -241,14 +240,14 @@ scenes:
           unit: ' q/s'
           max: 10000
           threshold: 1000
-          keyframes: [{ at: "l14:'ألف'", value: 1000 }, { at: "l14:'فطبيعي'", value: 10000, dur: 0.6 }]
+          keyframes: [{ at: "l14:'thousand'", value: 1000 }, { at: "l14:'so'", value: 10000, dur: 0.6 }]
         place: { x: 60, y: 400, w: 960, h: 180 }
         enter: { at: "l14:'database'", anim: rise }
       - use: stamp
         id: n_down
         props: { text: 'DB DOWN', color: red, size: 96 }
         place: { x: 90, y: 640, w: 760, h: 260 }
-        enter: { at: "l14:'وقعت.'" }
+        enter: { at: "l14:'crashed'" }
 
   # ── 03 · the trap ──────────────────────────────────────────────────────────
   - id: trap
@@ -257,14 +256,14 @@ scenes:
     elements:
       - use: trap
         id: t_trap
-        props: { sub: 'just raise the TTL?', at: l15, until: "l15:'نكبّر'" }
+        props: { sub: 'just raise the TTL?', at: l15, until: "l15:'raise'" }
       - use: chip
         id: t_bigger
         props: { text: 'TTL: 60s → 24h', color: amber, icon: clock, size: 44 }
         place: { x: 180, y: 160, w: 720, h: 110 }
-        enter: { at: "l15:'نكبّر'", anim: pop }
+        enter: { at: "l15:'raise'", anim: pop }
         states:
-          - { at: "l16:'بتأجل'", set: { strike: true } }
+          - { at: "l16:'delays'", set: { strike: true } }
       - use: timeline
         id: t_later
         props:
@@ -272,14 +271,14 @@ scenes:
           end: '+24h'
           color: amber
           markers:
-            - { pos: 0.85, label: 'STAMPEDE', sub: 'same herd, later', color: red, at: "l16:'بتأجل'" }
+            - { pos: 0.85, label: 'STAMPEDE', sub: 'same herd, later', color: red, at: "l16:'delays'" }
         place: { x: 60, y: 380, w: 860, h: 240 }
         enter: { at: "l15:'TTL'", anim: rise }
       - use: title
         id: t_not
-        props: { text: 'بتأجل **مش** بتحل', size: 84, accent: red }
+        props: { text: 'Delayed, **not** fixed', size: 84, accent: red }
         place: { x: 60, y: 700, w: 860, h: 160 }
-        enter: { at: "l16:'مش'", anim: rise }
+        enter: { at: "l16:'not'", anim: rise }
 
   # ── the quote ──────────────────────────────────────────────────────────────
   - id: quote
@@ -316,31 +315,26 @@ scenes:
           rows: 3
           tiles: ['#1', '#2', '#3', '#4', '#5', '#6', '#7', '#8', '#9', '#10', '#11', '…']
           steps:
-            - { at: "l19:'أول'", set: { '0': busy } }
-            - { at: "l20:'يستنوا'", set: { '1-11': warn } }
-            - { at: "l20:'النتيجة'", set: { '0-11': ok } }
+            - { at: "l19:'first'", set: { '0': busy } }
+            - { at: "l20:'wait'", set: { '1-11': warn } }
+            - { at: "l20:'result'", set: { '0-11': ok } }
         place: { x: 40, y: 260, w: 460, h: 440 }
         enter: { at: "l19:'request'", anim: pop, dur: 0.8 }
       - use: node
         id: c_db
         props: { title: 'Database', sub: '1 query', icon: db, color: amber, status: ok }
         place: { x: 660, y: 380, w: 380, h: 180 }
-        enter: { at: "l19:'database.'", anim: pop }
+        enter: { at: "l19:'database'", anim: pop }
       - use: arrow
         id: c_one
         props:
-          {
-            from: c_reqs,
-            to: c_db,
-            color: lime,
-            packet: { at: "l19:'database.'+0.3", dur: 0.7, label: '#1' },
-          }
-        enter: { at: "l19:'database.'", anim: draw }
+          { from: c_reqs, to: c_db, color: lime, packet: { at: "l19:'database'+0.3", dur: 0.7, label: '#1' } }
+        enter: { at: "l19:'database'", anim: draw }
       - use: chip
         id: c_wait
         props: { text: 'the rest wait & share', color: lime, icon: queue, size: 36 }
         place: { x: 60, y: 760, w: 640, h: 96 }
-        enter: { at: "l20:'والباقي'", anim: rise }
+        enter: { at: "l20:'rest'", anim: rise }
 
   # ── fix 2: jittered TTL ────────────────────────────────────────────────────
   - id: jitter
@@ -351,14 +345,14 @@ scenes:
         id: j_title
         props: { text: '**Jittered** TTL', size: 100, accent: cyan }
         place: { x: 40, y: 0, w: 1000, h: 180 }
-        enter: { at: "l21:'التاني'", anim: pop }
+        enter: { at: "l21:'two'", anim: pop }
       - use: code
         id: j_code
         props:
           title: 'cache.ts'
           lines:
             - 'const ttl = 60 + random(0, 15);'
-            - { text: 'cache.set(key, data, ttl);', at: "l22:'صغير.'" }
+            - { text: 'cache.set(key, data, ttl);', at: "l22:'top'" }
           highlight: [{ line: 1, at: "l22:'random'", color: cyan }]
           cps: 40
           fontSize: 34
@@ -373,10 +367,10 @@ scenes:
           markers:
             - { pos: 0.62, label: 'A', at: "l23:'keys'" }
             - { pos: 0.7, label: 'B', at: "l23:'keys'+0.2" }
-            - { pos: 0.78, label: 'C', at: "l23:'كلها'" }
-            - { pos: 0.86, label: 'D', sub: 'spread', at: "l23:'نفس'" }
+            - { pos: 0.78, label: 'C', at: "l23:'all'" }
+            - { pos: 0.86, label: 'D', sub: 'spread', at: "l23:'same'" }
         place: { x: 60, y: 480, w: 860, h: 240 }
-        enter: { at: "l23:'فالـ'", anim: rise }
+        enter: { at: "l23:'So'", anim: rise }
       - use: chip
         id: j_refresh
         props: { text: 'refresh-ahead', color: lime, icon: refresh, size: 40 }
@@ -394,11 +388,11 @@ scenes:
           {
             next: 'Retries & Exponential Backoff',
             keyword: 'backoff',
-            prompt: 'اكتب في الكومنتات',
+            prompt: 'Comment below',
             at: "l26:'backoff'",
           }
         place: { x: 40, y: 140, w: 880, h: 620 }
-        enter: { at: "l25:'الجاية'", anim: rise }
+        enter: { at: "l25:'Next'", anim: rise }
       - use: particles
         id: cta_conf
-        props: { kind: confetti, count: 80, at: "l26:'توصلك.'", colors: [lime, cyan, violet, amber] }
+        props: { kind: confetti, count: 80, at: "l26:'miss'", colors: [lime, cyan, violet, amber] }

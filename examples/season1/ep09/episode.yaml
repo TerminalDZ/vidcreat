@@ -5,16 +5,17 @@ meta:
   episode: 9
   preset: tiktok
   theme: season1
-  lang: ar-EG
+  lang: en-US
   publish:
-    cover: 'service بطيئة وقعت كل حاجة'
+    cover: 'One slow service killed everything'
     caption: |
-      service واحدة بطيئة ممكن تخلص الـ thread pool وتوقع الـ system كله.
-      الـ timeout لوحده مش كفاية، والـ retry ممكن يزود الطين بلة.
-      الحل: Circuit Breaker. closed، open، half-open.
-      آخر حلقة في الموسم الأول.
-    hashtags: ['#systemdesign', '#microservices', '#resilience', '#backend', '#برمجة', '#مبرمجين']
-    pinned: 'اكتب season2 في الكومنتات وقولي عايز نتكلم عن إيه في الموسم الجاي'
+      One slow service can drain your thread pool and take down the whole system.
+      A timeout alone isn't enough, and instant retries make it worse.
+      The fix: a Circuit Breaker. Closed, open, half-open.
+      Season 1 finale.
+    hashtags:
+      ['#systemdesign', '#microservices', '#resilience', '#backend', '#programming', '#softwareengineering']
+    pinned: 'Comment "season2" and tell me what you want covered next season'
 
 audio:
   voice: voice.wav
@@ -22,33 +23,33 @@ audio:
   sfx_gain_db: -16
 
 script:
-  - text: 'service واحدة بطيئة وقعت الـ system كله. إزاي؟'
-    break: ['إزاي؟']
-  - text: 'عندك API بتكلم payment service.'
-  - text: 'فجأة الـ payment service بقت ترد في 30 ثانية.'
-  - text: 'كل request بيمسك thread ويقعد مستني.'
-  - text: 'والـ thread pool عندك فيها 8 threads بس.'
-  - text: 'ثانية واحدة، والـ pool كلها اتملت.'
-  - text: 'ودلوقتي حتى الـ requests السليمة مش لاقية thread.'
-    break: ['مش']
-  - text: 'ده اسمه cascading failure.'
-  - text: 'أول حل: timeout. متستناش أكتر من تانيتين.'
-  - text: 'بس هنا الفخ اللي ناس كتير بتقع فيه.'
-  - text: 'يحطوا timeout ويعملوا retry على طول.'
-  - text: 'كده انت بتضرب الـ service الواقعة أكتر.'
-  - text: 'الحل الحقيقي اسمه Circuit Breaker.'
-  - text: 'زي الـ breaker اللي في كهربا البيت بالظبط.'
-  - text: 'في الأول بيكون closed، والـ requests بتعدي عادي.'
-  - text: 'وبيعد الـ errors، ويحسب الـ error rate.'
-  - text: 'لو الـ error rate عدى 50%، يقلب open.'
-  - text: 'وهو open بيرفض فورا من غير ما يستنى. fail fast.'
-    break: ['fail']
-  - text: 'وترجع fallback، زي آخر cached response.'
-  - text: 'بعد شوية، يبقى half-open ويجرب request واحد.'
-  - text: 'لو نجح يرجع closed، لو فشل يرجع open.'
-  - text: 'كده الـ threads فاضية، والـ service بتاخد نفسها.'
-  - text: 'ودي كانت آخر حلقة في الموسم الأول.'
-  - text: 'اكتب season2 في الكومنتات لو عايز موسم تاني.'
+  - text: 'One service got slow and took down the whole system. How?'
+    break: ['How?']
+  - text: 'Your API calls a payment service.'
+  - text: 'Suddenly, the payment service takes 30 seconds to respond.'
+  - text: 'Every request grabs a thread and just sits there waiting.'
+  - text: 'And your thread pool only has 8 threads.'
+  - text: 'One second later, the whole pool is full.'
+  - text: "Now even the healthy requests can't get a thread."
+    break: ["can't"]
+  - text: "That's called a cascading failure."
+  - text: 'First fix: a timeout. Never wait more than two seconds.'
+  - text: "But here's the trap so many people fall into."
+  - text: 'They add a timeout, then retry instantly.'
+  - text: "Now you're hammering the dying service even harder."
+  - text: 'The real fix is called a Circuit Breaker.'
+  - text: "Exactly like the breaker in your home's fuse box."
+  - text: "At first it's closed, and requests flow through normally."
+  - text: 'It counts the errors and tracks the error rate.'
+  - text: 'If the error rate passes 50%, it flips to open.'
+  - text: 'While open, it rejects instantly, no waiting. Fail fast.'
+    break: ['Fail']
+  - text: 'And it returns a fallback, like the last cached response.'
+  - text: 'After a while, it goes half-open and tries one request.'
+  - text: 'If it works, back to closed. If it fails, back to open.'
+  - text: 'Your threads stay free, and the service gets room to recover.'
+  - text: 'And that was the last episode of season one.'
+  - text: 'Comment season2 if you want another season.'
 
 chapters:
   - { at: l1, label: '01 · THE PROBLEM' }
@@ -60,7 +61,7 @@ scenes:
   # ─── hook ────────────────────────────────────────────────
   - id: hook
     at: l1
-    glow: [{ at: l1, color: cyan }, { at: "l1:'وقعت'", color: red }]
+    glow: [{ at: l1, color: cyan }, { at: "l1:'took'", color: red }]
     elements:
       - use: grid
         id: fleet
@@ -71,8 +72,8 @@ scenes:
           tiles: ['api', 'auth', 'pay', 'cart', 'find', 'mail', 'users', 'feed', 'ship']
           steps:
             - { at: "l1:'service'", set: { '0-8': ok } }
-            - { at: "l1:'بطيئة'", set: { '2': warn } }
-            - { at: "l1:'وقعت'", set: { '0': err, '5': err } }
+            - { at: "l1:'slow'", set: { '2': warn } }
+            - { at: "l1:'took'", set: { '0': err, '5': err } }
             - { at: "l1:'system'", set: { '0-8': err } }
         place: { x: 180, y: 30, w: 720, h: 580 }
         enter: { at: "l1:'service'", anim: pop, dur: 0.7 }
@@ -83,7 +84,7 @@ scenes:
         id: how
         props: { text: "1 slow service.\n**0** working services.", size: 64, accent: red }
         place: { x: 60, y: 660, w: 860, h: 220 }
-        enter: { at: "l1:'إزاي؟'", anim: rise }
+        enter: { at: "l1:'How'", anim: rise }
 
   # ─── setup ───────────────────────────────────────────────
   - id: setup
@@ -101,7 +102,7 @@ scenes:
         place: { x: 700, y: 60, w: 340, h: 170 }
         enter: { at: "l2:'payment'", anim: pop }
         states:
-          - { at: "l3:'ترد'", set: { status: warn, sub: 'p99 30s' } }
+          - { at: "l3:'respond'", set: { status: warn, sub: 'p99 30s' } }
       - use: arrow
         id: call
         props:
@@ -110,8 +111,8 @@ scenes:
           color: cyan
           packets:
             - { at: "l2:'payment'+0.2", dur: 0.6 }
-            - { at: "l3:'فجأة'", dur: 2.5, color: amber }
-        enter: { at: "l2:'بتكلم'", anim: draw }
+            - { at: "l3:'Suddenly'", dur: 2.5, color: amber }
+        enter: { at: "l2:'calls'", anim: draw }
       - use: counter
         id: latency
         props:
@@ -121,17 +122,17 @@ scenes:
           color: amber
           size: 150
         place: { x: 100, y: 330, w: 880, h: 300 }
-        enter: { at: "l3:'فجأة'", anim: pop }
+        enter: { at: "l3:'Suddenly'", anim: pop }
       - use: icon
         id: hg
         props: { name: hourglass, size: 120, color: amber, pulse: true }
         place: { x: 440, y: 680, w: 180, h: 180 }
-        enter: { at: "l3:'ثانية'", anim: pop }
+        enter: { at: "l3:'seconds'", anim: pop }
 
   # ─── thread pool exhaustion ─────────────────────────────
   - id: pool
     at: l4
-    glow: [{ at: l4, color: amber }, { at: "l6:'اتملت'", color: red }]
+    glow: [{ at: l4, color: amber }, { at: "l6:'full'", color: red }]
     elements:
       - use: grid
         id: threads
@@ -142,19 +143,19 @@ scenes:
           tiles: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8']
           steps:
             - { at: "l4:'thread'", set: { '0': busy } }
-            - { at: "l4:'مستني'", set: { '1-2': busy } }
-            - { at: "l6:'ثانية'", set: { '3-5': busy } }
-            - { at: "l6:'اتملت'", set: { '6-7': busy } }
+            - { at: "l4:'waiting'", set: { '1-2': busy } }
+            - { at: "l6:'second'", set: { '3-5': busy } }
+            - { at: "l6:'full'", set: { '6-7': busy } }
             - { at: "l8:'cascading'", set: { '0-7': err } }
         place: { x: 140, y: 20, w: 800, h: 440 }
         enter: { at: 'l4', anim: rise }
         fx:
-          - { at: "l6:'اتملت'", do: shake, amp: 16 }
+          - { at: "l6:'full'", do: shake, amp: 16 }
       - use: chip
         id: healthy
         props: { text: 'GET /cart → no thread', color: red, icon: x, size: 34 }
         place: { x: 140, y: 510, w: 800, h: 100 }
-        enter: { at: "l7:'السليمة'", anim: pop }
+        enter: { at: "l7:'healthy'", anim: pop }
       - use: stamp
         id: cascade
         props: { text: 'CASCADING FAILURE', color: red, size: 72 }
@@ -178,18 +179,18 @@ scenes:
           end: '30s'
           color: lime
           markers:
-            - { pos: 0.07, label: '2s', sub: 'timeout', color: lime, at: "l9:'تانيتين'" }
-            - { pos: 0.97, label: '30s', sub: 'reply', color: red, at: "l9:'أكتر'" }
+            - { pos: 0.07, label: '2s', sub: 'timeout', color: lime, at: "l9:'two'" }
+            - { pos: 0.97, label: '30s', sub: 'reply', color: red, at: "l9:'more'" }
           cursor:
-            - { at: "l9:'متستناش'", pos: 0, dur: 0 }
-            - { at: "l9:'تانيتين'", pos: 0.07, dur: 0.4 }
+            - { at: "l9:'Never'", pos: 0, dur: 0 }
+            - { at: "l9:'two'", pos: 0.07, dur: 0.4 }
         place: { x: 40, y: 360, w: 1000, h: 240 }
-        enter: { at: "l9:'متستناش'", anim: rise }
+        enter: { at: "l9:'Never'", anim: rise }
       - use: chip
         id: freed
         props: { text: '2s later: thread is free again', color: lime, icon: check, size: 34 }
         place: { x: 80, y: 680, w: 840, h: 100 }
-        enter: { at: "l9:'تانيتين'+0.3", anim: pop }
+        enter: { at: "l9:'two'+0.3", anim: pop }
 
   # ─── the trap ────────────────────────────────────────────
   - id: trap
@@ -208,15 +209,15 @@ scenes:
         id: victim
         props: { title: 'Payment', sub: 'drowning', icon: card, color: violet, status: err }
         place: { x: 370, y: 250, w: 340, h: 170 }
-        enter: { at: "l12:'بتضرب'", anim: pop }
+        enter: { at: "l12:'hammering'", anim: pop }
         fx:
-          - { at: "l12:'أكتر'", do: shake, amp: 20 }
+          - { at: "l12:'harder'", do: shake, amp: 20 }
       - use: counter
         id: load
         props:
           {
             keyframes:
-              [{ at: "l11:'retry'", value: 100, dur: 0 }, { at: "l12:'الواقعة'", value: 400, dur: 1.0 }],
+              [{ at: "l11:'retry'", value: 100, dur: 0 }, { at: "l12:'dying'", value: 400, dur: 1.0 }],
             suffix: ' req/s',
             label: 'load on payment',
             color: red,
@@ -226,7 +227,7 @@ scenes:
         enter: { at: "l11:'retry'+0.3", anim: pop }
       - use: particles
         id: herd
-        props: { kind: herd, count: 70, at: "l12:'بتضرب'", dur: 1.6, color: amber, to: victim }
+        props: { kind: herd, count: 70, at: "l12:'hammering'", dur: 1.6, color: amber, to: victim }
 
   # ─── the fix ─────────────────────────────────────────────
   - id: intro
@@ -247,7 +248,7 @@ scenes:
         id: fuse
         props: { text: 'trips before the fire', color: amber, icon: fire, size: 34 }
         place: { x: 180, y: 720, w: 640, h: 100 }
-        enter: { at: "l14:'كهربا'", anim: pop }
+        enter: { at: "l14:'fuse'", anim: pop }
 
   # ─── closed → open ──────────────────────────────────────
   - id: states
@@ -281,8 +282,8 @@ scenes:
           color: cyan
           packets:
             - { at: "l15:'requests'", dur: 0.5 }
-            - { at: "l18:'بيرفض'", dur: 0.5 }
-            - { at: "l18:'فورا'", dur: 0.5, reverse: true, color: red }
+            - { at: "l18:'rejects'", dur: 0.5 }
+            - { at: "l18:'instantly'", dur: 0.5, reverse: true, color: red }
         enter: { at: 'l15', anim: draw }
       - use: arrow
         id: out
@@ -291,7 +292,7 @@ scenes:
           to: pay2
           color: violet
           packets:
-            - { at: "l15:'بتعدي'", dur: 0.5 }
+            - { at: "l15:'flow'", dur: 0.5 }
             - { at: "l16:'errors'", dur: 0.5, reverse: true, color: red }
         enter: { at: "l15:'closed'", anim: draw }
         exit: { at: "l17:'open'", anim: fade }
@@ -307,7 +308,7 @@ scenes:
           keyframes:
             - { at: "l16:'errors'", value: 12, dur: 0.4 }
             - { at: "l16:'rate'", value: 38, dur: 0.6 }
-            - { at: "l17:'عدى'", value: 64, dur: 0.6 }
+            - { at: "l17:'passes'", value: 64, dur: 0.6 }
         place: { x: 60, y: 260, w: 960, h: 180 }
         enter: { at: "l16:'errors'", anim: rise }
       - use: counter
@@ -318,14 +319,14 @@ scenes:
               [
                 { at: "l16:'errors'", value: 6 },
                 { at: "l16:'rate'", value: 19 },
-                { at: "l17:'عدى'", value: 32 },
+                { at: "l17:'passes'", value: 32 },
               ],
             label: 'errors / 50 calls',
             color: red,
             size: 130,
           }
         place: { x: 40, y: 500, w: 420, h: 300 }
-        enter: { at: "l16:'وبيعد'", anim: pop }
+        enter: { at: "l16:'counts'", anim: pop }
       - use: chip
         id: ff
         props: { text: 'fail fast · 2ms', color: red, icon: bolt, size: 32 }
@@ -358,8 +359,8 @@ scenes:
         place: { x: 360, y: 300, w: 360, h: 150 }
         enter: { at: "l20:'half-open'", anim: pop }
         states:
-          - { at: "l21:'نجح'", set: { status: ok, sub: 'probe ok' } }
-          - { at: "l21:'فشل'", set: { status: err, sub: 'probe failed' } }
+          - { at: "l21:'works'", set: { status: ok, sub: 'probe ok' } }
+          - { at: "l21:'fails'", set: { status: err, sub: 'probe failed' } }
       - use: arrow
         id: trip
         props: { from: s_closed, to: s_open, label: 'errors > 50%', color: red }
@@ -373,9 +374,9 @@ scenes:
           color: amber
           label: 'after 30s'
           packets:
-            - { at: "l20:'ويجرب'", dur: 0.7, label: 'probe' }
-            - { at: "l21:'فشل'", dur: 0.7, reverse: true, color: red }
-        enter: { at: "l20:'شوية'", anim: draw }
+            - { at: "l20:'tries'", dur: 0.7, label: 'probe' }
+            - { at: "l21:'fails'", dur: 0.7, reverse: true, color: red }
+        enter: { at: "l20:'while'", anim: draw }
       - use: arrow
         id: heal
         props:
@@ -385,9 +386,9 @@ scenes:
             route: elbow,
             color: lime,
             label: 'success',
-            packet: { at: "l21:'يرجع'", dur: 0.7, color: lime },
+            packet: { at: "l21:'back'", dur: 0.7, color: lime },
           }
-        enter: { at: "l21:'نجح'", anim: draw }
+        enter: { at: "l21:'works'", anim: draw }
       - use: grid
         id: threads2
         props:
@@ -397,7 +398,7 @@ scenes:
           tiles: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8']
           steps:
             - { at: 'l22', set: { '0-7': busy } }
-            - { at: "l22:'فاضية'", set: { '0-7': ok } }
+            - { at: "l22:'free'", set: { '0-7': ok } }
         place: { x: 140, y: 500, w: 760, h: 360 }
         enter: { at: 'l22', anim: rise, dur: 0.7 }
 
@@ -410,7 +411,7 @@ scenes:
         id: s1
         props: { text: 'season 1 · complete', dot: true, color: violet }
         place: { x: 60, y: 30, w: 600, h: 60 }
-        enter: { at: "l23:'آخر'", anim: fade }
+        enter: { at: "l23:'last'", anim: fade }
       - use: cta
         id: next
         props:
@@ -418,12 +419,12 @@ scenes:
             label: 'COMING NEXT',
             next: 'Season 2',
             keyword: 'season2',
-            prompt: 'اكتب في الكومنتات',
+            prompt: 'Comment below',
             color: violet,
             at: "l24:'season2'",
           }
         place: { x: 60, y: 120, w: 860, h: 600 }
-        enter: { at: "l23:'الموسم'", anim: rise }
+        enter: { at: "l23:'season'", anim: rise }
       - use: particles
         id: conf
-        props: { kind: confetti, count: 120, at: "l24:'موسم'", colors: [lime, cyan, violet, amber] }
+        props: { kind: confetti, count: 120, at: "l24:'another'", colors: [lime, cyan, violet, amber] }

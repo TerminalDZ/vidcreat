@@ -1,0 +1,21 @@
+---
+description: How to make ReelForge explainer videos (episode.yaml, MCP tools) and work on the code
+globs:
+  - 'episodes/**/episode.yaml'
+  - 'examples/**/episode.yaml'
+  - 'packages/**/*.ts'
+alwaysApply: true
+---
+
+# ReelForge
+
+Read `AGENTS.md` at the project root first: Part 1 covers making videos, Part 2 covers the code.
+
+- Use the `reelforge` MCP server (`.cursor/mcp.json`) to create, edit, validate, **preview** and
+  render episodes. Look at `preview_frames` images before you say an episode is done.
+- One spoken sentence per script line. Elements enter on the words that name them, e.g.
+  `enter: { at: "l3:'bucket'" }`.
+- Use stage coordinates: 1080 × 1000. Keep `x ≥ 60` and `x + w ≤ 1020`, and `x + w ≤ 920` below
+  y = 600. No overlapping base elements.
+- Use only the 21 components and their schema props (`get_component_schema`).
+- Validate until there are 0 errors. Don't edit `cues.json` by hand unless asked.

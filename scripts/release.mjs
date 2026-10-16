@@ -41,7 +41,7 @@ step('Stage the package');
 rmSync(REL, { recursive: true, force: true });
 const stage = path.join(REL, 'stage', NAME);
 mkdirSync(stage, { recursive: true });
-const EXCLUDE = [/^\.github\//, /^marketing\//, /^docs\/codecanyon\//, /^docs\/PRD\.md$/, /^docs\/SRS\.md$/, /^docs\/screenshots\//, /^release\//];
+const EXCLUDE = [/^\.github\/workflows\//, /^marketing\//, /^docs\/codecanyon\//, /^docs\/PRD\.md$/, /^docs\/SRS\.md$/, /^docs\/screenshots\//, /^release\//];
 const tracked = execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8' }).split('\0').filter(Boolean);
 let files = 0;
 for (const f of tracked) {
@@ -82,6 +82,15 @@ if (!args.has('--skip-verify')) {
   const env = { ...process.env, REELFORGE_NO_OPEN: '1' };
   execFileSync('./install.sh', ['--yes'], { cwd: dir, stdio: 'inherit', env });
   execFileSync('./reelforge', ['validate', 'examples/season1/ep01', '--no-measure'], { cwd: dir, stdio: 'inherit', env });
+  execFileSync('./reelforge', ['validate', 'examples/season1-arabic/ep01', '--no-measure'], { cwd: dir, stdio: 'inherit', env });
+  const mcp = execFileSync('./reelforge', ['mcp'], {
+    cwd: dir,
+    env,
+    input: '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}\n{"jsonrpc":"2.0","id":2,"method":"tools/list"}\n',
+    encoding: 'utf8',
+  });
+  if (!/"serverInfo"/.test(mcp) || !/"preview_frames"/.test(mcp)) throw new Error(`MCP server check failed:\n${mcp}`);
+  console.log('MCP server responds');
   execFileSync('./reelforge', ['render', 'fixtures/mini', '--fast', '--workers', '2'], { cwd: dir, stdio: 'inherit', env });
   if (!args.has('--skip-assets')) {
     step('Demo video for the item page');

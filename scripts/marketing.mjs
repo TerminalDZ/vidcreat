@@ -41,6 +41,9 @@ for (const [ep, t, name] of FRAMES) {
   execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', path.join(dir, png), '-q:v', '2', path.join(OUT, 'frames', `${name}.jpg`)]);
 }
 
+// The editor screenshot is the hero of the covers.
+copyFileSync(path.join(ROOT, 'docs/screenshots/01-editor-overview.jpg'), path.join(work, 'editor.jpg'));
+
 const css = `
 @import url('fonts/fonts.css');
 *{box-sizing:border-box;margin:0}
@@ -53,7 +56,38 @@ body{background:#07080c;color:#eef1f7;font-family:'Space Grotesk','Cairo',sans-s
 .phone{position:absolute;border-radius:22px;overflow:hidden;border:3px solid #2a2f3d;box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.05)}
 .phone img{display:block;width:100%;height:100%;object-fit:cover}
 .chip{display:inline-block;border:1px solid rgba(184,255,60,.4);color:#b8ff3c;border-radius:999px;font-family:'JetBrains Mono',monospace;font-weight:600}
-.mono{font-family:'JetBrains Mono',monospace}`;
+.mono{font-family:'JetBrains Mono',monospace}
+.win{position:absolute;border-radius:16px;overflow:hidden;border:1px solid #2e3546;box-shadow:0 40px 120px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.04);background:#11141b}
+.win .bar{height:34px;display:flex;align-items:center;gap:8px;padding:0 14px;background:#161a23;border-bottom:1px solid #232937}
+.win .bar i{width:11px;height:11px;border-radius:50%;background:#ff5f57}.win .bar i+i{background:#febc2e}.win .bar i+i+i{background:#28c840}
+.win img{display:block;width:100%}`;
+
+/** Cover: headline on the left, the editor window on the right with a rendered phone frame in front. */
+function cover(w, h) {
+  const k = w / 2340;
+  const px = (n) => `${Math.round(n * k)}px`;
+  const ed = { x: 1000, y: 230, w: 1150 };
+  const edH = (ed.w * 1000) / 1680 + 34;
+  const top = h / k > 1300 ? 0 : -150; // 16:9 is shorter
+  return {
+    w,
+    h,
+    body: `<div class="glow"></div><div class="grid" style="background-size:${px(96)} ${px(96)}"></div>
+    <div style="position:absolute;left:${px(130)};top:${px(300 + top)};width:${px(800)}">
+      <div class="logo" style="font-size:${px(104)}"><span class="mark" style="width:${px(56)};height:${px(56)}"></span>ReelForge</div>
+      <div style="margin-top:${px(44)};font-size:${px(74)};font-weight:700;line-height:1.08">Your voice →<br><span class="lime">finished</span> vertical explainer videos</div>
+      <div style="margin-top:${px(36)};font-size:${px(31)};color:#a3aabb;line-height:1.5">Design on a real canvas, time everything to your spoken words on the timeline, render platform-ready MP4s with word-by-word English &amp; Arabic captions. Offline. No subscription.</div>
+      <div style="margin-top:${px(48)};display:flex;gap:${px(16)};flex-wrap:wrap">
+        <span class="chip" style="font-size:${px(26)};padding:${px(9)} ${px(22)}">Visual editor</span>
+        <span class="chip" style="font-size:${px(26)};padding:${px(9)} ${px(22)}">21 components</span>
+        <span class="chip" style="font-size:${px(26)};padding:${px(9)} ${px(22)}">AI-ready (MCP)</span>
+      </div>
+    </div>
+    <div class="win" style="left:${px(ed.x)};top:${px(ed.y + top)};width:${px(ed.w)};height:${px(edH)}"><div class="bar" style="height:${px(34)}"><i></i><i></i><i></i></div><img src="editor.jpg"></div>
+    <div class="phone" style="left:${px(1930)};top:${px(600 + top)};width:${px(310)};height:${px(551)};border-color:#b8ff3c66;border-radius:${px(26)}"><img src="lost-update.png"></div>
+    <div class="mono" style="position:absolute;left:${px(130)};bottom:${px(h / k > 1300 ? 140 : 70)};font-size:${px(27)};color:#7d8496">Windows · macOS · Linux &nbsp;·&nbsp; <span class="lime">master.mp4</span> · share.mp4 · .srt · publish.md</div>`,
+  };
+}
 
 const pages = {
   'inline-preview': {
@@ -62,10 +96,10 @@ const pages = {
     body: `<div class="glow"></div><div class="grid"></div>
     <div style="position:absolute;left:30px;top:34px;width:300px">
       <div class="logo" style="font-size:31px"><span class="mark" style="width:18px;height:18px"></span>ReelForge</div>
-      <div style="margin-top:14px;font-size:19px;font-weight:700;line-height:1.2">Voice + YAML → <span class="lime">finished</span> vertical explainer videos</div>
-      <div style="margin-top:12px;font-size:11.5px;color:#a3aabb;line-height:1.5">Animated diagrams, typing code, word-by-word Arabic captions, sound effects &amp; platform-ready MP4s. Offline. No AI.</div>
+      <div style="margin-top:14px;font-size:19px;font-weight:700;line-height:1.2">Your voice → <span class="lime">finished</span> vertical explainer videos</div>
+      <div style="margin-top:12px;font-size:11.5px;color:#a3aabb;line-height:1.5">Visual editor, 21 animated components, word-by-word English &amp; Arabic captions, sound &amp; platform-ready MP4s.</div>
       <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:6px">
-        <span class="chip" style="font-size:9.5px;padding:3px 8px">1080×1920</span><span class="chip" style="font-size:9.5px;padding:3px 8px">Live preview</span><span class="chip" style="font-size:9.5px;padding:3px 8px">21 components</span>
+        <span class="chip" style="font-size:9.5px;padding:3px 8px">Visual editor</span><span class="chip" style="font-size:9.5px;padding:3px 8px">Timed to words</span><span class="chip" style="font-size:9.5px;padding:3px 8px">AI-ready (MCP)</span>
       </div>
     </div>
     <div class="phone" style="left:340px;top:52px;width:110px;height:196px;transform:rotate(-7deg);border-radius:16px"><img src="lost-update.png"></div>
@@ -78,43 +112,8 @@ const pages = {
     body: `<div style="position:absolute;inset:0;border-radius:18px;background:radial-gradient(80% 80% at 30% 20%,rgba(184,255,60,.35),transparent 70%),#07080c"></div>
     <svg viewBox="0 0 80 80" width="80" height="80" style="position:absolute;inset:0"><rect x="23" y="12" width="34" height="56" rx="8" fill="none" stroke="#b8ff3c" stroke-width="5"/><path d="M35 30 L49 40 L35 50 Z" fill="#b8ff3c"/></svg>`,
   },
-  'cover-2340x1560': {
-    w: 2340,
-    h: 1560,
-    body: `<div class="glow"></div><div class="grid" style="background-size:96px 96px"></div>
-    <div style="position:absolute;left:150px;top:260px;width:1040px">
-      <div class="logo" style="font-size:112px"><span class="mark" style="width:60px;height:60px"></span>ReelForge</div>
-      <div style="margin-top:48px;font-size:76px;font-weight:700;line-height:1.1">Voice + YAML →<br><span class="lime">finished</span> vertical explainer videos</div>
-      <div style="margin-top:40px;font-size:34px;color:#a3aabb;line-height:1.55;max-width:980px">Animated diagrams, code that types itself, word-by-word Arabic &amp; English captions, sound effects, mastered audio and platform-ready vertical MP4s. Offline. No AI. No subscription.</div>
-      <div style="margin-top:56px;display:flex;gap:18px;flex-wrap:wrap">
-        <span class="chip" style="font-size:28px;padding:10px 24px">21 animated components</span>
-        <span class="chip" style="font-size:28px;padding:10px 24px">Live preview</span>
-        <span class="chip" style="font-size:28px;padding:10px 24px">Windows · macOS · Linux</span>
-      </div>
-    </div>
-    <div class="phone" style="left:1300px;top:270px;width:420px;height:747px;transform:rotate(-7deg);border-radius:28px"><img src="the-trap.png"></div>
-    <div class="phone" style="left:1840px;top:360px;width:420px;height:747px;transform:rotate(6deg);border-radius:28px"><img src="circuit-breaker.png"></div>
-    <div class="phone" style="left:1560px;top:300px;width:450px;height:800px;z-index:2;border-color:#b8ff3c66;border-radius:30px"><img src="lost-update.png"></div>
-    <div class="mono" style="position:absolute;left:150px;bottom:150px;font-size:30px;color:#7d8496">reelforge render ep02 &nbsp;→&nbsp; <span class="lime">ep02.master.mp4</span> · ep02.share.mp4 · ep02.srt · publish.md</div>`,
-  },
-  'cover-1920x1080': {
-    w: 1920,
-    h: 1080,
-    body: `<div class="glow"></div><div class="grid" style="background-size:80px 80px"></div>
-    <div style="position:absolute;left:110px;top:170px;width:820px">
-      <div class="logo" style="font-size:84px"><span class="mark" style="width:46px;height:46px"></span>ReelForge</div>
-      <div style="margin-top:36px;font-size:56px;font-weight:700;line-height:1.12">Voice + YAML →<br><span class="lime">finished</span> vertical explainer videos</div>
-      <div style="margin-top:30px;font-size:25px;color:#a3aabb;line-height:1.55;max-width:760px">Animated diagrams, code that types itself, word-by-word Arabic &amp; English captions, sound effects, mastered audio and platform-ready vertical MP4s. Offline. No AI. No subscription.</div>
-      <div style="margin-top:40px;display:flex;gap:14px;flex-wrap:wrap">
-        <span class="chip" style="font-size:20px;padding:8px 18px">21 animated components</span>
-        <span class="chip" style="font-size:20px;padding:8px 18px">Live preview</span>
-        <span class="chip" style="font-size:20px;padding:8px 18px">Windows · macOS · Linux</span>
-      </div>
-    </div>
-    <div class="phone" style="left:1040px;top:150px;width:330px;height:587px;transform:rotate(-7deg)"><img src="the-trap.png"></div>
-    <div class="phone" style="left:1480px;top:230px;width:330px;height:587px;transform:rotate(6deg)"><img src="circuit-breaker.png"></div>
-    <div class="phone" style="left:1250px;top:190px;width:350px;height:622px;z-index:2;border-color:#b8ff3c66"><img src="lost-update.png"></div>`,
-  },
+  'cover-2340x1560': cover(2340, 1560),
+  'cover-1920x1080': cover(1920, 1080),
 };
 
 const browser = await launchBrowser();
@@ -132,7 +131,26 @@ for (const [name, p] of Object.entries(pages)) {
 await browser.close();
 
 // Preview screenshots (ordered for the item page)
-const ORDER = ['00-dashboard', '25-dashboard-render-progress', '03-studio-preview-safe-zones', '01-studio-cue-marker', '09-component-gallery', '10-episode-ep01', '17-episode-ep08', '26-dashboard-player', '08-studio-lint-panel', '06-studio-yaml-error-overlay', '21-cli-validate', '20-cli-doctor'];
+const ORDER = [
+  '01-editor-overview',
+  '02-editor-drag-guides',
+  '03-editor-timeline',
+  '00-dashboard',
+  '04-editor-insert',
+  '05-editor-palette',
+  '11-editor-script',
+  '07-editor-cues',
+  '09-editor-review',
+  '13-component-gallery',
+  'episode-ep01',
+  'episode-ep08',
+  'episode-arabic-ep01',
+  '25-dashboard-render-progress',
+  '26-dashboard-player',
+  '06-editor-shortcuts',
+  '27-cli-mcp',
+  '21-cli-validate',
+];
 const shots = path.join(ROOT, 'docs/screenshots');
 const avail = readdirSync(shots);
 ORDER.forEach((base, i) => {

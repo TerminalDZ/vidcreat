@@ -1,21 +1,30 @@
 # Screenshots
 
-Regenerate with `node scripts/screenshots.mjs`. All captured from this repository with `reelforge` itself (studio via Playwright, video frames via
-`reelforge snap`). The examples ship with draft cues; the studio shots use a synthetic test voice so
-the waveform is visible.
+To regenerate these, run `node scripts/screenshots.mjs`. Everything is captured from this repository with ReelForge itself:
 
-| File                                    | What it shows                                                                 |
-| --------------------------------------- | ----------------------------------------------------------------------------- |
-| `00-dashboard.jpg`                      | Project dashboard: episodes with thumbnails, status chips, outputs            |
-| `23…26-dashboard-*.jpg`                 | Dashboard: validation, render options, live render progress, built-in player  |
-| `01-studio-cue-marker.jpg`              | Cue marker: script list, zoomed waveform with cue lines, playhead             |
-| `02-studio-cue-word-mode.jpg`           | Word mode: marking individual word starts of a selected line                  |
-| `03-studio-preview-safe-zones.jpg`      | Live preview with the TikTok UI safe-zone overlay                             |
-| `04-studio-preview-element-boxes.jpg`   | Element boxes with ids and the stage/caption bounds                           |
-| `05-studio-preview-clean.jpg`           | Preview without overlays                                                      |
-| `06-studio-yaml-error-overlay.jpg`      | A YAML error: message with file:line:col, last good frame kept, playhead kept |
-| `07-studio-shortcuts.jpg`               | Keyboard shortcuts overlay (`?`)                                              |
-| `08-studio-lint-panel.jpg`              | Lint panel on a seeded overlap bug (V-8)                                      |
-| `09-component-gallery.jpg`              | Every component (fixtures/golden/components)                                  |
-| `10…18-episode-epNN.jpg`                | One frame every 6 s of each Season 1 episode                                  |
-| `19-cli-help.png` … `22-cli-render.png` | CLI: help, doctor, validate, render                                           |
+- the dashboard and editor through Playwright;
+- video frames through `reelforge snap`.
+
+The examples ship with draft cues. The editor shots use a synthetic test voice so the waveform is visible.
+
+| File                                    | What it shows                                                                  |
+| --------------------------------------- | ------------------------------------------------------------------------------ |
+| `00-dashboard.jpg`                      | Project dashboard: episodes with thumbnails, status chips, outputs             |
+| `01-editor-overview.jpg`                | Editor: canvas with a selection, layers, inspector, multi-track timeline       |
+| `02-editor-drag-guides.jpg`             | Moving an element with smart guides                                            |
+| `03-editor-timeline.jpg`                | Retiming a clip: it snaps to a spoken word, and the badge shows the expression |
+| `04-editor-insert.jpg`                  | Component library (Insert)                                                     |
+| `05-editor-palette.jpg`                 | ⌘K command palette                                                             |
+| `06-editor-shortcuts.jpg`               | Keyboard shortcut sheet (`?`)                                                  |
+| `07-editor-cues.jpg`                    | Cues mode: script list, waveform, playhead                                     |
+| `08-editor-cues-word-mode.jpg`          | Word mode: marking individual word starts                                      |
+| `09-editor-review.jpg`                  | Review mode on a seeded overlap bug (V-8) with element outlines                |
+| `10-editor-yaml-error.jpg`              | A YAML syntax error: banner with the line; the last good frame is kept         |
+| `11-editor-script.jpg`                  | Script tab and a line in the inspector, with clickable words                   |
+| `12-editor-render.jpg`                  | Render options                                                                 |
+| `13-component-gallery.jpg`              | Every component (fixtures/golden/components)                                   |
+| `episode-ep01…09.jpg`                   | One frame every 6 s of each English Season 1 episode                           |
+| `episode-arabic-ep01…02.jpg`            | The Arabic series                                                              |
+| `19-cli-help.png` … `22-cli-render.png` | CLI: help, doctor, validate, render                                            |
+| `23…26-dashboard-*.jpg`                 | Dashboard: validation, render options, live render progress, built-in player   |
+| `27-cli-mcp.png`                        | The MCP server's tools for AI agents                                           |

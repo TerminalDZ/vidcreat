@@ -6,15 +6,15 @@ meta:
   episode: 6
   preset: tiktok
   theme: season1
-  lang: ar-EG
+  lang: en-US
   publish:
-    cover: 'السيستم واقف… ومفيش ولا error'
+    cover: 'Everything froze… and not a single error'
     caption: |
-      اتنين transactions كل واحدة مستنية التانية… للأبد.
-      الحلقة دي عن الـ Deadlock: بيحصل إزاي، وليه الـ retry لوحده مش كفاية،
-      والحل: Consistent Lock Ordering و Lock Timeout
-    hashtags: ['#systemdesign', '#databases', '#backend', '#concurrency', '#برمجة', '#مبرمجين']
-    pinned: 'قابلت deadlock في production قبل كده؟ احكيلنا حصل إزاي 👇'
+      Two transactions, each one waiting on the other… forever.
+      This one's about Deadlocks: how they happen, why retrying alone isn't enough,
+      and the fix: Consistent Lock Ordering + Lock Timeout
+    hashtags: ['#systemdesign', '#databases', '#backend', '#concurrency', '#programming', '#coding']
+    pinned: 'Ever hit a deadlock in production? Tell us how it happened 👇'
 
 audio:
   voice: voice.wav
@@ -22,48 +22,48 @@ audio:
   sfx_gain_db: -16
 
 script:
-  - text: 'الـ app وقف خالص، لا error ولا crash، بس كله مستني.'
-    break: ['لا']
-  - text: 'ده مش bug عادي، ده اسمه Deadlock.'
-  - text: 'خلينا نشوف بيحصل إزاي.'
-  - text: 'عندنا two transactions، واحدة بتحوّل من أحمد لسارة.'
-    break: ['واحدة']
-  - text: 'والتانية في نفس اللحظة بتحوّل من سارة لأحمد.'
-    break: ['بتحوّل']
-  - text: 'Transaction A بتقفل الـ row بتاع أحمد الأول.'
-    break: ['الـ']
-  - text: 'وفي نفس الوقت، Transaction B بتقفل الـ row بتاع سارة.'
-    break: ['Transaction']
-  - text: 'دلوقتي A عايزة سارة، بس سارة مقفولة عند B.'
-    break: ['بس']
-  - text: 'وفي المقابل B عايزة أحمد، وأحمد مقفول عند A.'
-    break: ['وأحمد']
-  - text: 'كل واحدة مستنية التانية، ومحدش هيسيب الأول.'
-    break: ['ومحدش']
-  - text: 'ده الـ Deadlock، دايرة انتظار ملهاش نهاية.'
-    break: ['دايرة']
-  - text: 'والفخ إنك تفتكر إن الـ database هتحلها لوحدها.'
-    break: ['إن']
-  - text: 'أيوه، الـ database بتكتشف الـ deadlock وبتقتل واحدة.'
-    break: ['وبتقتل']
-  - text: 'بس الـ transaction دي بتفشل، ولازم تعمل retry صح.'
-    break: ['ولازم']
-  - text: 'والأحسن إنك تمنعه من الأساس.'
-  - text: 'الحل الأول: Consistent Lock Ordering.'
-  - text: 'كل الـ transactions تقفل الـ rows بنفس الترتيب، مثلاً بالـ id.'
-    break: ['بنفس']
-  - text: 'يعني الاتنين يقفلوا أحمد الأول، وبعدين سارة.'
-    break: ['وبعدين']
-  - text: 'كده التانية تستنى شوية، بس مفيش دايرة.'
-    break: ['بس']
-  - text: 'الحل التاني: Lock Timeout.'
-  - text: 'لو مستني lock أكتر من تانيتين، اعمل rollback وجرّب تاني.'
-    break: ['اعمل']
-  - text: 'وخلّي الـ transactions قصيرة، وماتمسكش lock وانت بتكلم API.'
-    break: ['وماتمسكش']
-  - text: 'الحلقة الجاية عن الـ Message Queues والـ At-least-once Delivery.'
-    break: ['والـ']
-  - text: 'اكتب queue في الكومنتات عشان توصلك.'
+  - text: 'The app froze completely. No error, no crash, everything is just waiting.'
+    break: ['No']
+  - text: "This isn't a normal bug. It's called a Deadlock."
+  - text: "Let's see how it happens."
+  - text: "We've got two transactions. One moves money from Ahmed to Sara."
+    break: ['One']
+  - text: 'And the other one, at the same moment, sends from Sara to Ahmed.'
+    break: ['sends']
+  - text: 'Transaction A locks the row for Ahmed first.'
+    break: ['the']
+  - text: 'Meanwhile, Transaction B locks the row for Sara.'
+    break: ['Transaction', 'the']
+  - text: 'Now A wants Sara, but Sara is locked by B.'
+    break: ['but']
+  - text: 'And B wants Ahmed, but Ahmed is locked by A.'
+    break: ['but']
+  - text: 'Each one is waiting on the other, and neither will let go first.'
+    break: ['and']
+  - text: "That's the Deadlock: an endless circle of waiting."
+    break: ['an']
+  - text: 'The trap? Thinking your database will sort it out on its own.'
+    break: ['your']
+  - text: 'Sure, the database detects the deadlock and kills one of them.'
+    break: ['and']
+  - text: 'But that transaction fails, and you have to retry it properly.'
+    break: ['and']
+  - text: 'Better yet, prevent it from happening at all.'
+  - text: 'Fix number one: Consistent Lock Ordering.'
+  - text: 'Every transaction locks rows in the same order, say by id.'
+    break: ['in']
+  - text: 'So both of them lock Ahmed first, then Sara.'
+    break: ['then']
+  - text: "The second one waits a moment, but there's no circle."
+    break: ['but']
+  - text: 'Fix number two: Lock Timeout.'
+  - text: 'Waiting on a lock for over two seconds? Rollback and try again.'
+    break: ['Rollback']
+  - text: 'Keep transactions short, and never hold a lock while calling an API.'
+    break: ['and']
+  - text: 'Next episode: Message Queues and At-least-once Delivery.'
+    break: ['and']
+  - text: "Comment queue so you don't miss it."
 
 chapters:
   - { at: l1, label: '01 · THE PROBLEM' }
@@ -76,7 +76,7 @@ scenes:
   # ── 01 · hook: everything hangs ────────────────────────────────────────────
   - id: hook
     at: l1
-    glow: [{ at: l1, color: amber }, { at: "l2:'Deadlock.'", color: red }]
+    glow: [{ at: l1, color: amber }, { at: "l2:'Deadlock'", color: red }]
     elements:
       - use: label
         id: hk_lbl
@@ -91,8 +91,8 @@ scenes:
           rows: 2
           tiles: ['GET', 'POST', 'PUT', 'GET', 'POST', 'GET', 'PUT', 'POST']
           steps:
-            - { at: "l1:'وقف'", set: { '0-7': busy } }
-            - { at: "l1:'مستني.'", set: { '0-7': warn } }
+            - { at: "l1:'froze'", set: { '0-7': busy } }
+            - { at: "l1:'waiting'", set: { '0-7': warn } }
         place: { x: 190, y: 90, w: 700, h: 360 }
         enter: { at: "l1:'app'", anim: pop, dur: 0.8 }
       - use: chip
@@ -104,12 +104,12 @@ scenes:
         id: hk_crash
         props: { text: '0 crashes', color: dim, icon: bomb, variant: outline, size: 36 }
         place: { x: 560, y: 500, w: 400, h: 96 }
-        enter: { at: "l1:'crash،'", anim: pop }
+        enter: { at: "l1:'crash'", anim: pop }
       - use: stamp
         id: hk_stamp
         props: { text: 'DEADLOCK', color: red, size: 110 }
         place: { x: 90, y: 650, w: 780, h: 260 }
-        enter: { at: "l2:'Deadlock.'" }
+        enter: { at: "l2:'Deadlock'" }
 
   # ── 02 · the setup: two transfers ──────────────────────────────────────────
   - id: setup
@@ -123,25 +123,25 @@ scenes:
           widths: [0.6, 1.4, 1.2]
           fontSize: 34
           rows:
-            - { cells: ['1', 'Ahmed', '$500'], at: "l4:'أحمد'" }
-            - { cells: ['2', 'Sara', '$300'], at: "l4:'لسارة.'" }
+            - { cells: ['1', 'Ahmed', '$500'], at: "l4:'Ahmed'" }
+            - { cells: ['2', 'Sara', '$300'], at: "l4:'Sara'" }
         place: { x: 140, y: 0, w: 800, h: 280 }
-        enter: { at: "l3:'نشوف'", anim: rise }
+        enter: { at: "l3:'see'", anim: rise }
       - use: node
         id: su_a
         props: { title: 'Tx A', sub: 'Ahmed → Sara', icon: cpu, color: cyan }
         place: { x: 40, y: 340, w: 470, h: 180 }
-        enter: { at: "l4:'transactions،'", anim: pop }
+        enter: { at: "l4:'transactions'", anim: pop }
       - use: node
         id: su_b
         props: { title: 'Tx B', sub: 'Sara → Ahmed', icon: cpu, color: violet }
         place: { x: 570, y: 340, w: 470, h: 180 }
-        enter: { at: "l5:'والتانية'", anim: pop }
+        enter: { at: "l5:'other'", anim: pop }
       - use: chip
         id: su_same
         props: { text: 'at the same moment', color: amber, icon: clock, size: 36 }
         place: { x: 190, y: 600, w: 700, h: 100 }
-        enter: { at: "l5:'اللحظة'", anim: pop }
+        enter: { at: "l5:'moment'", anim: pop }
 
   # ── the lock cycle ─────────────────────────────────────────────────────────
   - id: cycle
@@ -154,38 +154,38 @@ scenes:
         place: { x: 40, y: 30, w: 360, h: 170 }
         enter: { at: "l6:'Transaction'", anim: pop }
         states:
-          - { at: "l8:'عايزة'", set: { status: warn, sub: 'waiting for Sara' } }
-          - { at: "l11:'Deadlock،'", set: { status: err, sub: 'stuck forever' } }
+          - { at: "l8:'wants'", set: { status: warn, sub: 'waiting for Sara' } }
+          - { at: "l11:'Deadlock'", set: { status: err, sub: 'stuck forever' } }
       - use: node
         id: cy_ahmed
         props: { title: 'row: Ahmed', sub: 'id = 1', icon: db, color: amber }
         place: { x: 40, y: 430, w: 360, h: 170 }
-        enter: { at: "l6:'أحمد'", anim: pop }
+        enter: { at: "l6:'Ahmed'", anim: pop }
         states:
-          - { at: "l6:'أحمد'+0.3", set: { status: busy, sub: '🔒 locked by A' } }
+          - { at: "l6:'Ahmed'+0.3", set: { status: busy, sub: '🔒 locked by A' } }
       - use: arrow
         id: cy_a_holds
         props: { from: cy_a.bottom, to: cy_ahmed.top, color: cyan, label: 'holds' }
-        enter: { at: "l6:'بتقفل'", anim: draw }
+        enter: { at: "l6:'locks'", anim: draw }
       - use: node
         id: cy_b
         props: { title: 'Tx B', sub: 'running', icon: cpu, color: violet, status: ok }
         place: { x: 680, y: 30, w: 360, h: 170 }
         enter: { at: "l7:'Transaction'", anim: pop }
         states:
-          - { at: "l9:'عايزة'", set: { status: warn, sub: 'waiting for Ahmed' } }
-          - { at: "l11:'Deadlock،'", set: { status: err, sub: 'stuck forever' } }
+          - { at: "l9:'wants'", set: { status: warn, sub: 'waiting for Ahmed' } }
+          - { at: "l11:'Deadlock'", set: { status: err, sub: 'stuck forever' } }
       - use: node
         id: cy_sara
         props: { title: 'row: Sara', sub: 'id = 2', icon: db, color: amber }
         place: { x: 680, y: 430, w: 360, h: 170 }
-        enter: { at: "l7:'سارة.'", anim: pop }
+        enter: { at: "l7:'Sara'", anim: pop }
         states:
-          - { at: "l7:'سارة.'+0.3", set: { status: busy, sub: '🔒 locked by B' } }
+          - { at: "l7:'Sara'+0.3", set: { status: busy, sub: '🔒 locked by B' } }
       - use: arrow
         id: cy_b_holds
         props: { from: cy_b.bottom, to: cy_sara.top, color: violet, label: 'holds' }
-        enter: { at: "l7:'بتقفل'", anim: draw }
+        enter: { at: "l7:'locks'", anim: draw }
       - use: arrow
         id: cy_a_wants
         props:
@@ -194,9 +194,9 @@ scenes:
             to: cy_sara.left,
             color: red,
             dashed: true,
-            packet: { at: "l8:'سارة،'", dur: 0.9, color: red },
+            packet: { at: "l8:'Sara'", dur: 0.9, color: red },
           }
-        enter: { at: "l8:'عايزة'", anim: draw }
+        enter: { at: "l8:'wants'", anim: draw }
       - use: arrow
         id: cy_b_wants
         props:
@@ -205,22 +205,22 @@ scenes:
             to: cy_ahmed.right,
             color: red,
             dashed: true,
-            packet: { at: "l9:'أحمد،'", dur: 0.9, color: red },
+            packet: { at: "l9:'Ahmed'", dur: 0.9, color: red },
           }
-        enter: { at: "l9:'عايزة'", anim: draw }
+        enter: { at: "l9:'wants'", anim: draw }
       - use: icon
         id: cy_wait
         props: { name: hourglass, size: 110, color: amber, ring: true, pulse: true }
         place: { x: 460, y: 640, w: 160, h: 160 }
-        enter: { at: "l10:'مستنية'", anim: pop }
-        exit: { at: "l11:'Deadlock،'", anim: fade }
+        enter: { at: "l10:'waiting'", anim: pop }
+        exit: { at: "l11:'Deadlock'", anim: fade }
       - use: stamp
         id: cy_stamp
         props: { text: 'DEADLOCK', color: red, size: 100 }
         place: { x: 120, y: 660, w: 720, h: 240 }
-        enter: { at: "l11:'Deadlock،'+0.3" }
+        enter: { at: "l11:'Deadlock'+0.3" }
         fx:
-          - { at: "l11:'Deadlock،'+0.3", do: shake, target: camera, amp: 16 }
+          - { at: "l11:'Deadlock'+0.3", do: shake, target: camera, amp: 16 }
 
   # ── 03 · the trap ──────────────────────────────────────────────────────────
   - id: trap
@@ -229,7 +229,7 @@ scenes:
     elements:
       - use: trap
         id: tp_trap
-        props: { sub: '"the DB will handle it"', at: l12, until: "l12:'هتحلها'" }
+        props: { sub: '"the DB will handle it"', at: l12, until: "l12:'sort'" }
       - use: node
         id: tp_db
         props: { title: 'Database', sub: 'deadlock detector', icon: db, color: amber, status: busy }
@@ -241,7 +241,7 @@ scenes:
         id: tp_victim
         props: { text: 'Tx B killed · victim', color: red, icon: x, size: 38 }
         place: { x: 190, y: 270, w: 700, h: 100 }
-        enter: { at: "l13:'وبتقتل'", anim: stamp }
+        enter: { at: "l13:'kills'", anim: stamp }
       - use: code
         id: tp_err
         props:
@@ -257,9 +257,9 @@ scenes:
         enter: { at: "l14:'transaction'", anim: rise }
       - use: title
         id: tp_prevent
-        props: { text: 'امنعه من **الأساس**', size: 80, accent: lime }
+        props: { text: 'Prevent it **upfront**', size: 80, accent: lime }
         place: { x: 40, y: 700, w: 880, h: 160 }
-        enter: { at: "l15:'تمنعه'", anim: rise }
+        enter: { at: "l15:'prevent'", anim: rise }
 
   # ── 04 · fix 1: consistent lock ordering ───────────────────────────────────
   - id: ordering
@@ -280,9 +280,9 @@ scenes:
           fontSize: 28
           lines:
             - 'SELECT * FROM accounts WHERE id IN (1, 2)'
-            - { text: 'ORDER BY id FOR UPDATE;', color: lime, at: "l17:'id.'" }
+            - { text: 'ORDER BY id FOR UPDATE;', color: lime, at: "l17:'id'" }
         place: { x: 40, y: 190, w: 1000, h: 200 }
-        enter: { at: "l17:'الترتيب،'", anim: rise }
+        enter: { at: "l17:'order'", anim: rise }
       - use: lanes
         id: or_lanes
         props:
@@ -291,17 +291,17 @@ scenes:
             - title: 'Tx A'
               color: cyan
               steps:
-                - { text: 'lock Ahmed (1)', at: "l18:'أحمد'" }
-                - { text: 'lock Sara (2)', at: "l18:'سارة.'" }
-                - { text: 'commit', at: "l19:'تستنى'+0.4", mark: ok }
+                - { text: 'lock Ahmed (1)', at: "l18:'Ahmed'" }
+                - { text: 'lock Sara (2)', at: "l18:'Sara'" }
+                - { text: 'commit', at: "l19:'waits'+0.4", mark: ok }
             - title: 'Tx B'
               color: violet
               steps:
-                - { text: 'wait for Ahmed', at: "l19:'تستنى'", mark: warn }
-                - { text: 'lock Sara (2)', at: "l19:'مفيش'" }
-                - { text: 'commit', at: "l19:'دايرة.'", mark: ok }
+                - { text: 'wait for Ahmed', at: "l19:'waits'", mark: warn }
+                - { text: 'lock Sara (2)', at: "l19:'no'" }
+                - { text: 'commit', at: "l19:'circle'", mark: ok }
         place: { x: 40, y: 430, w: 880, h: 500 }
-        enter: { at: "l18:'الاتنين'", anim: rise }
+        enter: { at: "l18:'both'", anim: rise }
 
   # ── fix 2: lock timeout + hygiene ──────────────────────────────────────────
   - id: timeout
@@ -323,7 +323,7 @@ scenes:
             - { pos: 0.66, label: '2s', sub: 'rollback + retry', color: amber, at: "l21:'rollback'" }
           cursor:
             - { at: "l21:'lock'", pos: 0 }
-            - { at: "l21:'تانيتين،'", pos: 0.66, dur: 0.8 }
+            - { at: "l21:'seconds'", pos: 0.66, dur: 0.8 }
         place: { x: 60, y: 210, w: 880, h: 240 }
         enter: { at: "l21:'lock'", anim: rise }
       - use: checklist
@@ -332,10 +332,10 @@ scenes:
           title: 'lock hygiene'
           fontSize: 44
           items:
-            - { text: 'keep transactions short', at: "l22:'قصيرة،'" }
-            - { text: 'no API calls inside a lock', at: "l22:'API.'", ok: false }
+            - { text: 'keep transactions short', at: "l22:'short'" }
+            - { text: 'no API calls inside a lock', at: "l22:'API'", ok: false }
         place: { x: 60, y: 480, w: 860, h: 380 }
-        enter: { at: "l22:'قصيرة،'", anim: rise, dur: 0.5 }
+        enter: { at: "l22:'short'", anim: rise, dur: 0.5 }
 
   # ── 05 · next episode ──────────────────────────────────────────────────────
   - id: cta
@@ -344,9 +344,9 @@ scenes:
     elements:
       - use: cta
         id: cta_next
-        props: { next: 'Message Queues', keyword: 'queue', prompt: 'اكتب في الكومنتات', at: "l24:'queue'" }
+        props: { next: 'Message Queues', keyword: 'queue', prompt: 'Comment below', at: "l24:'queue'" }
         place: { x: 40, y: 140, w: 880, h: 620 }
-        enter: { at: "l23:'الجاية'", anim: rise }
+        enter: { at: "l23:'Next'", anim: rise }
       - use: particles
         id: cta_conf
-        props: { kind: confetti, count: 80, at: "l24:'توصلك.'", colors: [lime, cyan, violet, amber] }
+        props: { kind: confetti, count: 80, at: "l24:'miss'", colors: [lime, cyan, violet, amber] }

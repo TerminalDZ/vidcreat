@@ -4,18 +4,20 @@ On Windows use `reelforge.cmd`; on macOS/Linux `./reelforge` (or add the folder 
 
 ![CLI help](assets/19-cli-help.png)
 
-| Command                                                | Description                                                           |
-| ------------------------------------------------------ | --------------------------------------------------------------------- |
-| `reelforge studio`                                     | Open the project dashboard                                            |
-| `reelforge new <id> [--series <name>] [--episode <n>]` | Create `episodes/<id>/episode.yaml`                                   |
-| `reelforge cue <id> [--draft]`                         | Open the cue marker (`--draft` writes estimated cues instead)         |
-| `reelforge dev <id>`                                   | Open the live preview                                                 |
-| `reelforge validate <id> [--strict] [--no-measure]`    | Check everything; exit code 1 on errors (or warnings with `--strict`) |
-| `reelforge render <id> [options]` / `--all`            | Render (see [Rendering](#rendering-and-outputs))                      |
-| `reelforge snap <id> <times…> [--every 5] [--cover]`   | PNG frames + contact sheet; times may be `12.5`, `l7`, `"l7:'word'"`  |
-| `reelforge doctor [--fix]`                             | Check the environment; `--fix` downloads Chromium                     |
-| `reelforge theme new <name> --accent <#hex>`           | Generate a theme                                                      |
-| `reelforge schema [--out <file>]`                      | Write the JSON Schema for editor autocompletion                       |
+| Command                                                                | Description                                                                   |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `reelforge studio`                                                     | Open the project dashboard                                                    |
+| `reelforge new <id> [--series <name>] [--episode <n>] [--lang en\|ar]` | Create `episodes/<id>/episode.yaml`                                           |
+| `reelforge edit <id>`                                                  | Open the visual editor                                                        |
+| `reelforge cue <id> [--draft]`                                         | Open the editor in Cues mode (`--draft` writes estimated cues instead)        |
+| `reelforge dev <id>`                                                   | Open the editor in Review mode                                                |
+| `reelforge mcp`                                                        | Run the MCP server for AI assistants (see [AI agents & MCP](#ai-agents--mcp)) |
+| `reelforge validate <id> [--strict] [--no-measure]`                    | Check everything; exit code 1 on errors (or warnings with `--strict`)         |
+| `reelforge render <id> [options]` / `--all`                            | Render (see [Rendering](#rendering-and-outputs))                              |
+| `reelforge snap <id> <times…> [--every 5] [--cover]`                   | PNG frames + contact sheet; times may be `12.5`, `l7`, `"l7:'word'"`          |
+| `reelforge doctor [--fix]`                                             | Check the environment; `--fix` downloads Chromium                             |
+| `reelforge theme new <name> --accent <#hex>`                           | Generate a theme                                                              |
+| `reelforge schema [--out <file>]`                                      | Write the JSON Schema for editor autocompletion                               |
 
 Global options: `--json` (machine-readable output, progress events while rendering), `--verbose`,
 `--root <folder>` (project folder; default: the current folder).

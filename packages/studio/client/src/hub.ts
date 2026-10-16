@@ -407,10 +407,14 @@ $<HTMLFormElement>('#newForm').addEventListener('submit', async (e) => {
       title: val('title'),
       series: val('series'),
       episode: Number(val('episode')),
+      lang: (f.elements.namedItem('lang') as HTMLSelectElement).value,
     });
     $<HTMLDialogElement>('#newDlg').close();
-    toast(`Created ${r.key}. Edit episode.yaml, then preview.`, 'ok');
+    toast(`Created ${r.key}. Opening the editor…`, 'ok');
     await refresh();
+    const win = window.open('about:blank', '_blank');
+    const { url } = await api<{ url: string }>('/api/studio', { ep: r.key, mode: 'edit' });
+    if (win) win.location.href = url;
   } catch (err) {
     $('#newErr').textContent = (err as Error).message;
   }
