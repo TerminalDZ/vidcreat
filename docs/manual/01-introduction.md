@@ -27,23 +27,23 @@ captions, sound effects and series branding, masters the audio and encodes platf
 - **Platform-ready output**: an archival master MP4, a share MP4 that fits the upload limit you choose,
   SRT captions, a contact sheet and a `publish.md` with your caption, hashtags and pinned comment.
 - **Offline and private.** Everything runs on your computer. No account, no subscription, no upload.
-- **No generated media.** The engine uses no AI: your voice, your words, your design, consistent every time.
+- **No generated media.** The video engine never generates voices or visuals: your voice, your words, your design, consistent every time. (AI assistants are optional.)
 - **Deterministic.** The same inputs always produce the same frames.
 
 ## What is in the package
 
-| Folder / file                                | Contents                                                                |
-| -------------------------------------------- | ----------------------------------------------------------------------- |
-| `install.bat`, `install.sh`                  | One-command installers for Windows, macOS and Linux                     |
-| `start.bat`, `start.sh`, `ReelForge.command` | Open the dashboard                                                      |
-| `reelforge.cmd`, `reelforge`                 | The command-line interface                                              |
-| `examples/season1/`                          | Nine complete example episodes in English (“System Design”)             |
-| `examples/season1-arabic/`                   | The same series in Arabic with English technical terms                  |
-| `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, …     | Instructions for AI assistants (see [AI agents & MCP](#ai-agents--mcp)) |
-| `themes/`, `presets/`                        | Editable visual themes and platform layouts                             |
-| `documentation/`                             | This documentation (offline)                                            |
-| `packages/`                                  | Full TypeScript source code                                             |
-| `LICENSE.md`, `THIRD-PARTY-NOTICES.md`       | License terms and open-source credits                                   |
+| Folder / file                                | Contents                                                               |
+| -------------------------------------------- | ---------------------------------------------------------------------- |
+| `install.bat`, `install.sh`                  | One-command installers for Windows, macOS and Linux                    |
+| `start.bat`, `start.sh`, `ReelForge.command` | Open the dashboard                                                     |
+| `reelforge.cmd`, `reelforge`                 | The command-line interface                                             |
+| `examples/season1/`                          | Nine complete example episodes in English (“System Design”)            |
+| `examples/season1-arabic/`                   | The same series in Arabic with English technical terms                 |
+| `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, …     | Instructions for AI assistants (see [AI agents & MCP](#ai-agents-mcp)) |
+| `themes/`, `presets/`                        | Editable visual themes and platform layouts                            |
+| `documentation/`                             | This documentation (offline)                                           |
+| `packages/`                                  | Full TypeScript source code                                            |
+| `LICENSE.md`, `THIRD-PARTY-NOTICES.md`       | License terms and open-source credits                                  |
 
 ## Requirements
 

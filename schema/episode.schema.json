@@ -1,0 +1,2167 @@
+{
+  "$ref": "#/definitions/Episode",
+  "definitions": {
+    "Episode": {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string"
+        },
+        "meta": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9_-]*$"
+            },
+            "series": {
+              "type": "string",
+              "default": ""
+            },
+            "title": {
+              "type": "string",
+              "default": ""
+            },
+            "episode": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "preset": {
+              "type": "string",
+              "default": "tiktok"
+            },
+            "theme": {
+              "type": "string",
+              "default": "default"
+            },
+            "lang": {
+              "type": "string",
+              "default": "ar-EG"
+            },
+            "publish": {
+              "type": "object",
+              "properties": {
+                "cover": {
+                  "type": "string"
+                },
+                "caption": {
+                  "type": "string"
+                },
+                "hashtags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": []
+                },
+                "pinned": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": ["id"],
+          "additionalProperties": false
+        },
+        "audio": {
+          "type": "object",
+          "properties": {
+            "voice": {
+              "type": "string",
+              "default": "voice.wav"
+            },
+            "sfx": {
+              "type": "string",
+              "enum": ["auto", "none", "manual"],
+              "default": "auto"
+            },
+            "sfx_gain_db": {
+              "type": "number",
+              "minimum": -60,
+              "maximum": 12,
+              "default": -16
+            },
+            "duck": {
+              "type": "boolean",
+              "default": true
+            },
+            "extra": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "number",
+                        "minimum": 0
+                      }
+                    ]
+                  },
+                  "sound": {
+                    "type": "string",
+                    "enum": ["whoosh", "hit", "ding", "err", "glitch", "tick", "tap", "typing"]
+                  },
+                  "gain_db": {
+                    "type": "number"
+                  }
+                },
+                "required": ["at", "sound"],
+                "additionalProperties": false
+              },
+              "default": []
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        },
+        "script": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1
+              },
+              "caption": {
+                "type": "string",
+                "default": "auto"
+              },
+              "break": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": []
+              }
+            },
+            "required": ["text"],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "chapters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ]
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "required": ["at", "label"],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "scenes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+              },
+              "at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ]
+              },
+              "end": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ]
+              },
+              "glow": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "at": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            {
+                              "type": "number",
+                              "minimum": 0
+                            }
+                          ]
+                        },
+                        "color": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["at", "color"],
+                      "additionalProperties": false
+                    },
+                    "minItems": 1
+                  }
+                ]
+              },
+              "transition": {
+                "type": "string",
+                "enum": ["crossfade", "cut", "slide-up"],
+                "default": "crossfade"
+              },
+              "layout": {
+                "type": "string",
+                "enum": ["stage", "full"],
+                "default": "stage"
+              },
+              "row": {
+                "type": "object",
+                "properties": {
+                  "gap": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "align": {
+                    "type": "string",
+                    "enum": ["start", "center", "end"]
+                  },
+                  "x": {
+                    "type": "integer"
+                  },
+                  "y": {
+                    "type": "integer"
+                  },
+                  "w": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0
+                  },
+                  "h": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "additionalProperties": false
+              },
+              "column": {
+                "type": "object",
+                "properties": {
+                  "gap": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "align": {
+                    "type": "string",
+                    "enum": ["start", "center", "end"]
+                  },
+                  "x": {
+                    "type": "integer"
+                  },
+                  "y": {
+                    "type": "integer"
+                  },
+                  "w": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0
+                  },
+                  "h": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "additionalProperties": false
+              },
+              "columns": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 6
+              },
+              "gutter": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "elements": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "use": {
+                      "type": "string"
+                    },
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"
+                    },
+                    "props": {
+                      "type": "object",
+                      "additionalProperties": {},
+                      "default": {}
+                    },
+                    "place": {
+                      "type": "object",
+                      "properties": {
+                        "x": {
+                          "type": "integer"
+                        },
+                        "y": {
+                          "type": "integer"
+                        },
+                        "w": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0
+                        },
+                        "h": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0
+                        },
+                        "center": {
+                          "type": "boolean"
+                        },
+                        "anchor": {
+                          "type": "string",
+                          "enum": ["top", "bottom", "center", "left", "right"]
+                        },
+                        "margin": {
+                          "type": "integer"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "size": {
+                      "type": "object",
+                      "properties": {
+                        "w": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0
+                        },
+                        "h": {
+                          "type": "integer",
+                          "exclusiveMinimum": 0
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "col": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "layer": {
+                      "type": "string",
+                      "enum": ["base", "overlay"]
+                    },
+                    "z": {
+                      "type": "integer"
+                    },
+                    "enter": {
+                      "type": "object",
+                      "properties": {
+                        "at": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            {
+                              "type": "number",
+                              "minimum": 0
+                            }
+                          ]
+                        },
+                        "anim": {
+                          "type": "string",
+                          "enum": [
+                            "pop",
+                            "rise",
+                            "slide-l",
+                            "slide-r",
+                            "fade",
+                            "draw",
+                            "type",
+                            "count",
+                            "flip",
+                            "glitch",
+                            "stamp",
+                            "zoom",
+                            "none"
+                          ]
+                        },
+                        "dur": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        },
+                        "s0": {
+                          "type": "number"
+                        },
+                        "dy": {
+                          "type": "number"
+                        },
+                        "dist": {
+                          "type": "number"
+                        },
+                        "cps": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        },
+                        "caret": {
+                          "type": "boolean"
+                        },
+                        "rot": {
+                          "type": "number"
+                        },
+                        "amp": {
+                          "type": "number"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "exit": {
+                      "type": "object",
+                      "properties": {
+                        "at": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "minLength": 1
+                            },
+                            {
+                              "type": "number",
+                              "minimum": 0
+                            }
+                          ]
+                        },
+                        "anim": {
+                          "type": "string",
+                          "enum": ["fade", "pop", "rise", "sink", "slide-l", "slide-r", "zoom", "none"]
+                        },
+                        "dur": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        }
+                      },
+                      "required": ["at"],
+                      "additionalProperties": false
+                    },
+                    "states": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              {
+                                "type": "number",
+                                "minimum": 0
+                              }
+                            ]
+                          },
+                          "set": {
+                            "type": "object",
+                            "additionalProperties": {}
+                          }
+                        },
+                        "required": ["at", "set"],
+                        "additionalProperties": false
+                      },
+                      "default": []
+                    },
+                    "fx": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "at": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "minLength": 1
+                              },
+                              {
+                                "type": "number",
+                                "minimum": 0
+                              }
+                            ]
+                          },
+                          "do": {
+                            "type": "string",
+                            "enum": ["shake", "flash", "glitch", "pulse", "bump"]
+                          },
+                          "amp": {
+                            "type": "number"
+                          },
+                          "dur": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                          },
+                          "color": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "rate": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                          },
+                          "target": {
+                            "type": "string",
+                            "enum": ["self", "camera"]
+                          },
+                          "sound": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": ["whoosh", "hit", "ding", "err", "glitch", "tick", "tap", "typing"]
+                              },
+                              {
+                                "type": "string",
+                                "const": "none"
+                              }
+                            ]
+                          }
+                        },
+                        "required": ["at", "do"],
+                        "additionalProperties": false
+                      },
+                      "default": []
+                    },
+                    "sfx": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": ["auto", "none"]
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "at": {
+                                "anyOf": [
+                                  {
+                                    "type": "string",
+                                    "minLength": 1
+                                  },
+                                  {
+                                    "type": "number",
+                                    "minimum": 0
+                                  }
+                                ]
+                              },
+                              "sound": {
+                                "type": "string",
+                                "enum": ["whoosh", "hit", "ding", "err", "glitch", "tick", "tap", "typing"]
+                              },
+                              "gain_db": {
+                                "type": "number"
+                              }
+                            },
+                            "required": ["at", "sound"],
+                            "additionalProperties": false
+                          }
+                        }
+                      ],
+                      "default": "auto"
+                    }
+                  },
+                  "required": ["use"],
+                  "additionalProperties": false
+                },
+                "default": []
+              }
+            },
+            "required": ["id", "at"],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["meta", "script", "scenes"],
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ReelForge episode.yaml",
+  "x-components": {
+    "title": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "align": {
+          "type": "string",
+          "enum": ["left", "center", "right"],
+          "default": "center"
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1,
+          "default": "ink"
+        },
+        "accent": {
+          "type": "string",
+          "minLength": 1,
+          "default": "lime"
+        },
+        "font": {
+          "type": "string",
+          "enum": ["auto", "display", "arabic", "mono"],
+          "default": "auto"
+        },
+        "weight": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 1000,
+          "default": 800
+        },
+        "sub": {
+          "type": "string"
+        }
+      },
+      "required": ["text"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "label": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1,
+          "default": "dim"
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "align": {
+          "type": "string",
+          "enum": ["left", "center", "right"],
+          "default": "left"
+        },
+        "dot": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": ["text"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "code": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "lang": {
+          "type": "string",
+          "default": "ts"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string"
+                  },
+                  "color": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "at": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "number",
+                        "minimum": 0
+                      }
+                    ]
+                  },
+                  "dim": {
+                    "type": "boolean"
+                  }
+                },
+                "required": ["text"],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "minItems": 1
+        },
+        "fontSize": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 30
+        },
+        "cps": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 28
+        },
+        "caret": {
+          "type": "boolean",
+          "default": true
+        },
+        "numbers": {
+          "type": "boolean",
+          "default": true
+        },
+        "typing": {
+          "type": "boolean",
+          "default": true
+        },
+        "highlight": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "line": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ]
+              },
+              "until": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ]
+              },
+              "color": {
+                "type": "string",
+                "minLength": 1,
+                "default": "lime"
+              }
+            },
+            "required": ["line"],
+            "additionalProperties": false
+          },
+          "default": []
+        }
+      },
+      "required": ["lines"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "node": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "sub": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1,
+          "default": "cyan"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["idle", "ok", "err", "warn", "busy", "off"],
+          "default": "idle"
+        },
+        "icon": {
+          "type": "string",
+          "enum": [
+            "lock",
+            "unlock",
+            "bell",
+            "clock",
+            "warn",
+            "bubble",
+            "bomb",
+            "check",
+            "x",
+            "server",
+            "db",
+            "user",
+            "users",
+            "bolt",
+            "card",
+            "wifi",
+            "wifi-off",
+            "cloud",
+            "key",
+            "mail",
+            "cart",
+            "cpu",
+            "queue",
+            "shield",
+            "fire",
+            "refresh",
+            "hourglass",
+            "phone",
+            "code",
+            "globe"
+          ]
+        },
+        "badge": {
+          "type": "string"
+        }
+      },
+      "required": ["title"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "arrow": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_-]*(\\.(left|right|top|bottom|center))?$"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "number"
+                },
+                "y": {
+                  "type": "number"
+                }
+              },
+              "required": ["x", "y"],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "to": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_-]*(\\.(left|right|top|bottom|center))?$"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "number"
+                },
+                "y": {
+                  "type": "number"
+                }
+              },
+              "required": ["x", "y"],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "label": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1,
+          "default": "dim"
+        },
+        "dashed": {
+          "type": "boolean",
+          "default": false
+        },
+        "route": {
+          "type": "string",
+          "enum": ["straight", "elbow", "curve"],
+          "default": "straight"
+        },
+        "width": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 5
+        },
+        "head": {
+          "type": "string",
+          "enum": ["end", "start", "both", "none"],
+          "default": "end"
+        },
+        "packet": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "at": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    }
+                  ]
+                },
+                "dur": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "default": 0.8
+                },
+                "color": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reverse": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "default": false
+        },
+        "packets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ]
+              },
+              "dur": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "default": 0.8
+              },
+              "color": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reverse": {
+                "type": "boolean",
+                "default": false
+              },
+              "label": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "gap": {
+          "type": "number",
+          "minimum": 0,
+          "default": 14
+        }
+      },
+      "required": ["from", "to"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "chip": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1,
+          "default": "lime"
+        },
+        "strike": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "number",
+                  "minimum": 0
+                }
+              ]
+            }
+          ],
+          "default": false
+        },
+        "icon": {
+          "type": "string",
+          "enum": [
+            "lock",
+            "unlock",
+            "bell",
+            "clock",
+            "warn",
+            "bubble",
+            "bomb",
+            "check",
+            "x",
+            "server",
+            "db",
+            "user",
+            "users",
+            "bolt",
+            "card",
+            "wifi",
+            "wifi-off",
+            "cloud",
+            "key",
+            "mail",
+            "cart",
+            "cpu",
+            "queue",
+            "shield",
+            "fire",
+            "refresh",
+            "hourglass",
+            "phone",
+            "code",
+            "globe"
+          ]
+        },
+        "variant": {
+          "type": "string",
+          "enum": ["solid", "outline", "soft"],
+          "default": "soft"
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 34
+        }
+      },
+      "required": ["text"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "stamp": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1,
+          "default": "red"
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 120
+        },
+        "rot": {
+          "type": "number",
+          "default": -5
+        }
+      },
+      "required": ["text"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "table": {
+      "type": "object",
+      "properties": {
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "cells": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "text": {
+                          "type": ["string", "number"]
+                        },
+                        "color": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": ["text", "color"],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ]
+              },
+              "highlight": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "number",
+                        "minimum": 0
+                      }
+                    ]
+                  }
+                ]
+              },
+              "color": {
+                "type": "string",
+                "minLength": 1
+              },
+              "strike": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "number",
+                        "minimum": 0
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "required": ["cells"],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "widths": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "fontSize": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 28
+        },
+        "accent": {
+          "type": "string",
+          "minLength": 1,
+          "default": "lime"
+        }
+      },
+      "required": ["columns"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "lanes": {
+      "type": "object",
+      "properties": {
+        "lanes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "color": {
+                "type": "string",
+                "minLength": 1,
+                "default": "cyan"
+              },
+              "steps": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string"
+                    },
+                    "at": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        {
+                          "type": "number",
+                          "minimum": 0
+                        }
+                      ]
+                    },
+                    "color": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "mark": {
+                      "type": "string",
+                      "enum": ["ok", "err", "warn"]
+                    }
+                  },
+                  "required": ["text", "at"],
+                  "additionalProperties": false
+                },
+                "default": []
+              }
+            },
+            "required": ["title"],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "interleave": {
+          "type": "boolean",
+          "default": true
+        },
+        "fontSize": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 26
+        }
+      },
+      "required": ["lanes"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "checklist": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string"
+              },
+              "at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ]
+              },
+              "ok": {
+                "type": "boolean",
+                "default": true
+              }
+            },
+            "required": ["text"],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "fontSize": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 36
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1,
+          "default": "lime"
+        }
+      },
+      "required": ["items"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "counter": {
+      "type": "object",
+      "properties": {
+        "keyframes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ]
+              },
+              "value": {
+                "type": "number"
+              },
+              "dur": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": ["at", "value"],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "from": {
+          "type": "number",
+          "default": 0
+        },
+        "prefix": {
+          "type": "string",
+          "default": ""
+        },
+        "suffix": {
+          "type": "string",
+          "default": ""
+        },
+        "decimals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6,
+          "default": 0
+        },
+        "separator": {
+          "type": "boolean",
+          "default": true
+        },
+        "label": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1,
+          "default": "ink"
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 180
+        }
+      },
+      "required": ["keyframes"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "meter": {
+      "type": "object",
+      "properties": {
+        "keyframes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ]
+              },
+              "value": {
+                "type": "number"
+              },
+              "dur": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": ["at", "value"],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "from": {
+          "type": "number",
+          "default": 0
+        },
+        "max": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 100
+        },
+        "threshold": {
+          "type": "number"
+        },
+        "label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string",
+          "default": ""
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1,
+          "default": "lime"
+        },
+        "danger": {
+          "type": "string",
+          "minLength": 1,
+          "default": "red"
+        }
+      },
+      "required": ["keyframes"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "timeline": {
+      "type": "object",
+      "properties": {
+        "markers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "pos": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "label": {
+                "type": "string"
+              },
+              "sub": {
+                "type": "string"
+              },
+              "at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ]
+              },
+              "color": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": ["pos", "label"],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "start": {
+          "type": "string"
+        },
+        "end": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1,
+          "default": "cyan"
+        },
+        "cursor": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ]
+              },
+              "pos": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "dur": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": ["at", "pos"],
+            "additionalProperties": false
+          },
+          "default": []
+        }
+      },
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "grid": {
+      "type": "object",
+      "properties": {
+        "cols": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "rows": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "tiles": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string",
+                    "enum": ["idle", "ok", "err", "warn", "busy", "off"]
+                  }
+                },
+                "additionalProperties": false
+              }
+            ]
+          },
+          "default": []
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ]
+              },
+              "set": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string",
+                  "enum": ["idle", "ok", "err", "warn", "busy", "off"]
+                }
+              }
+            },
+            "required": ["at", "set"],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "gap": {
+          "type": "number",
+          "minimum": 0,
+          "default": 14
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": ["cols", "rows"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "bucket": {
+      "type": "object",
+      "properties": {
+        "capacity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 40
+        },
+        "keyframes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ]
+              },
+              "tokens": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": ["at", "tokens"],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "label": {
+          "type": "string"
+        },
+        "rate": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1,
+          "default": "lime"
+        }
+      },
+      "required": ["capacity"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "phone": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": "Checkout"
+        },
+        "amount": {
+          "type": "string"
+        },
+        "item": {
+          "type": "string"
+        },
+        "button": {
+          "type": "string",
+          "default": "Pay now"
+        },
+        "notifications": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "default": "Bank"
+              },
+              "text": {
+                "type": "string"
+              },
+              "at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ]
+              },
+              "color": {
+                "type": "string",
+                "minLength": 1,
+                "default": "red"
+              },
+              "icon": {
+                "type": "string",
+                "enum": [
+                  "lock",
+                  "unlock",
+                  "bell",
+                  "clock",
+                  "warn",
+                  "bubble",
+                  "bomb",
+                  "check",
+                  "x",
+                  "server",
+                  "db",
+                  "user",
+                  "users",
+                  "bolt",
+                  "card",
+                  "wifi",
+                  "wifi-off",
+                  "cloud",
+                  "key",
+                  "mail",
+                  "cart",
+                  "cpu",
+                  "queue",
+                  "shield",
+                  "fire",
+                  "refresh",
+                  "hourglass",
+                  "phone",
+                  "code",
+                  "globe"
+                ],
+                "default": "bell"
+              }
+            },
+            "required": ["text"],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "taps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                ]
+              }
+            },
+            "required": ["at"],
+            "additionalProperties": false
+          },
+          "default": []
+        },
+        "offline": {
+          "type": "boolean",
+          "default": false
+        },
+        "loading": {
+          "type": "boolean",
+          "default": false
+        },
+        "success": {
+          "type": ["boolean", "string"],
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "quote": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "highlight": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "cps": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 32
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1,
+          "default": "lime"
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 56
+        }
+      },
+      "required": ["text"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "particles": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["burst", "herd", "stream", "dust", "confetti"],
+          "default": "burst"
+        },
+        "from": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_-]*(\\.(left|right|top|bottom|center))?$"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "number"
+                },
+                "y": {
+                  "type": "number"
+                }
+              },
+              "required": ["x", "y"],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "to": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_-]*(\\.(left|right|top|bottom|center))?$"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "number"
+                },
+                "y": {
+                  "type": "number"
+                }
+              },
+              "required": ["x", "y"],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 400,
+          "default": 40
+        },
+        "at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "number",
+              "minimum": 0
+            }
+          ]
+        },
+        "dur": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 1.2
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1,
+          "default": "lime"
+        },
+        "colors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 10
+        },
+        "spread": {
+          "type": "number",
+          "minimum": 0,
+          "default": 140
+        },
+        "seed": {
+          "type": "integer",
+          "default": 1
+        }
+      },
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "trap": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "default": "THE TRAP"
+        },
+        "sub": {
+          "type": "string"
+        },
+        "at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "number",
+              "minimum": 0
+            }
+          ]
+        },
+        "until": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "number",
+              "minimum": 0
+            }
+          ]
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1,
+          "default": "amber"
+        }
+      },
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "cta": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "default": "NEXT EPISODE"
+        },
+        "next": {
+          "type": "string"
+        },
+        "keyword": {
+          "type": "string"
+        },
+        "prompt": {
+          "type": "string",
+          "default": "Comment"
+        },
+        "at": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "number",
+              "minimum": 0
+            }
+          ]
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1,
+          "default": "lime"
+        }
+      },
+      "required": ["next"],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "icon": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": [
+            "lock",
+            "unlock",
+            "bell",
+            "clock",
+            "warn",
+            "bubble",
+            "bomb",
+            "check",
+            "x",
+            "server",
+            "db",
+            "user",
+            "users",
+            "bolt",
+            "card",
+            "wifi",
+            "wifi-off",
+            "cloud",
+            "key",
+            "mail",
+            "cart",
+            "cpu",
+            "queue",
+            "shield",
+            "fire",
+            "refresh",
+            "hourglass",
+            "phone",
+            "code",
+            "globe"
+          ]
+        },
+        "src": {
+          "type": "string"
+        },
+        "size": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 140
+        },
+        "color": {
+          "type": "string",
+          "minLength": 1,
+          "default": "ink"
+        },
+        "pulse": {
+          "type": "boolean",
+          "default": false
+        },
+        "ring": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    }
+  }
+}

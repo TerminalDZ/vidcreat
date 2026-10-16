@@ -176,11 +176,11 @@ async function serve(
   });
   out(g, { url: studio.url }, () => {
     console.log(
-      `${c.green('●')} ReelForge Studio (${{ edit: 'editor', cue: 'cue marker', dev: 'preview' }[mode]}) for ${c.bold(p.id)}`,
+      `${c.green('●')} ReelForge editor (${{ edit: 'Edit mode', cue: 'Cues mode', dev: 'Review mode' }[mode]}) for ${c.bold(p.id)}`,
     );
     console.log(`  ${c.cyan(studio.url)}`);
     console.log(
-      c.dim('  listening on 127.0.0.1 only · press ? in the studio for shortcuts · Ctrl+C to stop'),
+      c.dim('  listening on 127.0.0.1 only · press ? in the editor for shortcuts · Ctrl+C to stop'),
     );
   });
   if (o.open !== false) openBrowser(studio.url);
@@ -549,7 +549,9 @@ export function buildProgram(): Command {
   program.exitOverride(); // inherited by subcommands: usage errors become exit code 2
   program
     .name('reelforge')
-    .description('Voice + YAML → finished vertical explainer videos. Offline, deterministic, no AI.')
+    .description(
+      'Your voice → finished vertical explainer videos. Offline and deterministic; AI assistants optional (MCP).',
+    )
     .version(VERSION)
     .option('--verbose', 'more output (info messages, logs)')
     .option('--json', 'machine-readable JSON output')
@@ -558,7 +560,9 @@ export function buildProgram(): Command {
 
   program
     .command('studio')
-    .description('open the project dashboard: create, record, cue, preview, validate and render episodes')
+    .description(
+      'open the project dashboard: create episodes, upload voice, open the editor, validate and render',
+    )
     .option('--port <port>', 'port (default 4310 or $REELFORGE_PORT)', posInt('--port'))
     .option('--no-open', 'do not open the browser')
     .action((o, cmd) => cmdHub(o, globals(cmd)));
@@ -574,7 +578,7 @@ export function buildProgram(): Command {
 
   program
     .command('cue')
-    .description('open the studio in cue-marker mode (writes cues.json)')
+    .description('open the editor in Cues mode: mark when each line starts (writes cues.json)')
     .argument('<id>', 'episode id or path')
     .option('--draft', 'write estimated cues instead (preview before recording)')
     .option('--port <port>', 'port (default 4317 or $REELFORGE_PORT)', posInt('--port'))
@@ -593,7 +597,7 @@ export function buildProgram(): Command {
 
   program
     .command('dev')
-    .description('open the studio in live-preview mode with hot reload')
+    .description('open the editor in Review mode: checks, safe zones, element outlines')
     .argument('<id>', 'episode id or path')
     .option('--port <port>', 'port (default 4317 or $REELFORGE_PORT)', posInt('--port'))
     .option('--preset <name>', 'override meta.preset')

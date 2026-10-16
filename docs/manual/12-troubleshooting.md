@@ -20,14 +20,15 @@ caption before that word, or lower `captions.max_chars` in the theme.
 **Text overflows its box (V-9).** Shorten the text, lower `fontSize`, or enlarge `place.w/h`. Titles,
 quotes and stamps shrink automatically to fit.
 
-**An element sits under the TikTok buttons (V-7).** Press **Z** in the preview: keep content out of the
-red zones.
+**An element sits under the TikTok buttons (V-7).** Press **Z** in the editor to show the safe zones, and keep
+content out of the red areas.
 
 **Can I use my own fonts?** v1.0 ships Cairo (Arabic), Space Grotesk and JetBrains Mono so renders never
 depend on system fonts. Custom fonts are on the roadmap.
 
 **Does ReelForge need the internet?** Only during installation (dependencies, Chromium, ffmpeg). Creating,
-previewing and rendering are fully offline.
+editing and rendering are fully offline. If you use an AI assistant through MCP, the assistant itself needs
+its own internet connection and subscription; ReelForge's MCP server stays local.
 
 **Can I render on a server / in CI?** Yes: everything is available from the command line (`--json` gives
 machine-readable output) and works headless on Linux.

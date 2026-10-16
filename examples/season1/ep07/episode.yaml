@@ -36,7 +36,7 @@ script:
   - text: 'They go chasing exactly-once delivery.'
   - text: "But over a real network, that's basically impossible."
     break: ["that's"]
-  - text: 'The real fix is called an idempotent consumer.'
+  - text: 'An idempotent consumer is the real fix.'
   - text: 'Every message carries a stable message_id.'
   - text: 'The consumer first checks a processed table.'
   - text: 'If the id is already there, it acks and skips it.'

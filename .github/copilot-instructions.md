@@ -7,7 +7,7 @@ follow.
 - **Make videos through the `reelforge` MCP server** (configured in `.vscode/mcp.json`; enable it in
   Copilot Chat agent mode). The tools are: list_episodes, get_episode, create_episode, edit_episode,
   write_episode_yaml, validate_episode, preview_frames, list_components, get_component_schema,
-  draft_cues, set_cues, render_episode, get_render_status, open_editor, doctor.
+  draft_cues, set_cues, render_episode, get_render_status, cancel_render, open_editor, doctor.
 - **Workflow:**
   1. Write a script with one spoken sentence per line.
   2. Create the episode.

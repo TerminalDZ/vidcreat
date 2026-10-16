@@ -37,7 +37,7 @@ script:
   - text: "But here's the trap so many people fall into."
   - text: 'They add a timeout, then retry instantly.'
   - text: "Now you're hammering the dying service even harder."
-  - text: 'The real fix is called a Circuit Breaker.'
+  - text: 'A Circuit Breaker is the real fix.'
   - text: "Exactly like the breaker in your home's fuse box."
   - text: "At first it's closed, and requests flow through normally."
   - text: 'It counts the errors and tracks the error rate.'

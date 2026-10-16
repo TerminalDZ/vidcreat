@@ -643,7 +643,7 @@ export function drawOverlay(t: number): void {
             'font-family': 'Inter, system-ui, sans-serif',
             'font-weight': 600,
           },
-          `${tl.preset.label} UI · ${z.name}`,
+          `Safe zone · ${z.name}`,
         ),
       );
     }

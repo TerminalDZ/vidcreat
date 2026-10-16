@@ -2,8 +2,8 @@
 
 **Voice recording + one YAML file → a finished vertical explainer video** (1080×1920, 30 fps) for TikTok,
 Instagram Reels and YouTube Shorts. Animated diagrams, code that types itself, race-condition lanes,
-stamps, word-by-word Arabic captions with correctly mixed English terms, procedural sound effects and
-platform-ready encoding.
+stamps, word-by-word English and Arabic captions (Arabic keeps mixed-in English terms in order), procedural
+sound effects and platform-ready encoding, all designed in a visual editor.
 
 - **A real editor.** Canvas with smart guides, layers, a schema-driven inspector for every property,
   a multi-track timeline that snaps to your words, undo/redo, ⌘K command palette and shortcuts.

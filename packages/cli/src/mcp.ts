@@ -473,7 +473,7 @@ export async function startMcp(opts: { root: string; version: string }): Promise
             minimum: 180,
             maximum: 1080,
             default: 360,
-            description: 'Image width in pixels (height is 16:9 × width)',
+            description: 'Image width in pixels (height is 16/9 × width; frames are 9:16)',
           },
         },
         required: ['episode', 'times'],

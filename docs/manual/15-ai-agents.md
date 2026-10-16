@@ -26,19 +26,19 @@ what your client sends it.
 
 ## What the assistant can do
 
-| Tool                                       | What it does                                                                   |
-| ------------------------------------------ | ------------------------------------------------------------------------------ |
-| `list_episodes`                            | Lists the episodes and examples in the project                                 |
-| `get_episode`                              | Reads an episode: the YAML plus a compiled outline (line times, element boxes) |
-| `create_episode`                           | Creates an episode from a script (English or Arabic)                           |
-| `edit_episode` / `write_episode_yaml`      | Changes scenes, elements, timing and settings (comments in your file are kept) |
-| `validate_episode`                         | Runs every check (schema, timing, overlap, safe zones, text overflow)          |
-| `preview_frames`                           | Renders still frames and **shows them to the assistant**                       |
-| `list_components` / `get_component_schema` | Lists the 21 components and their exact properties                             |
-| `draft_cues` / `set_cues`                  | Writes estimated or known line timings                                         |
-| `render_episode` / `get_render_status`     | Renders the final videos in the background                                     |
-| `open_editor`                              | Opens the visual editor so you can review and fine-tune                        |
-| `doctor`                                   | Checks Node.js, FFmpeg, Chromium and fonts                                     |
+| Tool                                                     | What it does                                                                   |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `list_episodes`                                          | Lists the episodes and examples in the project                                 |
+| `get_episode`                                            | Reads an episode: the YAML plus a compiled outline (line times, element boxes) |
+| `create_episode`                                         | Creates an episode from a script (English or Arabic)                           |
+| `edit_episode` / `write_episode_yaml`                    | Changes scenes, elements, timing and settings (comments in your file are kept) |
+| `validate_episode`                                       | Runs every check (schema, timing, overlap, safe zones, text overflow)          |
+| `preview_frames`                                         | Renders still frames and **shows them to the assistant**                       |
+| `list_components` / `get_component_schema`               | Lists the 21 components and their exact properties                             |
+| `draft_cues` / `set_cues`                                | Writes estimated or known line timings                                         |
+| `render_episode` / `get_render_status` / `cancel_render` | Renders the final videos in the background, reports progress, cancels          |
+| `open_editor`                                            | Opens the visual editor so you can review and fine-tune                        |
+| `doctor`                                                 | Checks Node.js, FFmpeg, Chromium and fonts                                     |
 
 It also offers the **make_explainer** prompt. Give it a topic and the assistant follows the whole
 workflow.

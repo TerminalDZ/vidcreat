@@ -46,7 +46,7 @@ script:
   - text: "But that only delays the problem. It's not a fix."
   - text: 'Like Phil Karlton said years ago about cache invalidation.'
     break: ['about']
-  - text: 'Fix number one is called Request Coalescing.'
+  - text: 'Request Coalescing is fix number one.'
   - text: 'Only the first request actually goes to the database.'
   - text: 'The rest wait for that same result instead of hammering the DB.'
     break: ['instead']

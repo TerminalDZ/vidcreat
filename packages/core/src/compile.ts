@@ -418,7 +418,7 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
           `Cues are not in script order: ${l.id} (${v}s) is before ${prevId} (${prevCue}s)`,
           ['script', i],
           {
-            hint: 'Re-mark the line in the cue marker, or reorder the script',
+            hint: 'Re-mark the line in the editor’s Cues mode, or reorder the script',
             time: v,
           },
         );

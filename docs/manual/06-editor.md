@@ -1,7 +1,7 @@
 # The editor
 
-The editor is where you design an episode. It works like a design tool (Figma) on top of a video
-timeline (Premiere), but it is made for one job. You place animated components on the real
+The editor is where you design an episode. It works like a design tool on top of a video
+timeline, but it is made for one job. You place animated components on the real
 1080×1920 frame and time them to the words you speak.
 
 Open it from the dashboard with **Open editor**, or run `reelforge edit <id>`.
@@ -67,7 +67,7 @@ The inspector edits **every property** of the selection:
   `l3:'bucket'` whenever the playhead is on a word, so the element stays on that word even after
   you re-record.
 - **Properties**: every option of the component, generated from its schema. That covers text
-  fields, numbers (drag the dotted handle to scrub, like in Figma), on/off switches, menus, colors
+  fields, numbers (drag the dotted handle to scrub), on/off switches, menus, colors
   (theme swatches or any color), times, and lists you can add to, reorder and remove from.
 - **Effects** (shake, flash, glitch, pulse, bump) and **States** (prop changes at a time, e.g. a
   node turning red).

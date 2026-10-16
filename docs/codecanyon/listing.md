@@ -51,7 +51,7 @@ video editor, video generator, explainer video, vertical video, short video, ani
 | Field               | Value                                                                                                                            |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | Software version    | Node.js (select it if the list offers it; otherwise pick the closest JavaScript option and give the versions in the description) |
-| Compatible browsers | Chrome, Edge, Firefox (the local dashboard and studio). Do not tick IE or Safari                                                 |
+| Compatible browsers | Chrome, Edge, Firefox (the local dashboard and editor). Do not tick IE or Safari                                                 |
 | Files included      | JavaScript JS, HTML, CSS, JSON (TypeScript, YAML and Markdown are inside the source tree; tick the closest options available)    |
 | High resolution     | Yes (1080×1920 output)                                                                                                           |
 | Documentation       | Well Documented (offline HTML in `documentation/`, English)                                                                      |
@@ -68,7 +68,7 @@ video editor, video generator, explainer video, vertical video, short video, ani
 | Inline preview (if the form asks)   | `release/ReelForge-<v>-marketing/inline-preview.jpg`           | 590×300 JPEG                                             |
 | Cover image (if the form asks)      | `release/ReelForge-<v>-marketing/cover-2340x1560.jpg`          | 3:2 ratio, 2340×1560 recommended, JPEG < 20 MB           |
 | Main files                          | `release/ReelForge-<v>.zip`                                    | Source + prebuilt dist + English HTML docs + installers  |
-| Preview screenshots (ZIP)           | `release/ReelForge-<v>-previews.zip`                           | 12 screenshots ≥ 1170 px wide + 8 full-resolution frames |
+| Preview screenshots (ZIP)           | `release/ReelForge-<v>-previews.zip`                           | 18 screenshots ≥ 1170 px wide + 8 full-resolution frames |
 | Video preview                       | `release/ReelForge-<v>-marketing/demo.mp4` → upload to YouTube | Rendered with ReelForge from example ep02                |
 | Wide banner (social media, YouTube) | `release/ReelForge-<v>-marketing/cover-1920x1080.jpg`          | 16:9                                                     |
 
@@ -93,8 +93,7 @@ How to test it quickly (about 5 minutes):
 1. Unzip, then run install.bat (Windows) or ./install.sh (macOS/Linux). The installer checks Node.js 22,
    offers to install FFmpeg, installs dependencies, downloads Chromium and runs "reelforge doctor".
 2. Run start.bat, ReelForge.command or ./start.sh. The dashboard opens at http://127.0.0.1:4310.
-3. Click "Open editor" on any example episode to try the editor, or click Render (tick "Silent" because no
-   voice recording is included) and play the result in the dashboard.
+3. Click "Open editor" on any example episode to try the editor, or click Render (tick "Allow rendering without a voice recording", because no voice recording is included) and play the result in the dashboard.
 The documentation is in documentation/index.html.
 
 Notes:
@@ -109,21 +108,21 @@ Notes:
 
 ## 11. Pre-submission checklist (common rejection reasons)
 
-| Envato requirement / rejection reason                                 | Status                                                                                      |
-| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Documentation in English, HTML or PDF, covering install/use/customize | `documentation/index.html` (11 chapters + component reference + changelog)                  |
-| Credits for third-party assets in the documentation                   | `THIRD-PARTY-NOTICES.md` + License chapter in the docs                                      |
-| Unminified source code included                                       | `packages/*/src` (TypeScript) included alongside `dist`                                     |
-| Third-party assets licensed for redistribution                        | OFL fonts and permissive npm packages only; FFmpeg/Chromium not bundled                     |
-| Preview content not included in the download is disclosed             | None. Every preview is made from the included examples (stated in the description)          |
-| No trademarks in title, tags or preview images                        | Done. Platform names appear only in the description, with a trademark notice                |
-| Item not available free or elsewhere (exclusivity)                    | **Action: make the GitHub repository private before submitting** (see below)                |
-| Works on a clean machine                                              | `pnpm release` installs from the ZIP and renders two videos; also test real Windows and Mac |
-| No security or malware issues                                         | `pnpm audit` clean; localhost-only server with origin checks and path containment           |
-| Quality / not too general                                             | 21 components, dashboard, studio, 13 lint rules, audio mastering, 98 tests                  |
-| Support policy stated                                                 | `SUPPORT.md`, plus the Support section of the description                                   |
-| Changelog                                                             | `CHANGELOG.md` and the end of the description                                               |
-| Thumbnail 80×80, inline preview 590×300, cover 3:2                    | Generated and checked by `scripts/marketing.mjs`                                            |
+| Envato requirement / rejection reason                                 | Status                                                                                                                       |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Documentation in English, HTML or PDF, covering install/use/customize | `documentation/index.html` (15 chapters: 12 manual chapters, the authoring guide, the component reference and the changelog) |
+| Credits for third-party assets in the documentation                   | `THIRD-PARTY-NOTICES.md` + License chapter in the docs                                                                       |
+| Unminified source code included                                       | `packages/*/src` (TypeScript) included alongside `dist`                                                                      |
+| Third-party assets licensed for redistribution                        | OFL fonts and permissive npm packages only; FFmpeg/Chromium not bundled                                                      |
+| Preview content not included in the download is disclosed             | None. Every preview is made from the included examples (stated in the description)                                           |
+| No trademarks in title, tags or preview images                        | Done. Platform names appear only in the description, with a trademark notice                                                 |
+| Item not available free or elsewhere (exclusivity)                    | **Action: make the GitHub repository private before submitting** (see below)                                                 |
+| Works on a clean machine                                              | `pnpm release` installs from the ZIP and renders two videos; also test real Windows and Mac                                  |
+| No security or malware issues                                         | `pnpm audit` clean; localhost-only server with origin checks and path containment                                            |
+| Quality / not too general                                             | 21 components, dashboard, visual editor, MCP server, 13 lint rules, audio mastering, 117 tests                               |
+| Support policy stated                                                 | `SUPPORT.md`, plus the Support section of the description                                                                    |
+| Changelog                                                             | `CHANGELOG.md` and the end of the description                                                                                |
+| Thumbnail 80×80, inline preview 590×300, cover 3:2                    | Generated and checked by `scripts/marketing.mjs`                                                                             |
 
 ### Before you press Submit
 

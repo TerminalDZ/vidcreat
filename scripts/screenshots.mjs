@@ -235,7 +235,7 @@ if (want('cli')) {
   };
   const mcpTools = execFileSync('sh', ['-c', `printf '%s\\n' '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18"}}' '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' | node "${CLI}" mcp 2>/dev/null`], { cwd: ROOT, encoding: 'utf8' });
   const list = JSON.parse(mcpTools.trim().split('\n')[1]).result.tools;
-  blocks['27-cli-mcp'] = `$ reelforge mcp   # started by your AI client (Claude, Cursor, Copilot, Codex, Gemini…)\n${list.map((t) => `✓ ${t.name.padEnd(22)} ${t.title}`).join('\n')}`;
+  blocks['27-cli-mcp'] = `$ reelforge mcp   # started by your AI assistant\n${list.map((t) => `✓ ${t.name.padEnd(22)} ${t.title}`).join('\n')}`;
   const mini = path.join(tmp, 'cli', 'mini');
   cpSync(path.join(ROOT, 'fixtures/mini'), mini, { recursive: true, filter: (s) => !s.includes(`${path.sep}out`) });
   blocks['22-cli-render'] = `$ reelforge render mini --workers 3\n${execFileSync('sh', ['-c', `NO_COLOR=1 node "${CLI}" render "${mini}" --workers 3 2>&1 | grep -v '…$'`], { encoding: 'utf8' }).replaceAll(path.dirname(mini) + '/', '')}`;

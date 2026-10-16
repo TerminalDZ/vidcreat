@@ -3,7 +3,7 @@
   ReelForge turns a <strong>voice recording</strong> and one simple text file into a <strong>polished vertical explainer video</strong>
   (1080×1920, 30 fps) ready to publish on short-video platforms such as TikTok, Instagram Reels and YouTube Shorts.
   You get animated diagrams, code that types itself, word-by-word captions, sound effects, mastered audio and
-  platform-ready MP4 files. It is designed in a visual editor that feels like Figma and Premiere, but much simpler.
+  platform-ready MP4 files. It is designed in a visual editor that feels like a professional design tool and video editor, but much simpler.
   There are no keyframes and no subscription.
 </p>
 <p>
@@ -36,14 +36,14 @@
       <li><strong>Canvas:</strong> zoom and pan, selection, drag and resize with smart guides, arrow-key nudging, and double-click to edit text in place.</li>
       <li><strong>Panels:</strong> a layers panel with drag-to-reorder, and a component library with drag-and-drop.</li>
       <li><strong>Inspector:</strong> every property of every component, with scrubbable numbers, theme color swatches, effects and states.</li>
-      <li><strong>Timeline:</strong> multi-track, in the style of Premiere, with scenes, script cues, layers, the voice waveform and sound effects.</li>
+      <li><strong>Timeline:</strong> multi-track, like a professional video editor, with scenes, script cues, layers, the voice waveform and sound effects.</li>
       <li><strong>Everywhere:</strong> unlimited undo and redo, a ⌘K command palette, right-click menus, keyboard shortcuts for everything, and a first-run tour.</li>
     </ul>
   </li>
   <li><strong>Timed to your words</strong>: the timeline snaps to the words in your recording. A title set to appear on “Idempotency” stays on that word even after you re-record.</li>
   <li><strong>AI-ready (optional)</strong>: a built-in MCP server lets AI assistants write scripts, build scenes, check rendered frames and render for you. It works with Claude, Cursor, GitHub Copilot, Codex, Gemini CLI, Windsurf and others. Instruction files (<code>AGENTS.md</code>, <code>CLAUDE.md</code>, <code>GEMINI.md</code> and more) and ready-made configs are included.</li>
   <li><strong>Project dashboard</strong> (runs in your browser, on your computer only): create episodes, upload recordings, open the editor, validate, render with live progress, then play and open the results.</li>
-  <li><strong>Cue marker</strong>: listen at 0.5×, 0.75× or 1× speed. Nudge cues by 10 or 50 ms, re-mark any line, set word-level marks, snap to voice onsets, undo, and everything saves automatically.</li>
+  <li><strong>Cues mode</strong>: mark each sentence with Space while you listen at 0.5×, 0.75× or 1× speed. Nudge cues by 10 or 50 ms, re-mark any line, set word-level marks, snap to voice onsets, undo, and everything saves automatically.</li>
   <li><strong>Review mode</strong>: the exact 1080×1920 frame, synced to your audio, with safe-zone overlays for each platform, element outlines and every check one click away.</li>
   <li><strong>21 animated components</strong>: title, label, code, node, arrow with moving packets, chip, stamp, table, lanes, checklist, counter, meter, timeline, grid, token bucket, phone mock-up, quote, particles, “trap” interstitial, call-to-action and icons.</li>
   <li><strong>Word-timed animation</strong>: make any element enter, change or leave on a specific spoken word, for example <code>at: "l3:'Idempotency'"</code>.</li>
@@ -76,8 +76,8 @@ reelforge studio            open the project dashboard
 reelforge edit &lt;id&gt;         the visual editor
 reelforge mcp               MCP server for AI assistants
 reelforge new &lt;id&gt;          create an episode from a commented template
-reelforge cue &lt;id&gt;          mark cues while listening
-reelforge dev &lt;id&gt;          live preview with hot reload
+reelforge cue &lt;id&gt;          the editor in Cues mode
+reelforge dev &lt;id&gt;          the editor in Review mode (checks, safe zones)
 reelforge validate &lt;id&gt;     13 lint rules with fix hints
 reelforge render &lt;id&gt;       master + share MP4, SRT, contact sheet, publish.md
 reelforge snap &lt;id&gt; &lt;t&gt;     PNG frames, contact sheet, cover image
@@ -92,7 +92,7 @@ reelforge doctor --fix      check and fix Node.js, FFmpeg, Chromium and fonts
   <li>About 1.5 GB of free disk space for dependencies and the rendering browser, which the installer downloads once</li>
   <li>At least 4 CPU cores and 8 GB RAM; 8 cores are recommended</li>
   <li>An internet connection during installation only</li>
-  <li>For the dashboard and studio: a current Chrome, Edge or Firefox</li>
+  <li>For the dashboard and editor: a current Chrome, Edge or Firefox</li>
 </ul>
 
 <h3>Please note</h3>
@@ -103,6 +103,7 @@ reelforge doctor --fix      check and fix Node.js, FFmpeg, Chromium and fonts
   <li>The preview images and demo video were made entirely with ReelForge and the bundled example episodes. All fonts used in the previews are included.</li>
   <li>The videos you create are yours to use, including commercially.</li>
   <li>TikTok, Instagram, Reels, YouTube and Shorts are trademarks of their respective owners. ReelForge is not affiliated with or endorsed by them. Those names only describe the video formats ReelForge exports.</li>
+  <li>Claude, Cursor, GitHub Copilot, Codex, Gemini and Windsurf are trademarks of their respective owners. They are named only to describe compatibility, and ReelForge is not affiliated with them.</li>
 </ul>
 
 <h3>Credits</h3>

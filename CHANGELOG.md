@@ -36,7 +36,6 @@ First public release.
   verified (codec, profile, pixel format, frame rate, AAC 48 kHz, faststart, size).
 - **Validation**: 13 rules with `file:line:col` locations and fix hints.
 - **Themes and presets** in editable YAML; `reelforge theme new --accent #hex`.
-- **CLI**: `studio`, `new`, `cue`, `dev`, `validate`, `render` (`--all`), `snap` (`--cover`), `doctor`,
-  `schema`, `theme new`.
-- **Nine example episodes** (Season 1 of "System Design بالعربي").
+- **CLI**: `studio`, `new` (`--lang`), `edit`, `cue`, `dev`, `mcp`, `validate`, `render` (`--all`),
+  `snap` (`--cover`), `doctor`, `schema`, `theme new`.
 - One-command installers for Windows, macOS and Linux.

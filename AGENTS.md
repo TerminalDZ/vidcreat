@@ -22,20 +22,20 @@ configured for this project in `.mcp.json` (Claude Code), `.cursor/mcp.json`, `.
 node packages/cli/bin/reelforge.js mcp      # or: ./reelforge mcp · reelforge.cmd mcp
 ```
 
-| Tool                                       | Use it to                                                                    |
-| ------------------------------------------ | ---------------------------------------------------------------------------- |
-| `list_episodes`                            | see what exists                                                              |
-| `get_episode`                              | read episode.yaml plus a compiled outline (line times, element paths, boxes) |
-| `create_episode`                           | start a new episode from a script (draft cues are written for you)           |
-| `edit_episode`                             | structured edits (`set` / `delete` / `insert` / `move` by YAML path)         |
-| `write_episode_yaml`                       | replace the whole file (validated before writing)                            |
-| `validate_episode`                         | run all checks (V-1…V-13) with line numbers and fix hints                    |
-| `preview_frames`                           | **look** at frames (returned as images); always check your work              |
-| `list_components` / `get_component_schema` | the 21 components and their exact props                                      |
-| `draft_cues` / `set_cues`                  | estimated or known line timings                                              |
-| `render_episode` / `get_render_status`     | render in the background and poll                                            |
-| `open_editor`                              | give the person a URL to the visual editor to fine-tune and mark cues        |
-| `doctor`                                   | check Node.js, FFmpeg, Chromium and fonts                                    |
+| Tool                                                     | Use it to                                                                    |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `list_episodes`                                          | see what exists                                                              |
+| `get_episode`                                            | read episode.yaml plus a compiled outline (line times, element paths, boxes) |
+| `create_episode`                                         | start a new episode from a script (draft cues are written for you)           |
+| `edit_episode`                                           | structured edits (`set` / `delete` / `insert` / `move` by YAML path)         |
+| `write_episode_yaml`                                     | replace the whole file (validated before writing)                            |
+| `validate_episode`                                       | run all checks (V-1…V-13) with line numbers and fix hints                    |
+| `preview_frames`                                         | **look** at frames (returned as images); always check your work              |
+| `list_components` / `get_component_schema`               | the 21 components and their exact props                                      |
+| `draft_cues` / `set_cues`                                | estimated or known line timings                                              |
+| `render_episode` / `get_render_status` / `cancel_render` | render in the background, poll, cancel                                       |
+| `open_editor`                                            | give the person a URL to the visual editor to fine-tune and mark cues        |
+| `doctor`                                                 | check Node.js, FFmpeg, Chromium and fonts                                    |
 
 Without MCP, use the command line (`./reelforge` on macOS/Linux, `reelforge.cmd` on Windows):
 

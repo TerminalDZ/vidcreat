@@ -525,7 +525,7 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
         case '/api/cues/draft': {
           const ep = resolveKey(body.ep);
           if (existsSync(ep.cues))
-            throw new HttpError(409, 'cues.json already exists; mark cues in the cue marker instead');
+            throw new HttpError(409, 'cues.json already exists; mark cues in the editor’s Cues mode instead');
           const r = compileEpisode(ep, { draftCues: true, decode: opts.decode });
           const d = draftCues(r.script, r.spec?.audio.voice);
           if (r.voice) {

@@ -33,6 +33,7 @@ if (!args.has('--skip-tests')) {
 step('Generated docs, notices and marketing assets');
 run('node', ['scripts/gen-components-doc.mjs']);
 run('node', ['scripts/gen-notices.mjs']);
+run('node', ['packages/cli/bin/reelforge.js', 'schema']);
 if (!args.has('--skip-assets') && !existsSync(path.join(ROOT, 'docs/screenshots/00-dashboard.jpg'))) run('node', ['scripts/screenshots.mjs']);
 run('node', ['scripts/build-docs.mjs']);
 if (!args.has('--skip-assets')) run('node', ['scripts/marketing.mjs']);

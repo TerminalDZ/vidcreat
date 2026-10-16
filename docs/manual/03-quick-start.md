@@ -54,5 +54,5 @@ overflows or an element under the platform buttons. Fix the problems, then click
 When rendering finishes, watch the result and upload `out/ep10.share.mp4` with the caption from
 `out/publish.md`.
 
-> Prefer working with an AI assistant? See [AI agents & MCP](#ai-agents--mcp). An assistant can
+> Prefer working with an AI assistant? See [AI agents & MCP](#ai-agents-mcp). An assistant can
 > write the script, build the scenes and check the frames for you.

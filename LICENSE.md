@@ -5,8 +5,8 @@ Copyright © 2026 Idriss Boukmouche. All rights reserved.
 ReelForge is sold exclusively through **Envato Market (CodeCanyon)**. Your rights to use it are
 defined by the license you purchased there:
 
-- **Regular License** — <https://codecanyon.net/licenses/standard>
-- **Extended License** — <https://codecanyon.net/licenses/standard>
+- **Regular License** — <https://codecanyon.net/licenses/terms/regular>
+- **Extended License** — <https://codecanyon.net/licenses/terms/extended>
 
 ## What this means in practice
 
