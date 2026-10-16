@@ -1,0 +1,11 @@
+# Example rebrand for course clips (PRD persona "Educator"): a calmer palette, no grain.
+name: workshop
+extends: default
+colors:
+  bg: '#0b1020'
+  card: '#121a30'
+  line: '#26304d'
+  lime: '#7cf2c4'
+  cyan: '#8ab4ff'
+chrome: { grain: 0, grid: false }
+captions: { active: lime, english: cyan }

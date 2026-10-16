@@ -1,0 +1,12 @@
+# Instagram Reels 9:16 layout (SRS §7.1).
+name: reels
+label: Instagram Reels
+canvas: { width: 1080, height: 1920, fps: 30 }
+header_top: 150
+stage: { y: 270, h: 1000 }
+captions_y: 1290
+safe:
+  - { name: right-rail, x: 960, y: 1000, w: 120, h: 920 }
+  - { name: bottom, x: 0, y: 1500, w: 1080, h: 420 }
+share_mb: 28
+max_duration: 900

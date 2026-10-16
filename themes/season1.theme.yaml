@@ -1,0 +1,4 @@
+# Season 1 of "System Design بالعربي". Identical to the default look; kept as its own file so the
+# series can evolve without touching the default.
+name: season1
+extends: default
