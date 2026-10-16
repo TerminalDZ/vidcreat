@@ -34,15 +34,15 @@
     "@reelforge/studio": "workspace:*",
     "@types/node": "22.19.1",
     "@types/pngjs": "6.0.5",
-    "@vitest/coverage-v8": "3.2.4",
-    "eslint": "9.39.1",
-    "happy-dom": "18.0.1",
+    "@vitest/coverage-v8": "4.1.12",
+    "eslint": "9.39.5",
+    "happy-dom": "20.14.6",
     "pixelmatch": "7.1.0",
     "playwright": "1.56.1",
     "pngjs": "7.0.0",
     "prettier": "3.6.2",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.46.4",
-    "vitest": "3.2.4"
+    "typescript-eslint": "8.71.2",
+    "vitest": "4.1.12"
   }
 }
