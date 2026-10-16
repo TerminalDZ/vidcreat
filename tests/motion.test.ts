@@ -3,7 +3,6 @@
  * snapping to whole pixels (which reads as stutter), and the mask of `reveal` keeps text below
  * its final edge hidden. Positions are measured from the pixels by 1-D cross-correlation.
  */
-import path from 'node:path';
 import type { Browser } from 'playwright';
 import { PNG } from 'pngjs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
