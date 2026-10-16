@@ -1,0 +1,101 @@
+import type { RuntimeComponent } from '../types.js';
+import { code } from './code.js';
+import { bucket, checklist, grid, lanes, meter, table, timeline } from './data.js';
+import {
+  barChart,
+  beforeAfter,
+  comparison,
+  donutChart,
+  lineChart,
+  progressRing,
+  ranking,
+  statCard,
+} from './datavis.js';
+import { arrow, chip, iconC, node, particles } from './diagram.js';
+import { phone, trap } from './screens.js';
+import { cycle, flow, funnel, matrix2x2, orgChart, pyramid, steps, tree } from './structure.js';
+import { counter, cta, label, quote, stamp, title } from './text.js';
+import { building, containerStack, floorPlan, map, route } from './place.js';
+import { appointment, calendar, clock, scheduleBoard } from './time.js';
+import { chat, lowerThird, notification, personCard, speechBubble } from './people.js';
+import {
+  bulletList,
+  callout,
+  image,
+  kineticText,
+  logo,
+  pricingTable,
+  qrCode,
+  rating,
+  splitScreen,
+  spotlight,
+  vitals,
+} from './media.js';
+
+/** Runtime implementations, keyed by the component names of @reelforge/core. */
+export const COMPONENT_REGISTRY: Record<string, RuntimeComponent> = Object.fromEntries(
+  [
+    title,
+    label,
+    code,
+    node,
+    arrow,
+    chip,
+    stamp,
+    table,
+    lanes,
+    checklist,
+    counter,
+    meter,
+    timeline,
+    grid,
+    bucket,
+    phone,
+    quote,
+    particles,
+    trap,
+    cta,
+    iconC,
+    barChart,
+    lineChart,
+    donutChart,
+    statCard,
+    progressRing,
+    comparison,
+    beforeAfter,
+    ranking,
+    steps,
+    flow,
+    orgChart,
+    tree,
+    cycle,
+    funnel,
+    pyramid,
+    matrix2x2,
+    map,
+    route,
+    floorPlan,
+    building,
+    containerStack,
+    calendar,
+    clock,
+    scheduleBoard,
+    appointment,
+    personCard,
+    chat,
+    notification,
+    speechBubble,
+    lowerThird,
+    image,
+    logo,
+    kineticText,
+    bulletList,
+    callout,
+    spotlight,
+    splitScreen,
+    pricingTable,
+    qrCode,
+    rating,
+    vitals,
+  ].map((c) => [c.name, c]),
+);
