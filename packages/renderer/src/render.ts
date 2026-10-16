@@ -13,7 +13,15 @@ import {
   type Timeline,
 } from '@reelforge/core';
 import { mixAudio, writeSfx } from './audio.js';
-import { checkCompliance, contactSheet, encodeMaster, encodeShare, type Compliance } from './encode.js';
+import {
+  AUDIO_KBPS_MASTER,
+  checkCompliance,
+  contactSheet,
+  encodeMaster,
+  encodeShare,
+  MIN_SHARE_VIDEO_KBPS,
+  type Compliance,
+} from './encode.js';
 import { countFrames, killAll, probeFfmpeg, run } from './ffmpeg.js';
 import { measureTimeline } from './measure.js';
 import { renderAll, splitRanges } from './workers.js';
@@ -254,7 +262,11 @@ export async function renderEpisode(paths: EpisodePaths, opts: RenderOptions = {
         written.push(share);
         const shareMb = opts.shareMb ?? Number(process.env.REELFORGE_SHARE_SIZE ?? tl.preset.shareMb);
         progress({ phase: 'share', done: 0, total: segDur });
+        // The share file never needs more bits than the master already uses (short clips).
+        const masterVideoKbps =
+          Math.floor((compliance.master!.info.size * 8) / 1000 / tl.duration) - AUDIO_KBPS_MASTER;
         let r = await encodeShare({
+          maxKbps: Math.max(MIN_SHARE_VIDEO_KBPS, masterVideoKbps),
           video,
           audio: mix,
           out: share,

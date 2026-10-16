@@ -91,7 +91,7 @@ export async function encodeMaster(o: EncodeInput & { fast?: boolean }): Promise
 }
 
 export async function encodeShare(
-  o: EncodeInput & { shareMb: number; tmpDir: string; fast?: boolean },
+  o: EncodeInput & { shareMb: number; tmpDir: string; fast?: boolean; maxKbps?: number },
 ): Promise<{ kbps: number }> {
   let kbps = shareVideoKbps(o.shareMb, o.duration);
   if (kbps < MIN_SHARE_VIDEO_KBPS) {
@@ -99,7 +99,7 @@ export async function encodeShare(
       `Share size ${o.shareMb} MB is too small for ${o.duration.toFixed(1)} s (needs ≥ ${MIN_SHARE_VIDEO_KBPS} kb/s video). Raise --share-size.`,
     );
   }
-  kbps = Math.min(kbps, MAX_SHARE_VIDEO_KBPS);
+  kbps = Math.min(kbps, MAX_SHARE_VIDEO_KBPS, o.maxKbps ?? Infinity);
   const passlog = path.join(o.tmpDir, 'x264pass');
   const rate = ['-b:v', `${kbps}k`, '-maxrate', `${Math.round(kbps * 1.5)}k`, '-bufsize', `${kbps * 3}k`];
   const preset = ['-preset', o.fast ? 'medium' : 'slow'];

@@ -1,6 +1,8 @@
 // Generates docs/components.md from the component schemas (single source of truth).
 // Usage: node scripts/gen-components-doc.mjs   (requires `pnpm build`)
 import { writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import prettier from 'prettier';
 import { COMPONENTS, episodeJsonSchema } from '../packages/core/dist/index.js';
 
 const schema = episodeJsonSchema()['x-components'];
@@ -45,5 +47,7 @@ for (const c of Object.values(COMPONENTS)) {
     md += `| \`${k}\` | ${TIME.has(k) ? 'time' : typeOf(v)} | ${def} | ${req.has(k) && v.default === undefined ? 'yes' : ''} |\n`;
   }
 }
-writeFileSync(new URL('../docs/components.md', import.meta.url), md);
+const target = fileURLToPath(new URL('../docs/components.md', import.meta.url));
+const options = (await prettier.resolveConfig(target)) ?? {};
+writeFileSync(target, await prettier.format(md, { ...options, filepath: target }));
 console.log('wrote docs/components.md');

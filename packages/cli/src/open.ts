@@ -7,7 +7,8 @@ export function openBrowser(url: string): void {
     process.platform === 'darwin'
       ? ['open', [url]]
       : process.platform === 'win32'
-        ? ['cmd', ['/c', 'start', '""', url]]
+        ? // explorer.exe opens a URL in the default browser without going through cmd's quoting rules
+          ['explorer.exe', [url]]
         : ['xdg-open', [url]];
   try {
     const p = spawn(cmd, args as string[], { stdio: 'ignore', detached: true, windowsHide: true });

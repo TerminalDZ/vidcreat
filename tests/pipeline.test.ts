@@ -32,6 +32,8 @@ describe('render pipeline (fixtures/mini)', () => {
     expect(r.compliance.master!.problems).toEqual([]);
     expect(r.compliance.share!.problems).toEqual([]);
     expect(statSync(share!).size).toBeLessThanOrEqual(28 * 1048576);
+    // a short clip's share file must not be larger than its master
+    expect(statSync(share!).size).toBeLessThanOrEqual(statSync(master!).size * 1.05);
     // frame count = ceil(duration × fps); audio duration = voice duration ± 1 frame
     expect(await countFrames(master!)).toBe(180);
     const probe = await ffprobeJson(master!);
