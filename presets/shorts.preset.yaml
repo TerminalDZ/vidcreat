@@ -1,0 +1,12 @@
+# YouTube Shorts 9:16 layout (SRS §7.1).
+name: shorts
+label: YouTube Shorts
+canvas: { width: 1080, height: 1920, fps: 30 }
+header_top: 130
+stage: { y: 250, h: 1000 }
+captions_y: 1280
+safe:
+  - { name: right-rail, x: 960, y: 1000, w: 120, h: 920 }
+  - { name: bottom, x: 0, y: 1560, w: 1080, h: 360 }
+share_mb: 28
+max_duration: 180
