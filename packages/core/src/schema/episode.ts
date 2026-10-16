@@ -15,9 +15,28 @@ export const ENTER_ANIMS = [
   'glitch',
   'stamp',
   'zoom',
+  'blur',
+  'wipe',
+  'spring',
+  'drop',
+  'reveal',
   'none',
 ] as const;
-export const EXIT_ANIMS = ['fade', 'pop', 'rise', 'sink', 'slide-l', 'slide-r', 'zoom', 'none'] as const;
+export const EXIT_ANIMS = [
+  'fade',
+  'pop',
+  'rise',
+  'sink',
+  'slide-l',
+  'slide-r',
+  'zoom',
+  'blur',
+  'wipe',
+  'none',
+] as const;
+export const EASES = ['smooth', 'snappy', 'gentle', 'linear'] as const;
+export const TRANSITIONS = ['crossfade', 'cut', 'slide-up', 'zoom', 'push', 'blur'] as const;
+export const CAMERAS = ['still', 'drift', 'push-in', 'pull-out'] as const;
 export const FX_KINDS = ['shake', 'flash', 'glitch', 'pulse', 'bump'] as const;
 export const PRESETS = ['tiktok', 'reels', 'shorts'] as const;
 
@@ -83,6 +102,7 @@ const enter = z
     at: time().optional(),
     anim: z.enum(ENTER_ANIMS).optional(),
     dur: z.number().positive().optional(),
+    ease: z.enum(EASES).optional(),
     // animation parameters (SRS §6.2)
     s0: z.number().optional(),
     dy: z.number().optional(),
@@ -157,7 +177,8 @@ export const scene = z
     at: time(),
     end: time().optional(),
     glow: glow.optional(),
-    transition: z.enum(['crossfade', 'cut', 'slide-up']).default('crossfade'),
+    transition: z.enum(TRANSITIONS).default('crossfade'),
+    camera: z.enum(CAMERAS).default('still'),
     layout: z.enum(['stage', 'full']).default('stage'),
     row: flow.optional(),
     column: flow.optional(),

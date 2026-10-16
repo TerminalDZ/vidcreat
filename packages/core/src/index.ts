@@ -22,6 +22,14 @@ export {
   ICONS_LIST,
 } from './components/exports.js';
 export type { ComponentDef, ComponentEvent } from './components/index.js';
-export { episodeSchema, ENTER_ANIMS, EXIT_ANIMS, FX_KINDS } from './schema/episode.js';
+export {
+  CAMERAS,
+  EASES,
+  episodeSchema,
+  ENTER_ANIMS,
+  EXIT_ANIMS,
+  FX_KINDS,
+  TRANSITIONS,
+} from './schema/episode.js';
 export type { EpisodeSpec, SceneSpec, ElementSpec } from './schema/episode.js';
 export type { Resolved } from './schema/common.js';

@@ -1,0 +1,36 @@
+# fixtures/motion — rendered-motion smoothness (tests/motion.test.ts): slow moves expose pixel snapping.
+meta:
+  id: motion
+  series: 'MOTION'
+  title: 'Motion'
+  episode: 1
+  preset: tiktok
+  theme: default
+  lang: en-US
+
+audio:
+  voice: voice.wav
+  sfx: none
+
+script:
+  - text: 'One two three four five six seven eight nine ten eleven twelve.'
+
+scenes:
+  - id: s
+    at: l1
+    elements:
+      - use: title
+        id: rise
+        props: { text: 'Smooth motion' }
+        place: { x: 60, y: 60, w: 960, h: 200 }
+        enter: { at: 1, anim: rise, dur: 1.2, dist: 60 }
+      - use: chip
+        id: slide
+        props: { text: 'Slide' }
+        place: { x: 300, y: 420, w: 400, h: 100 }
+        enter: { at: 1, anim: slide-r, dur: 1.2 }
+      - use: title
+        id: reveal
+        props: { text: 'Reveal', size: 90 }
+        place: { x: 60, y: 600, w: 820, h: 160 }
+        enter: { at: 1, anim: reveal, dur: 1.2 }

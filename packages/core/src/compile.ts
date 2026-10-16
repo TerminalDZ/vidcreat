@@ -113,6 +113,11 @@ const DEFAULT_FX: Record<TFx['do'], { amp: number; dur: number }> = {
 };
 
 const DEFAULT_ENTER_DUR: Partial<Record<EnterAnim, number>> = {
+  blur: 0.6,
+  wipe: 0.6,
+  spring: 0.8,
+  drop: 0.7,
+  reveal: 0.6,
   draw: 0.6,
   stamp: 0.5,
   glitch: 0.5,
@@ -642,7 +647,13 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
         box: { x: 0, y: 0, w: 0, h: 0 },
         layer: e.layer ?? def.layer ?? 'base',
         z: e.z ?? ej,
-        enter: { t: enterT, anim, dur: round3(enterDur), params },
+        enter: {
+          t: enterT,
+          anim,
+          dur: round3(enterDur),
+          params,
+          ...(e.enter?.ease ? { ease: e.enter.ease } : {}),
+        },
         exit:
           exitT === undefined ? null : { t: exitT, anim: e.exit?.anim ?? 'fade', dur: e.exit?.dur ?? 0.3 },
         states,
@@ -790,6 +801,7 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
       start,
       end,
       transition: s.transition,
+      ...(s.camera !== 'still' ? { camera: s.camera } : {}),
       layout: s.layout,
       origin: area,
       elements,

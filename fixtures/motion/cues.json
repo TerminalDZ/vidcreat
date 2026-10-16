@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "audio": {
+    "file": "voice.wav",
+    "duration": 5.15
+  },
+  "cues": {
+    "l1": 0.2
+  },
+  "words": {},
+  "draft": true,
+  "updated": "2026-10-16T14:07:05.532Z"
+}

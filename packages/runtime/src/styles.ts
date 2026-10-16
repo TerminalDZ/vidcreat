@@ -27,14 +27,14 @@ body { -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision; 
 .rf-chapter span { position: absolute; left: 0; top: 0; white-space: nowrap; }
 
 /* scenes & elements */
-.rf-scene { position: absolute; overflow: visible; transform-origin: 50% 50%; }
-.rf-el { position: absolute; transform-origin: 50% 50%; }
+.rf-scene { position: absolute; overflow: visible; transform-origin: 50% 50%; will-change: transform, opacity; }
+.rf-el { position: absolute; transform-origin: 50% 50%; will-change: transform, opacity; }
 .rf-c { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
 
 /* captions */
 .rf-captions { position: absolute; text-align: center; font-family: var(--f-arabic); font-weight: 800;
   line-height: 1.32; color: var(--ink); }
-.rf-chunk { position: absolute; left: 0; top: 0; width: 100%; }
+.rf-chunk { position: absolute; left: 0; top: 0; width: 100%; will-change: transform, opacity; }
 .rf-cline { background: var(--scrim); padding: 0.06em 0.34em 0.12em; border-radius: 18px;
   -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 .rf-tok { position: relative; display: inline-block; white-space: nowrap; transform-origin: 50% 60%; }

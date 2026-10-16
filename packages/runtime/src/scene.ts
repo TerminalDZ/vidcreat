@@ -2,12 +2,19 @@
 import type { TElement, Theme, Timeline, TScene } from '@reelforge/core';
 import {
   clamp,
+  easeFor,
   easeInCubic,
+  easeInOutCubic,
+  easeInOutSine,
   easeOutBack,
+  easeOutBounce,
   easeOutCubic,
+  easeOutQuart,
+  easeOutSine,
   identity,
   jitter,
   progress,
+  spring,
   transformCss,
   type Transform,
 } from './anim.js';
@@ -84,7 +91,18 @@ export class ElementView {
     const exitP = exit ? progress(t, exit.t, exit.dur) : 0;
     const tr = identity();
     const handled = this.comp.handles?.includes(enter.anim) ?? false;
-    applyEnter(tr, enter.anim, enterRaw, enter.params, handled, this.theme, t, this.seed);
+    applyEnter(
+      tr,
+      enter.anim,
+      enterRaw,
+      enter.params,
+      handled,
+      this.theme,
+      t,
+      this.seed,
+      this.spec.box.h,
+      enter.ease,
+    );
     if (exit && t >= exit.t) applyExit(tr, exit.anim, exitP);
     for (const f of this.spec.fx) applyFx(tr, f, t, this.seed);
 
@@ -99,13 +117,9 @@ export class ElementView {
       filters.push(`drop-shadow(${(-a * 0.35 * (1 - j)).toFixed(1)}px 0 0 rgba(85,220,255,.85))`);
     }
     css(this.el, 'filter', filters.length ? filters.join(' ') : 'none');
-    css(
-      this.el,
-      'clip-path',
-      tr.clip < 0.999 ? `inset(-20px ${((1 - tr.clip) * 100).toFixed(2)}% -20px -20px)` : 'none',
-    );
+    css(this.el, 'clip-path', clipCss(tr, this.el.style.direction === 'rtl'));
 
-    const ease = enter.anim === 'pop' ? easeOutBack(this.theme.motion.pop_overshoot) : easeOutCubic;
+    const ease = enter.anim === 'pop' ? easeOutBack(this.theme.motion.pop_overshoot) : easeFor(enter.ease);
     const local: LocalTime = {
       since: t - enter.t,
       enterRaw,
@@ -144,9 +158,11 @@ export function applyEnter(
   theme: Theme,
   t: number,
   seed: number,
+  boxH = 0,
+  ease?: string,
 ): void {
   if (p >= 1 || anim === 'none') return;
-  const e = easeOutCubic(p);
+  const e = easeFor(ease)(p);
   const num = (k: string, d: number) => (typeof params[k] === 'number' ? (params[k] as number) : d);
   if (handled) {
     tr.opacity *= clamp(p / 0.25);
@@ -199,6 +215,43 @@ export function applyEnter(
       tr.rot += num('rot', 0) * (1 - k);
       break;
     }
+    case 'blur': {
+      // Focus pull: from soft and slightly large to crisp.
+      tr.opacity *= easeOutSine(clamp(p * 1.4));
+      tr.blur += num('amp', 16) * (1 - e);
+      tr.scale *= 1 + 0.06 * (1 - e);
+      tr.ty += num('dy', 14) * (1 - e);
+      break;
+    }
+    case 'wipe': {
+      // Clean reveal sweep with a short lead-in of the content itself.
+      const w = easeInOutCubic(p);
+      tr.clip = w;
+      tr.tx -= num('dist', 24) * (1 - e);
+      tr.opacity *= clamp(p / 0.12);
+      break;
+    }
+    case 'spring': {
+      const s0 = num('s0', 0.55);
+      tr.opacity *= easeOutCubic(clamp(p * 3));
+      tr.scale *= s0 + (1 - s0) * spring(p);
+      break;
+    }
+    case 'drop': {
+      // Falls from above and bounces to rest.
+      tr.opacity *= easeOutCubic(clamp(p * 3));
+      tr.ty -= num('dist', 220) * (1 - easeOutBounce(p));
+      break;
+    }
+    case 'reveal': {
+      // Rises out of a mask at its own bottom edge (title-sequence style).
+      const d = num('dist', boxH > 0 ? Math.min(boxH, 160) : 80);
+      const k = 1 - easeOutQuart(p);
+      tr.ty += d * k;
+      tr.clipBottom = Math.max(tr.clipBottom, d * k);
+      tr.opacity *= clamp(p / 0.08);
+      break;
+    }
     case 'glitch': {
       const steps = jitter(seed, t, 20);
       tr.opacity *= p < 0.7 ? (steps > -0.3 ? 1 : 0.25) : 1;
@@ -214,28 +267,50 @@ export function applyExit(tr: Transform, anim: string, q: number): void {
     tr.opacity = 0;
     return;
   }
-  const e = easeOutCubic(q);
-  tr.opacity *= 1 - e;
+  // Exits accelerate away (ease-in) while the fade stays soft: the reverse of a good entrance.
+  const mv = easeInCubic(q);
+  if (anim !== 'wipe') tr.opacity *= 1 - easeInOutSine(q);
   switch (anim) {
     case 'pop':
-      tr.scale *= 1 - 0.2 * e;
+      tr.scale *= 1 - 0.2 * mv;
       break;
     case 'rise':
-      tr.ty -= 50 * e;
+      tr.ty -= 60 * mv;
       break;
     case 'sink':
-      tr.ty += 50 * e;
+      tr.ty += 60 * mv;
       break;
     case 'slide-l':
-      tr.tx -= SLIDE_DIST * e;
+      tr.tx -= SLIDE_DIST * mv;
       break;
     case 'slide-r':
-      tr.tx += SLIDE_DIST * e;
+      tr.tx += SLIDE_DIST * mv;
       break;
     case 'zoom':
-      tr.scale *= 1 + 0.25 * e;
+      tr.scale *= 1 + 0.25 * mv;
+      break;
+    case 'blur':
+      tr.blur += 16 * mv;
+      tr.scale *= 1 + 0.05 * mv;
+      break;
+    case 'wipe':
+      tr.clipEnd = easeInOutCubic(q);
       break;
   }
+}
+
+/** clip-path for the reveal/wipe/mask animations (inline-start follows the text direction). */
+function clipCss(tr: Transform, rtl: boolean): string {
+  const show = tr.clip < 0.999;
+  const hide = tr.clipEnd > 0.001;
+  const bottom = tr.clipBottom > 0.05;
+  if (!show && !hide && !bottom) return 'none';
+  const pad = '-20px';
+  let start = hide ? `${(tr.clipEnd * 100).toFixed(2)}%` : pad;
+  let end = show ? `${((1 - tr.clip) * 100).toFixed(2)}%` : pad;
+  if (rtl) [start, end] = [end, start];
+  const b = bottom ? `${tr.clipBottom.toFixed(2)}px` : pad;
+  return `inset(${pad} ${end} ${b} ${start})`;
 }
 
 export function applyFx(tr: Transform, f: TElement['fx'][number], t: number, seed: number): void {
@@ -313,31 +388,83 @@ export class SceneView {
     let opacity = 1;
     let scale = 1;
     let blur = 0;
+    let tx = 0;
     let ty = 0;
+    const w = this.spec.origin.w;
+    // Slow camera move across the whole scene (eased at both ends so it never jolts).
+    const cam = this.spec.camera;
+    if (cam && cam !== 'still') {
+      const span = Math.max(0.5, this.spec.end - this.spec.start + this.outDur);
+      const k = easeInOutSine(progress(t, this.spec.start, span));
+      if (cam === 'push-in') scale *= 1 + 0.06 * k;
+      else if (cam === 'pull-out') scale *= 1.06 - 0.06 * k;
+      else {
+        scale *= 1.03;
+        tx += 18 * (k - 0.5) * 2;
+        ty += -10 * (k - 0.5) * 2;
+      }
+    }
     const inD = this.inDur;
     if (inD > 0 && t < this.spec.start + inD) {
-      const e = easeOutCubic(progress(t, this.spec.start, inD));
-      opacity *= e;
-      if (this.spec.transition === 'slide-up') ty += 140 * (1 - e);
-      else {
-        scale *= 0.97 + 0.03 * e;
-        blur += 8 * (1 - e);
+      const p = progress(t, this.spec.start, inD);
+      const e = easeOutCubic(p);
+      switch (this.spec.transition) {
+        case 'slide-up':
+          opacity *= e;
+          ty += 140 * (1 - e);
+          break;
+        case 'zoom':
+          opacity *= e;
+          scale *= 1.12 - 0.12 * e;
+          blur += 6 * (1 - e);
+          break;
+        case 'push': {
+          const m = easeInOutCubic(p);
+          tx += w * (1 - m);
+          break;
+        }
+        case 'blur':
+          opacity *= easeInOutSine(p);
+          blur += 22 * (1 - e);
+          break;
+        default:
+          opacity *= e;
+          scale *= 0.97 + 0.03 * e;
+          blur += 8 * (1 - e);
       }
     }
     if (t >= this.spec.end) {
-      const q = easeOutCubic(progress(t, this.spec.end, this.outDur));
-      opacity *= 1 - q;
-      if (this.outKind === 'slide-up') ty -= 140 * q;
-      else {
-        scale *= 1 + 0.02 * q;
-        blur += 8 * q;
+      const raw = progress(t, this.spec.end, this.outDur);
+      const q = easeOutCubic(raw);
+      switch (this.outKind) {
+        case 'slide-up':
+          opacity *= 1 - q;
+          ty -= 140 * q;
+          break;
+        case 'zoom':
+          opacity *= 1 - q;
+          scale *= 1 - 0.08 * q;
+          break;
+        case 'push':
+          tx -= w * easeInOutCubic(raw);
+          break;
+        case 'blur':
+          opacity *= 1 - easeInOutSine(raw);
+          blur += 22 * q;
+          break;
+        default:
+          opacity *= 1 - q;
+          scale *= 1 + 0.02 * q;
+          blur += 8 * q;
       }
     }
     css(this.el, 'opacity', opacity >= 0.999 ? '1' : opacity.toFixed(3));
     css(
       this.el,
       'transform',
-      scale === 1 && ty === 0 ? 'none' : `translateY(${ty.toFixed(2)}px) scale(${scale.toFixed(4)})`,
+      scale === 1 && ty === 0 && tx === 0
+        ? 'none'
+        : `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px) scale(${scale.toFixed(4)})`,
     );
     css(this.el, 'filter', blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : 'none');
     // Elements freeze at the scene end while the scene fades out.

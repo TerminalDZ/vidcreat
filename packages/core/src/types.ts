@@ -69,14 +69,34 @@ export type EnterAnim =
   | 'glitch'
   | 'stamp'
   | 'zoom'
+  | 'blur'
+  | 'wipe'
+  | 'spring'
+  | 'drop'
+  | 'reveal'
   | 'none';
-export type ExitAnim = 'fade' | 'pop' | 'rise' | 'sink' | 'slide-l' | 'slide-r' | 'zoom' | 'none';
+export type ExitAnim =
+  | 'fade'
+  | 'pop'
+  | 'rise'
+  | 'sink'
+  | 'slide-l'
+  | 'slide-r'
+  | 'zoom'
+  | 'blur'
+  | 'wipe'
+  | 'none';
+/** Easing of an enter animation: smooth (cubic), snappy (quint), gentle (sine), linear. */
+export type Ease = 'smooth' | 'snappy' | 'gentle' | 'linear';
+/** Slow continuous camera move over a scene. */
+export type Camera = 'still' | 'drift' | 'push-in' | 'pull-out';
 export type FxKind = 'shake' | 'flash' | 'glitch' | 'pulse' | 'bump';
 
 export interface TEnter {
   t: number;
   anim: EnterAnim;
   dur: number;
+  ease?: Ease;
   /** Animation parameters (s0, dy, dist, cps, rot, …). */
   params: Record<string, number | boolean>;
 }
@@ -121,13 +141,14 @@ export interface TElement {
   source?: SourcePos;
 }
 
-export type Transition = 'crossfade' | 'cut' | 'slide-up';
+export type Transition = 'crossfade' | 'cut' | 'slide-up' | 'zoom' | 'push' | 'blur';
 
 export interface TScene {
   id: string;
   start: number;
   end: number;
   transition: Transition;
+  camera?: Camera;
   layout: 'stage' | 'full';
   /** Top-left of the scene coordinate system on the canvas. */
   origin: { x: number; y: number; w: number; h: number };
