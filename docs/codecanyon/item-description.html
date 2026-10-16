@@ -1,65 +1,110 @@
-<h2>ReelForge — Voice + YAML → finished vertical explainer videos</h2>
+<h2>ReelForge - Voice + YAML to Finished Vertical Explainer Videos</h2>
 <p>
-  Turn a <strong>voice recording</strong> and one simple text file into a <strong>polished vertical explainer video</strong>
-  (1080×1920, 30 fps) for <strong>TikTok, Instagram Reels and YouTube Shorts</strong> — with animated diagrams, code that types
-  itself, word-by-word captions, sound effects, mastered audio and platform-ready MP4 files.
-  No video editor, no keyframes, no subscription, no AI.
+  ReelForge turns a <strong>voice recording</strong> and one simple text file into a <strong>polished vertical explainer video</strong>
+  (1080×1920, 30 fps) ready to publish on short-video platforms such as TikTok, Instagram Reels and YouTube Shorts.
+  You get animated diagrams, code that types itself, word-by-word captions, sound effects, mastered audio and
+  platform-ready MP4 files. You don't need a video editor, keyframes, a subscription or AI.
 </p>
 <p>
-  You write what you say, sentence by sentence, and describe what appears on screen and <strong>on which word</strong>.
-  ReelForge animates everything exactly when you say it. Re-record one sentence and everything after it stays in sync.
+  You write your script one sentence per line and describe what appears on screen and <strong>on which word</strong>.
+  ReelForge animates everything exactly when you say it. If you re-record one sentence, everything after it stays in sync.
 </p>
 
-<h3>Perfect for</h3>
+<h3>Who is it for?</h3>
 <ul>
-  <li>Developers and educators making technical explainer series (system design, programming, DevOps, data…)</li>
-  <li>Arabic creators who mix English terms — captions that are finally laid out correctly</li>
-  <li>Agencies producing consistent branded reels at scale</li>
-  <li>Trainers turning course material into short clips</li>
+  <li>Developers and educators who make technical explainer series (system design, programming, DevOps, data).</li>
+  <li>Arabic creators who mix English terms into their speech. Right-to-left captions keep the English words in the correct order.</li>
+  <li>Agencies and teams producing consistent, branded short videos at scale.</li>
+  <li>Trainers and course authors who turn lessons into short clips.</li>
 </ul>
+
+<h3>How it works</h3>
+<ol>
+  <li><strong>Create</strong> an episode in the dashboard (or with <code>reelforge new ep10</code>).</li>
+  <li><strong>Write</strong> the script and the scenes in <code>episode.yaml</code>. VS Code autocompletion is included.</li>
+  <li><strong>Record</strong> your voice with any recorder, then upload WAV, MP3, M4A, AAC, OGG, FLAC, WebM or Opus.</li>
+  <li><strong>Mark cues</strong> by pressing Space at the start of each sentence while you listen.</li>
+  <li><strong>Preview</strong> the real frame synced to your voice. It reloads every time you save.</li>
+  <li><strong>Validate and render.</strong> You get a master MP4, a share MP4 sized for upload, SRT captions, a contact sheet and a ready-to-paste caption.</li>
+</ol>
 
 <h3>Key features</h3>
 <ul>
-  <li><strong>Project dashboard</strong> — create episodes, upload your recording (WAV, MP3, M4A, OGG, FLAC…), mark cues, preview, validate and render with live progress, then play and download the results.</li>
-  <li><strong>Cue marker</strong> — press Space at the start of each sentence while listening at 0.5×–1× speed; nudge by 10/50 ms, re-mark any line, word-level marks, snap-to-voice-onset, undo, autosave.</li>
-  <li><strong>Live preview</strong> — the real 1080×1920 frame synced to your voice, reloading on every save, with TikTok/Reels/Shorts safe-zone overlays, element boxes and a lint panel.</li>
-  <li><strong>21 animated components</strong> — title, label, code, node, arrow (with moving packets), chip, stamp, table, lanes, checklist, counter, meter, timeline, grid, token bucket, phone mock-up, quote, particles, “The Trap” interstitial, call-to-action and icons.</li>
-  <li><strong>Arabic-first captions</strong> — word-by-word karaoke highlight; right-to-left text with English terms in the correct order; “الـ client” kept together; punctuation on the correct side.</li>
-  <li><strong>Professional audio</strong> — procedural sound effects on hits and transitions, voice mastered to −14 LUFS, effects ducked under the voice, true-peak limiter.</li>
-  <li><strong>Platform-ready output</strong> — H.264 master, a share file that fits the size you choose, SRT captions, a contact sheet and a publish.md with your caption, hashtags and pinned comment. Every file is verified after encoding.</li>
-  <li><strong>13 validation rules</strong> — schema, timing, overlaps, off-screen elements, platform UI zones, text overflow and caption length, each with file:line:column and a fix hint.</li>
-  <li><strong>Themes and presets</strong> — every color, font size and motion value in one YAML file; generate a full theme from one accent color.</li>
-  <li><strong>Fast, parallel rendering</strong> — uses all your CPU cores; a 2-minute episode renders in about 5–10 minutes.</li>
-  <li><strong>Offline and private</strong> — everything runs on your computer. No account, no upload, no per-video cost.</li>
-  <li><strong>Deterministic</strong> — the same inputs always produce exactly the same frames.</li>
-  <li><strong>Command line</strong> for automation and CI: studio, new, cue, dev, validate, render (batch), snap (cover image), doctor, theme, schema — with JSON output.</li>
+  <li><strong>Project dashboard</strong> (runs in your browser, on your computer only): create episodes, upload recordings, mark cues, preview, validate, render with live progress, then play and open the results.</li>
+  <li><strong>Cue marker</strong>: listen at 0.5×, 0.75× or 1× speed. Nudge cues by 10 or 50 ms, re-mark any line, set word-level marks, snap to voice onsets, undo, and everything saves automatically.</li>
+  <li><strong>Live preview</strong>: the exact 1080×1920 frame, synced to your audio, with safe-zone overlays for each platform, element outlines, a lint panel and an error overlay that points to the YAML line.</li>
+  <li><strong>21 animated components</strong>: title, label, code, node, arrow with moving packets, chip, stamp, table, lanes, checklist, counter, meter, timeline, grid, token bucket, phone mock-up, quote, particles, “trap” interstitial, call-to-action and icons.</li>
+  <li><strong>Word-timed animation</strong>: make any element enter, change or leave on a specific spoken word, for example <code>at: "l3:'Idempotency'"</code>.</li>
+  <li><strong>Arabic-first captions</strong>: word-by-word karaoke highlight, right-to-left text with English terms in the correct order, Arabic prefixes kept attached to English words, and punctuation on the correct side. English-only captions work too.</li>
+  <li><strong>Professional audio</strong>: procedural sound effects on hits and transitions, voice mastered to −14 LUFS with two-pass loudness normalisation, effects ducked under the voice, and a true-peak limiter.</li>
+  <li><strong>Platform-ready output</strong>: an H.264 master (CRF 18), a share file that fits the size you choose, SRT subtitles, a contact sheet, a cover frame and a publish.md with caption, hashtags and pinned comment. Every output is checked with ffprobe after encoding.</li>
+  <li><strong>13 validation rules</strong> covering schema, timing, overlaps, off-screen elements, platform UI zones, text overflow and caption length. Each issue reports file:line:column and a fix hint.</li>
+  <li><strong>Themes and presets</strong>: every color, font size and motion value lives in one YAML file. Generate a complete theme from a single accent color.</li>
+  <li><strong>Fast parallel rendering</strong> uses all your CPU cores. A 2-minute episode takes about 5–10 minutes on a typical 8-core computer.</li>
+  <li><strong>Batch and automation</strong>: <code>render --all</code>, JSON output, environment-variable configuration and clean Ctrl+C handling.</li>
+  <li><strong>Offline and private</strong>: everything runs on your own computer, with no account, no uploads and no per-video cost.</li>
+  <li><strong>Deterministic</strong>: the same inputs always produce exactly the same frames.</li>
 </ul>
 
 <h3>What you get</h3>
 <ul>
-  <li>Full TypeScript source code (monorepo, strict mode, 98 automated tests)</li>
-  <li>One-click installers for Windows, macOS and Linux</li>
-  <li>Nine complete example episodes (Season 1 of “System Design بالعربي”)</li>
-  <li>Three themes and three platform presets (TikTok, Reels, Shorts)</li>
-  <li>Offline HTML documentation with screenshots, a component reference and troubleshooting</li>
+  <li>Full, unminified TypeScript source code (strict mode, monorepo of 6 packages) plus a prebuilt build, ready to run</li>
+  <li>One-click installers and launchers for Windows, macOS and Linux</li>
+  <li>9 complete example episodes (an Arabic system-design series) with draft cues</li>
+  <li>3 themes and 3 editable platform presets</li>
+  <li>Offline HTML documentation in English: installation, quick start, dashboard, recording and cues, preview, themes, rendering, command line, troubleshooting and FAQ, component reference, and screenshots</li>
+  <li>A JSON Schema for editor autocompletion</li>
+  <li>98 automated tests</li>
 </ul>
+
+<h3>Command line</h3>
+<pre>
+reelforge studio            open the project dashboard
+reelforge new &lt;id&gt;          create an episode from a commented template
+reelforge cue &lt;id&gt;          mark cues while listening
+reelforge dev &lt;id&gt;          live preview with hot reload
+reelforge validate &lt;id&gt;     13 lint rules with fix hints
+reelforge render &lt;id&gt;       master + share MP4, SRT, contact sheet, publish.md
+reelforge snap &lt;id&gt; &lt;t&gt;     PNG frames, contact sheet, cover image
+reelforge theme new &lt;name&gt;  generate a theme from one accent color
+reelforge doctor --fix      check and fix Node.js, FFmpeg, Chromium and fonts
+</pre>
 
 <h3>Requirements</h3>
 <ul>
-  <li>Windows 10/11, macOS 13+ or Linux</li>
-  <li>Node.js 22 LTS (free) and FFmpeg 6+ (free) — the installer sets them up for you where possible</li>
-  <li>4 CPU cores and 8 GB RAM minimum</li>
+  <li>Windows 10/11 (64-bit), macOS 13 or later, or a 64-bit Linux distribution</li>
+  <li>Node.js 22 LTS and FFmpeg 6 or later, both free. The installer checks for them and offers to install FFmpeg.</li>
+  <li>About 1.5 GB of free disk space for dependencies and the rendering browser, which the installer downloads once</li>
+  <li>At least 4 CPU cores and 8 GB RAM; 8 cores are recommended</li>
+  <li>An internet connection during installation only</li>
+  <li>For the dashboard and studio: a current Chrome, Edge or Firefox</li>
 </ul>
 
-<h3>Notes</h3>
+<h3>Please note</h3>
 <ul>
-  <li>ReelForge does not generate voices or visuals with AI: you record your own voice and design scenes in a simple YAML file (autocompletion included for VS Code).</li>
-  <li>The bundled fonts (Cairo, Space Grotesk, JetBrains Mono) are under the SIL Open Font License; credits are included.</li>
-  <li>The videos you create are yours to use commercially.</li>
+  <li>ReelForge is a <strong>desktop tool that runs on your computer</strong>. It is not a website script, and you don't need a web server or hosting.</li>
+  <li>It does <strong>not</strong> generate voices, scripts or visuals with AI. You record your own voice and describe your scenes in a simple YAML file.</li>
+  <li>Voice recordings are <strong>not included</strong>. The example episodes come with draft cues so you can preview and render them silently, or record your own voice.</li>
+  <li>The preview images and demo video were made entirely with ReelForge and the bundled example episodes. All fonts used in the previews are included.</li>
+  <li>The videos you create are yours to use, including commercially.</li>
+  <li>TikTok, Instagram, Reels, YouTube and Shorts are trademarks of their respective owners. ReelForge is not affiliated with or endorsed by them. Those names only describe the video formats ReelForge exports.</li>
 </ul>
+
+<h3>Credits</h3>
+<ul>
+  <li>Fonts: Cairo, Space Grotesk and JetBrains Mono, all under the SIL Open Font License 1.1 and bundled with their license texts</li>
+  <li>Open-source npm packages under MIT, ISC and Apache-2.0 licenses, listed in full in THIRD-PARTY-NOTICES.md</li>
+  <li>FFmpeg and Chromium (through Playwright) are installed separately on your computer and are not bundled</li>
+</ul>
+
+<h3>Support</h3>
+<p>
+  Item support is provided through the Support tab on this page, following the Envato item support policy.
+  Before you contact us, please run <code>reelforge doctor</code> and include its output. Updates are free for all buyers.
+</p>
 
 <h3>Changelog</h3>
 <pre>
-v1.0.0 — 2026-10-16
+v1.0.0 - 16 October 2026
 - Initial release
 </pre>

@@ -1,5 +1,5 @@
 // Builds CodeCanyon marketing assets into marketing/:
-//   thumbnail.png (80×80), inline-preview.jpg (590×300), cover-1920x1080.jpg,
+//   thumbnail.png (80×80), inline-preview.jpg (590×300), cover-2340x1560.jpg (3:2 cover image), cover-1920x1080.jpg,
 //   screenshots/*.jpg (preview images), frames/*.jpg (full-resolution example frames).
 // Requires `pnpm build` and docs/screenshots (node scripts/screenshots.mjs).
 import { execFileSync } from 'node:child_process';
@@ -65,7 +65,7 @@ const pages = {
       <div style="margin-top:14px;font-size:19px;font-weight:700;line-height:1.2">Voice + YAML → <span class="lime">finished</span> vertical explainer videos</div>
       <div style="margin-top:12px;font-size:11.5px;color:#a3aabb;line-height:1.5">Animated diagrams, typing code, word-by-word Arabic captions, sound effects &amp; platform-ready MP4s. Offline. No AI.</div>
       <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:6px">
-        <span class="chip" style="font-size:9.5px;padding:3px 8px">TikTok</span><span class="chip" style="font-size:9.5px;padding:3px 8px">Reels</span><span class="chip" style="font-size:9.5px;padding:3px 8px">Shorts</span><span class="chip" style="font-size:9.5px;padding:3px 8px">21 components</span>
+        <span class="chip" style="font-size:9.5px;padding:3px 8px">1080×1920</span><span class="chip" style="font-size:9.5px;padding:3px 8px">Live preview</span><span class="chip" style="font-size:9.5px;padding:3px 8px">21 components</span>
       </div>
     </div>
     <div class="phone" style="left:340px;top:52px;width:110px;height:196px;transform:rotate(-7deg);border-radius:16px"><img src="lost-update.png"></div>
@@ -78,6 +78,25 @@ const pages = {
     body: `<div style="position:absolute;inset:0;border-radius:18px;background:radial-gradient(80% 80% at 30% 20%,rgba(184,255,60,.35),transparent 70%),#07080c"></div>
     <svg viewBox="0 0 80 80" width="80" height="80" style="position:absolute;inset:0"><rect x="23" y="12" width="34" height="56" rx="8" fill="none" stroke="#b8ff3c" stroke-width="5"/><path d="M35 30 L49 40 L35 50 Z" fill="#b8ff3c"/></svg>`,
   },
+  'cover-2340x1560': {
+    w: 2340,
+    h: 1560,
+    body: `<div class="glow"></div><div class="grid" style="background-size:96px 96px"></div>
+    <div style="position:absolute;left:150px;top:260px;width:1040px">
+      <div class="logo" style="font-size:112px"><span class="mark" style="width:60px;height:60px"></span>ReelForge</div>
+      <div style="margin-top:48px;font-size:76px;font-weight:700;line-height:1.1">Voice + YAML →<br><span class="lime">finished</span> vertical explainer videos</div>
+      <div style="margin-top:40px;font-size:34px;color:#a3aabb;line-height:1.55;max-width:980px">Animated diagrams, code that types itself, word-by-word Arabic &amp; English captions, sound effects, mastered audio and platform-ready vertical MP4s. Offline. No AI. No subscription.</div>
+      <div style="margin-top:56px;display:flex;gap:18px;flex-wrap:wrap">
+        <span class="chip" style="font-size:28px;padding:10px 24px">21 animated components</span>
+        <span class="chip" style="font-size:28px;padding:10px 24px">Live preview</span>
+        <span class="chip" style="font-size:28px;padding:10px 24px">Windows · macOS · Linux</span>
+      </div>
+    </div>
+    <div class="phone" style="left:1300px;top:270px;width:420px;height:747px;transform:rotate(-7deg);border-radius:28px"><img src="the-trap.png"></div>
+    <div class="phone" style="left:1840px;top:360px;width:420px;height:747px;transform:rotate(6deg);border-radius:28px"><img src="circuit-breaker.png"></div>
+    <div class="phone" style="left:1560px;top:300px;width:450px;height:800px;z-index:2;border-color:#b8ff3c66;border-radius:30px"><img src="lost-update.png"></div>
+    <div class="mono" style="position:absolute;left:150px;bottom:150px;font-size:30px;color:#7d8496">reelforge render ep02 &nbsp;→&nbsp; <span class="lime">ep02.master.mp4</span> · ep02.share.mp4 · ep02.srt · publish.md</div>`,
+  },
   'cover-1920x1080': {
     w: 1920,
     h: 1080,
@@ -85,7 +104,7 @@ const pages = {
     <div style="position:absolute;left:110px;top:170px;width:820px">
       <div class="logo" style="font-size:84px"><span class="mark" style="width:46px;height:46px"></span>ReelForge</div>
       <div style="margin-top:36px;font-size:56px;font-weight:700;line-height:1.12">Voice + YAML →<br><span class="lime">finished</span> vertical explainer videos</div>
-      <div style="margin-top:30px;font-size:25px;color:#a3aabb;line-height:1.55;max-width:760px">Animated diagrams, code that types itself, word-by-word Arabic &amp; English captions, sound effects, mastered audio and platform-ready MP4s for TikTok, Reels and Shorts. Offline. No AI. No subscription.</div>
+      <div style="margin-top:30px;font-size:25px;color:#a3aabb;line-height:1.55;max-width:760px">Animated diagrams, code that types itself, word-by-word Arabic &amp; English captions, sound effects, mastered audio and platform-ready vertical MP4s. Offline. No AI. No subscription.</div>
       <div style="margin-top:40px;display:flex;gap:14px;flex-wrap:wrap">
         <span class="chip" style="font-size:20px;padding:8px 18px">21 animated components</span>
         <span class="chip" style="font-size:20px;padding:8px 18px">Live preview</span>
