@@ -674,9 +674,7 @@ export function buildProgram(): Command {
 
   program
     .command('mcp')
-    .description(
-      'run the Model Context Protocol server on stdio (for AI agents: Claude, Cursor, Copilot, Codex, Gemini…)',
-    )
+    .description('run the Model Context Protocol server on stdio (for AI assistants and agents)')
     .action(async (_o, cmd) => {
       const { startMcp } = await import('./mcp.js');
       await startMcp({ root: projectRoot(globals(cmd).root), version: VERSION });

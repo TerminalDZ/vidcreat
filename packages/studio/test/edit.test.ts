@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -99,5 +99,16 @@ describe('History', () => {
     expect(() => h.undo()).toThrow(/changed outside/);
     expect(h.counts.undo).toBe(0);
     expect(readFileSync(f, 'utf8')).toBe('a: 100\n');
+  });
+
+  it('undoes a change that created the file by removing it, and redoes it', () => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'rf-hist-'));
+    const f = path.join(dir, 'cues.json');
+    const h = new History();
+    h.write(f, '{}\n', 'create');
+    expect(h.undo()).toBe('create');
+    expect(existsSync(f)).toBe(false);
+    expect(h.redo()).toBe('create');
+    expect(readFileSync(f, 'utf8')).toBe('{}\n');
   });
 });

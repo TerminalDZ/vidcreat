@@ -248,7 +248,7 @@ if (want('cli')) {
       .replace(/(✗)/g, '<span class="r">$1</span>')
       .replace(/\b(error)\b/g, '<span class="r">$1</span>')
       .replace(/\b(warn)\b/g, '<span class="y">$1</span>')
-      .replace(/(→ .*)$/g, '<span class="d">$1</span>')
+      .replace(/^(\s+→ .*)$/g, '<span class="d">$1</span>')
       .replace(/^(\S+\.yaml:\d+:\d+)/, '<span class="w">$1</span>');
   };
   for (const [name, text] of Object.entries(blocks)) {

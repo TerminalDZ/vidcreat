@@ -11,6 +11,7 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
+  renameSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -37,7 +38,7 @@ import {
   type Issue,
 } from '@reelforge/core';
 import { ffmpegBin, measureTimeline, runDoctor, snapFrames } from '@reelforge/renderer';
-import { applyOps, RenderRunner, startStudio, type EditOp, type Studio } from '@reelforge/studio';
+import { applyOps, parseOps, RenderRunner, startStudio, type EditOp, type Studio } from '@reelforge/studio';
 import { ffmpegDecode } from './decode.js';
 
 const PROTOCOLS = ['2025-06-18', '2025-03-26', '2024-11-05'];
@@ -61,6 +62,13 @@ interface Tool {
 }
 
 class ToolError extends Error {}
+
+/** Writes via a temp file + rename, so a watching editor never reads a half-written file. */
+function atomicWrite(file: string, text: string): void {
+  const tmp = path.join(path.dirname(file), `.${path.basename(file)}.${process.pid}.${Date.now()}.tmp`);
+  writeFileSync(tmp, text);
+  renameSync(tmp, file);
+}
 
 /**
  * Text result. Some clients (Claude Code among them) show only structuredContent when it is present,
@@ -180,7 +188,15 @@ export async function startMcp(opts: { root: string; version: string }): Promise
       if (typeof x === 'number') return Math.max(0, Math.min(tl.duration, x));
       const s = String(x).trim();
       try {
-        return resolveTime(/^\d+(\.\d+)?$/.test(s) ? `${s}s` : s, { lines, duration: tl.duration });
+        return resolveTime(/^\d+(\.\d+)?$/.test(s) ? `${s}s` : s, {
+          lines,
+          duration: tl.duration,
+          sceneIds: () => tl.scenes.map((x) => x.id),
+          sceneTime: (id, part) => {
+            const sc = tl.scenes.find((x) => x.id === id)!;
+            return part === 'end' ? sc.end : sc.start;
+          },
+        });
       } catch (e) {
         throw new ToolError(`Invalid time "${s}": ${(e as Error).message}`);
       }
@@ -378,11 +394,11 @@ export async function startMcp(opts: { root: string; version: string }): Promise
         const before = readFileSync(p.yaml, 'utf8');
         let after: string;
         try {
-          after = applyOps(before, a.ops as EditOp[]);
+          after = applyOps(before, parseOps({ ops: a.ops }));
         } catch (e) {
           throw new ToolError((e as Error).message);
         }
-        writeFileSync(p.yaml, after);
+        atomicWrite(p.yaml, after);
         const r = compile(p);
         const s = issueSummary(r.issues);
         return text(
@@ -415,7 +431,7 @@ export async function startMcp(opts: { root: string; version: string }): Promise
             ...text(`Not written: the YAML has errors.\n${s.list.join('\n')}`, { issues: s }),
             isError: true,
           };
-        writeFileSync(p.yaml, String(a.yaml).endsWith('\n') ? String(a.yaml) : `${String(a.yaml)}\n`);
+        atomicWrite(p.yaml, String(a.yaml).endsWith('\n') ? String(a.yaml) : `${String(a.yaml)}\n`);
         return text(
           `Wrote ${keyOf(p)}/episode.yaml. ${s.errors} error(s), ${s.warnings} warning(s).${s.list.length ? `\n${s.list.join('\n')}` : ''}`,
           { issues: s },

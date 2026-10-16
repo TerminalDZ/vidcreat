@@ -32,7 +32,7 @@ import { applyOps, EditError, History, parseOps } from './edit.js';
 import { listen, readBody, safeJoin, sendFile } from './http.js';
 import { RenderBusyError, RenderRunner, type Job, type RenderOptions } from './jobs.js';
 export { startHub, type Hub, type HubOptions, type EpisodeSummary } from './hub.js';
-export { applyOps, History, type EditOp } from './edit.js';
+export { applyOps, History, parseOps, type EditOp } from './edit.js';
 export { RenderRunner, type Job, type RenderOptions } from './jobs.js';
 
 export type StudioMode = 'edit' | 'cue' | 'dev';
@@ -237,7 +237,7 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
       }
       if (p === '/api/meta') return json(res, 200, meta());
       if (p.startsWith('/episode/out/'))
-        return sendFile(req, res, safeJoin(paths.out, decodeURIComponent(p.slice('/episode/out/'.length))));
+        return sendFile(req, res, safeJoin(paths.out, p.slice('/episode/out/'.length)));
       if (p === '/api/state') {
         res.writeHead(200, {
           'content-type': 'application/json; charset=utf-8',
@@ -247,12 +247,14 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
         return;
       }
       if (p.startsWith('/episode/voice')) return sendFile(req, res, result.voice?.file);
-      if (p.startsWith('/episode/assets/'))
-        return sendFile(
-          req,
-          res,
-          safeJoin(paths.assets, decodeURIComponent(p.slice('/episode/assets/'.length))),
+      if (p.startsWith('/episode/assets/')) {
+        // Assets are shown as images; never let an uploaded SVG run script on this origin.
+        res.setHeader(
+          'content-security-policy',
+          "sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:",
         );
+        return sendFile(req, res, safeJoin(paths.assets, p.slice('/episode/assets/'.length)));
+      }
       if (p.startsWith('/runtime/'))
         return sendFile(req, res, safeJoin(RUNTIME_DIR, p.slice('/runtime/'.length)));
       const rel = p === '/' ? 'index.html' : p.slice(1);
@@ -417,6 +419,7 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
     wss.handleUpgrade(req, socket, head, (ws) => {
       clients.add(ws);
       ws.on('close', () => clients.delete(ws));
+      ws.on('error', () => clients.delete(ws));
       ws.send(JSON.stringify({ type: 'state', state }));
     });
   });

@@ -362,6 +362,7 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
         if (size > MAX_UPLOAD) {
           req.destroy();
           ws.destroy();
+          rmSync(tmp, { force: true });
           reject(new HttpError(413, 'File too large (max 1 GB)'));
         }
       });
@@ -386,18 +387,25 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
           isPcm = false;
         }
       }
-      if (isPcm && path.extname(target).toLowerCase() === '.wav') renameSync(tmp, target);
+      const targetExt = path.extname(target).toLowerCase();
+      if (isPcm && targetExt === '.wav') renameSync(tmp, target);
       else {
+        // Convert next to the target and swap it in only when ffmpeg succeeded (keeps the old take otherwise).
+        const converted = path.join(p.dir, `.voice-${Date.now()}${targetExt || '.wav'}`);
+        const codec = targetExt === '.wav' || !targetExt ? ['-c:a', 'pcm_s16le'] : [];
         const r = spawnSync(
           ffmpegBin(),
-          ['-v', 'error', '-y', '-i', tmp, '-ac', '1', '-ar', '48000', '-c:a', 'pcm_s16le', target],
+          ['-v', 'error', '-y', '-i', tmp, '-ac', '1', '-ar', '48000', ...codec, converted],
           { encoding: 'utf8' },
         );
-        if (r.error || r.status !== 0)
+        if (r.error || r.status !== 0) {
+          rmSync(converted, { force: true });
           throw new HttpError(
             422,
             `Cannot convert the recording with ffmpeg: ${(r.error?.message ?? r.stderr).trim().split('\n').pop()}`,
           );
+        }
+        renameSync(converted, target);
       }
     } finally {
       rmSync(tmp, { force: true });
@@ -486,6 +494,10 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
           const ep = resolveKey(q('ep'));
           const rel = q('f');
           if (!rel.startsWith('out/')) throw new HttpError(403, 'Only output files can be served');
+          res.setHeader(
+            'content-security-policy',
+            "sandbox; default-src 'none'; img-src data:; media-src 'self'",
+          );
           return sendFile(req, res, safeJoin(ep.out, rel.slice(4)));
         }
         if (p === '/docs' || p.startsWith('/docs/')) {
@@ -567,6 +579,7 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
     wss.handleUpgrade(req, socket, head, (ws) => {
       clients.add(ws);
       ws.on('close', () => clients.delete(ws));
+      ws.on('error', () => clients.delete(ws));
       if (runner.job) ws.send(JSON.stringify({ type: 'job', job: runner.job }));
     });
   });

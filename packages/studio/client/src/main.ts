@@ -15,7 +15,16 @@ import {
   takePendingSelect,
 } from './actions.js';
 import { $, app, fmt, h, toast, type Mode, type Selection } from './app.js';
-import { drawOverlay, fit, initCanvas, nudge, zoom100, zoomBy, zoomToSelection } from './canvas.js';
+import {
+  consumeSpacePan,
+  drawOverlay,
+  fit,
+  initCanvas,
+  nudge,
+  zoom100,
+  zoomBy,
+  zoomToSelection,
+} from './canvas.js';
 import { Clock } from './clock.js';
 import { handleKey, openContextMenu, openHelp, openPalette, register } from './commands.js';
 import { cueKey, initCuePanel, initReview, renderIssues, renderLines, syncCueModel } from './cuepanel.js';
@@ -111,7 +120,12 @@ function applyState(s: StudioState): void {
   $('#epTitle').textContent = s.title || s.id;
   $('#epId').textContent = s.id;
   document.title = `${s.title || s.id} · ReelForge Studio`;
-  if (first) setMode((location.hash.slice(1) as Mode) || s.mode, false);
+  if (first) {
+    setMode((location.hash.slice(1) as Mode) || s.mode, false);
+    // A render that finished before this tab opened is not news: don't pop its results up.
+    lastJobNotified = s.job?.finished ?? 0;
+    prevJob.status = s.job?.status ?? '';
+  }
   const pending = takePendingSelect();
   app.selection = pending ? { kind: 'element', ...pending } : validSelection(app.selection);
   syncCueModel();
@@ -403,6 +417,7 @@ register(
   },
   {
     id: 'back',
+    repeat: true,
     title: 'Back 1 second',
     group: 'Playback',
     keys: ['J'],
@@ -411,6 +426,7 @@ register(
   },
   {
     id: 'fwd',
+    repeat: true,
     title: 'Forward 1 second',
     group: 'Playback',
     keys: ['L'],
@@ -419,6 +435,7 @@ register(
   },
   {
     id: 'prev-frame',
+    repeat: true,
     title: 'Previous frame',
     group: 'Playback',
     keys: [',', 'Alt+ArrowLeft'],
@@ -427,6 +444,7 @@ register(
   },
   {
     id: 'next-frame',
+    repeat: true,
     title: 'Next frame',
     group: 'Playback',
     keys: ['.', 'Alt+ArrowRight'],
@@ -435,6 +453,7 @@ register(
   },
   {
     id: 'prev-frame-arrow',
+    repeat: true,
     title: 'Previous frame',
     group: 'Playback',
     keys: ['ArrowLeft'],
@@ -445,6 +464,7 @@ register(
   },
   {
     id: 'next-frame-arrow',
+    repeat: true,
     title: 'Next frame',
     group: 'Playback',
     keys: ['ArrowRight'],
@@ -466,9 +486,18 @@ register(
   { id: 'speed-75', title: 'Speed 0.75×', group: 'Playback', keys: ['2'], run: () => setSpeed(0.75) },
   { id: 'speed-100', title: 'Speed 1×', group: 'Playback', keys: ['3'], run: () => setSpeed(1) },
   // edit
-  { id: 'undo', title: 'Undo', group: 'Edit', keys: ['Mod+Z'], icon: 'undo', run: () => void app.undo() },
+  {
+    id: 'undo',
+    repeat: true,
+    title: 'Undo',
+    group: 'Edit',
+    keys: ['Mod+Z'],
+    icon: 'undo',
+    run: () => void app.undo(),
+  },
   {
     id: 'redo',
+    repeat: true,
     title: 'Redo',
     group: 'Edit',
     keys: ['Mod+Shift+Z', 'Mod+Y'],
@@ -647,6 +676,7 @@ register(
   { id: 'zoom-100', title: 'Zoom to 100%', group: 'View', keys: ['Shift+0'], run: zoom100 },
   {
     id: 'zoom-in',
+    repeat: true,
     title: 'Zoom in',
     group: 'View',
     keys: ['Mod+='],
@@ -655,14 +685,29 @@ register(
   },
   {
     id: 'zoom-out',
+    repeat: true,
     title: 'Zoom out',
     group: 'View',
     keys: ['Mod+-'],
     icon: 'zoomout',
     run: () => zoomBy(0.8),
   },
-  { id: 'tl-in', title: 'Timeline zoom in', group: 'View', keys: ['='], run: () => zoomTimeline(1.5) },
-  { id: 'tl-out', title: 'Timeline zoom out', group: 'View', keys: ['-'], run: () => zoomTimeline(1 / 1.5) },
+  {
+    id: 'tl-in',
+    repeat: true,
+    title: 'Timeline zoom in',
+    group: 'View',
+    keys: ['='],
+    run: () => zoomTimeline(1.5),
+  },
+  {
+    id: 'tl-out',
+    repeat: true,
+    title: 'Timeline zoom out',
+    group: 'View',
+    keys: ['-'],
+    run: () => zoomTimeline(1 / 1.5),
+  },
   { id: 'tl-fit', title: 'Fit the timeline', group: 'View', keys: ['\\'], run: fitTimeline },
   {
     id: 'safe',
@@ -839,6 +884,11 @@ window.addEventListener('keydown', (e) => {
     renderNow();
     return;
   }
+  // Space plays/pauses on release, so that Space+drag can pan the canvas without toggling playback.
+  if (e.code === 'Space' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+    e.preventDefault();
+    return;
+  }
   // arrow-key nudge of the selected element
   if (app.mode === 'edit' && hasEl() && !e.altKey && !e.metaKey && !e.ctrlKey && e.key.startsWith('Arrow')) {
     const d = e.shiftKey ? 10 : 1;
@@ -850,6 +900,15 @@ window.addEventListener('keydown', (e) => {
     }
   }
   if (handleKey(e)) renderNow();
+});
+
+window.addEventListener('keyup', (e) => {
+  if (e.code !== 'Space' || app.mode === 'cue' || document.querySelector('dialog[open]')) return;
+  const t = e.target as HTMLElement;
+  if (t.matches('input:not([type=checkbox]):not([type=range]), textarea, select, [contenteditable]')) return;
+  if (consumeSpacePan()) return;
+  clock.toggle();
+  renderNow();
 });
 
 // ------------------------------------------------------------------ cross-module events

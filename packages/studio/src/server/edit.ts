@@ -4,7 +4,7 @@
  * comments, key order and quoting of untouched values survive. Every write is recorded in an
  * undo/redo history that also covers cues.json.
  */
-import { existsSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { isCollection, isMap, isScalar, isSeq, parseDocument, type Document, type Node } from 'yaml';
 
@@ -222,8 +222,9 @@ export class History {
       throw new EditError(`${path.basename(c.file)} changed outside the studio; history was cleared`, 409);
     }
     const target = dir === 'undo' ? c.before : c.after;
-    if (target === null) throw new EditError('Nothing to restore', 409);
-    atomicWrite(c.file, target);
+    // A change that created the file is undone by removing it again.
+    if (target === null) rmSync(c.file, { force: true });
+    else atomicWrite(c.file, target);
     to.push(c);
     return c.label;
   }

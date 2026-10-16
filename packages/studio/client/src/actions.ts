@@ -59,6 +59,16 @@ export function starterProps(component: string, at: string): Record<string, unkn
 
 const elPath = (si: number, ej: number) => ['scenes', si, 'elements', ej];
 
+/**
+ * Elements without an id are named by position (`scene-use-3`); before reordering, inserting or
+ * deleting, write those ids out so arrows and states that refer to them keep pointing at the same element.
+ */
+function freezeElementIds(si: number): EditOp[] {
+  return (app.scenes[si]?.elements ?? []).flatMap((e, ej) =>
+    e.id ? [] : [{ op: 'set' as const, path: [...elPath(si, ej), 'id'], value: app.elementId(si, ej) }],
+  );
+}
+
 /** Inserts a component into a scene at the playhead (or a canvas point). */
 export async function insertElement(
   component: string,
@@ -117,7 +127,10 @@ export async function deleteSelection(): Promise<void> {
   if (s.kind === 'element') {
     const id = app.elementId(s.scene, s.index);
     app.select(null);
-    await app.edit([{ op: 'delete', path: elPath(s.scene, s.index) }], `Delete ${id}`);
+    await app.edit(
+      [...freezeElementIds(s.scene), { op: 'delete', path: elPath(s.scene, s.index) }],
+      `Delete ${id}`,
+    );
   } else if (s.kind === 'scene') {
     if (app.scenes.length <= 1) return toast('An episode needs at least one scene', 'err');
     const sc = app.scenes[s.scene];
@@ -175,7 +188,10 @@ export async function duplicateSelection(): Promise<void> {
     el.place = { ...el.place, x: (el.place.x as number) + 40, y: (el.place.y as number) + 40 };
   }
   await editAndSelect(
-    [{ op: 'insert', path: ['scenes', s.scene, 'elements'], index: s.index + 1, value: el }],
+    [
+      ...freezeElementIds(s.scene),
+      { op: 'insert', path: ['scenes', s.scene, 'elements'], index: s.index + 1, value: el },
+    ],
     `Duplicate ${el.id}`,
     { id: el.id },
   );
@@ -189,7 +205,7 @@ export async function reorder(delta: number | 'top' | 'bottom'): Promise<void> {
   const to = delta === 'top' ? n - 1 : delta === 'bottom' ? 0 : Math.max(0, Math.min(n - 1, s.index + delta));
   if (to === s.index) return;
   await editAndSelect(
-    [{ op: 'move', path: ['scenes', s.scene, 'elements'], from: s.index, to }],
+    [...freezeElementIds(s.scene), { op: 'move', path: ['scenes', s.scene, 'elements'], from: s.index, to }],
     'Reorder layers',
     { id: app.elementId(s.scene, s.index) },
   );
@@ -197,9 +213,13 @@ export async function reorder(delta: number | 'top' | 'bottom'): Promise<void> {
 
 export async function moveElementTo(si: number, from: number, to: number): Promise<void> {
   if (from === to) return;
-  await editAndSelect([{ op: 'move', path: ['scenes', si, 'elements'], from, to }], 'Reorder layers', {
-    id: app.elementId(si, from),
-  });
+  await editAndSelect(
+    [...freezeElementIds(si), { op: 'move', path: ['scenes', si, 'elements'], from, to }],
+    'Reorder layers',
+    {
+      id: app.elementId(si, from),
+    },
+  );
 }
 
 /** Sets the element's position/size (scene coordinates); drops anchors that would override it. */
@@ -264,21 +284,30 @@ function nextLineId(): string {
   for (let i = ids.size + 1; ; i++) if (!ids.has(`l${i}`)) return `l${i}`;
 }
 
+/** Line start times as the episode currently plays them (marked, draft or estimated). */
+export function effectiveCues(): Record<string, number> {
+  const est = Object.fromEntries((app.timeline?.script ?? []).map((l) => [l.id, l.start]));
+  return { ...est, ...(app.state?.cues?.cues ?? {}) };
+}
+
 export async function insertLine(after: number, text = 'New line'): Promise<void> {
   const id = nextLineId();
+  // Snapshot before the edit: the recompiled state may or may not have arrived when it returns.
+  const cues = effectiveCues();
+  const ids = (app.state?.script ?? []).map((l) => l.id);
+  const prev = ids[after] !== undefined ? cues[ids[after]] : 0;
+  const next = ids[after + 1] !== undefined ? cues[ids[after + 1]] : undefined;
   const ok = await app.edit(
     [...freezeLineIds(), { op: 'insert', path: ['script'], index: after + 1, value: { id, text } }],
     'Add script line',
   );
-  if (!ok || !app.state) return;
+  if (!ok) return;
   // Give the new line an estimated cue between its neighbours so the episode keeps compiling.
-  const cues = { ...(app.state.cues?.cues ?? {}) };
-  const script = app.state.script;
-  const prev = script[after] ? cues[script[after].id] : 0;
-  const next = script[after + 1] ? cues[script[after + 1].id] : undefined;
-  const t = next !== undefined ? (prev ?? 0) + (next - (prev ?? 0)) / 2 : (prev ?? 0) + 2;
-  cues[id] = Math.round(Math.min(t, app.duration) * 1000) / 1000;
-  await putCues(cues);
+  const t =
+    next !== undefined ? (prev ?? 0) + (next - (prev ?? 0)) / 2 : Math.min((prev ?? 0) + 2, app.duration);
+  cues[id] = Math.round(t * 1000) / 1000;
+  ids.splice(after + 1, 0, id);
+  await putCues(cues, undefined, ids);
   app.select({ kind: 'line', index: after + 1 });
   toast('Line added with an estimated cue: mark it in Cues mode after recording');
 }
@@ -299,18 +328,18 @@ export async function moveLine(from: number, to: number): Promise<void> {
 export async function putCues(
   cues: Record<string, number>,
   words?: Record<string, number[]>,
+  order?: string[],
 ): Promise<boolean> {
   const st = app.state;
   if (!st) return false;
+  const ids = order ?? st.script.map((l) => l.id);
   const res = await fetch('/cues', {
     method: 'PUT',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
       version: 1,
       audio: { file: 'voice.wav', duration: Math.round(app.duration * 1000) / 1000 },
-      cues: Object.fromEntries(
-        st.script.filter((l) => cues[l.id] !== undefined).map((l) => [l.id, cues[l.id]]),
-      ),
+      cues: Object.fromEntries(ids.filter((id) => cues[id] !== undefined).map((id) => [id, cues[id]])),
       words: words ?? st.cues?.words ?? {},
     }),
   });

@@ -4,7 +4,7 @@
  * and a YAML view of the selection for anything else.
  */
 import { parse as parseYaml, stringify as toYaml } from 'yaml';
-import { placeOps, putCues, renameElement } from './actions.js';
+import { effectiveCues, placeOps, putCues, renameElement } from './actions.js';
 import { app, esc, fmt, h, toast, type EditOp, type JsonSchema, type Path } from './app.js';
 import { COMPONENT_ICON, icon } from './icons.js';
 import { describeExpr, exprFor } from './timeexpr.js';
@@ -993,7 +993,7 @@ function lineView(i: number): Node[] {
     label: 'cue',
     onCommit: (v) => {
       if (v === undefined || !app.state) return;
-      void putCues({ ...(app.state.cues?.cues ?? {}), [id]: v });
+      void putCues({ ...effectiveCues(), [id]: v });
     },
   });
   const mark = h('button', { class: 'btn sm' }, 'Mark in Cues mode');

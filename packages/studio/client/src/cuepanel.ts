@@ -1,6 +1,7 @@
 /** Cues mode (FR-CUE-1…7): press Space at the start of each line while listening; Review mode: lint. */
 import type { Issue } from '@reelforge/core';
 import { app, esc, fmt, h } from './app.js';
+import { latinKey } from './commands.js';
 import { CueModel } from './cue.js';
 import { icon } from './icons.js';
 import type { DecodedAudio } from './wave.js';
@@ -165,9 +166,10 @@ async function save(): Promise<void> {
 export function cueKey(e: KeyboardEvent, audio: DecodedAudio | null): boolean {
   const step = e.shiftKey ? 0.01 : 0.05;
   if (e.metaKey || e.ctrlKey || e.altKey) return false;
-  switch (e.key) {
+  switch (latinKey(e)) {
     case ' ':
-      changed(model.mark(ctx.time(), audio));
+      // a held Space must not mark several lines at once
+      if (!e.repeat) changed(model.mark(ctx.time(), audio));
       return true;
     case 'Backspace':
       changed(model.undo());

@@ -60,6 +60,14 @@ let drag: {
 } | null = null;
 let guides: { x?: number[]; y?: number[] } = {};
 let spaceDown = false;
+/** Whether the canvas was panned while Space was held (then Space must not toggle playback). */
+let spacePanned = false;
+
+export function consumeSpacePan(): boolean {
+  const v = spacePanned;
+  spacePanned = false;
+  return v;
+}
 
 export function initCanvas(c: Ctx): void {
   ctx = c;
@@ -109,7 +117,10 @@ export function initCanvas(c: Ctx): void {
     void insertElement(name, { time: ctx.time(), x: p.x, y: p.y });
   });
   window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' && (e.target as HTMLElement).tagName !== 'INPUT') spaceDown = true;
+    if (e.code === 'Space' && (e.target as HTMLElement).tagName !== 'INPUT') {
+      if (!e.repeat) spacePanned = false;
+      spaceDown = true;
+    }
   });
   window.addEventListener('keyup', (e) => {
     if (e.code === 'Space') spaceDown = false;
@@ -275,6 +286,7 @@ function onDown(e: PointerEvent): void {
   ctx.stage.focus({ preventScroll: true });
   const p = toCanvas(e.clientX, e.clientY);
   const screen = { x: e.clientX, y: e.clientY };
+  if (spaceDown && e.button === 0) spacePanned = true;
   if (e.button === 1 || spaceDown || app.tool === 'hand') {
     drag = {
       kind: 'pan',

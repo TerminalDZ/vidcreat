@@ -4,7 +4,7 @@
  * words, lines, scenes and the playhead, and saved as voice-anchored time expressions.
  */
 import type { TElement } from '@reelforge/core';
-import { putCues } from './actions.js';
+import { effectiveCues, putCues } from './actions.js';
 import { app, esc, fmt, h, type EditOp } from './app.js';
 import { COMPONENT_ICON, icon } from './icons.js';
 import { exprFor, nearestSnap, type SnapPoint } from './timeexpr.js';
@@ -277,8 +277,9 @@ function fillScenes(lane: HTMLElement): void {
 function fillScript(lane: HTMLElement): void {
   const tl = app.timeline;
   if (!tl) return;
-  const cues = app.state?.cues?.cues ?? {};
-  const draft = !app.state?.cues || Object.keys(cues).length === 0;
+  const marked = app.state?.cues?.cues ?? {};
+  const draft = !app.state?.cues || Object.keys(marked).length === 0;
+  const cues = effectiveCues();
   tl.script.forEach((l, i) => {
     const sel = app.selection?.kind === 'line' && app.selection.index === i;
     const end = tl.script[i + 1]?.start ?? app.duration;

@@ -56,9 +56,15 @@ export function setTab(t: typeof tab): void {
   if (t === 'insert') (document.querySelector('#insertSearch') as HTMLInputElement | null)?.focus();
 }
 
-export function renderPanels(): void {
+export function renderPanels(force = false): void {
   const body = document.querySelector<HTMLElement>('#leftBody');
   if (!body) return;
+  const active = document.activeElement;
+  if (!force && active && body.contains(active) && (active as HTMLElement).matches('input, textarea')) {
+    // Don't rebuild under the user's cursor; refresh once they leave the field.
+    active.addEventListener('blur', () => setTimeout(() => renderPanels()), { once: true });
+    return;
+  }
   if (tab === 'layers') renderLayers(body);
   else if (tab === 'insert') renderInsert(body);
   else renderScript(body);
@@ -152,9 +158,13 @@ function startRename(item: HTMLElement, si: number, ej: number): void {
   nm.replaceWith(input);
   input.focus();
   input.select();
+  let finished = false;
   const done = (save: boolean) => {
+    if (finished) return;
+    finished = true;
     if (save) void renameElement(si, ej, input.value.trim());
-    else renderPanels();
+    input.blur();
+    renderPanels(true);
   };
   input.addEventListener('keydown', (e) => {
     e.stopPropagation();
@@ -186,7 +196,7 @@ function renderInsert(body: HTMLElement): void {
   search.addEventListener('input', () => {
     query = search.value;
     const pos = search.selectionStart;
-    renderPanels();
+    renderPanels(true);
     const s = document.querySelector<HTMLInputElement>('#insertSearch');
     s?.focus();
     s?.setSelectionRange(pos, pos);

@@ -15,6 +15,8 @@ export interface Command {
   modes?: ('edit' | 'cue' | 'dev')[];
   when?: () => boolean;
   run: () => void;
+  /** Keeps firing while the key is held (frame steps, zoom, undo). Default: once per press. */
+  repeat?: boolean;
   /** Shown in the palette (default true). */
   palette?: boolean;
 }
@@ -38,15 +40,29 @@ export function run(id: string): void {
 }
 
 /** Normalized combo of a key event: "Mod+Shift+Z", "Alt+1", "Space", "?", "ArrowLeft". */
+/**
+ * The key as on a US layout when the layout types a non-Latin character (Arabic, Cyrillic, Greek…),
+ * so K, J, L, ⌘Z… work whatever the keyboard language.
+ */
+export function latinKey(e: KeyboardEvent): string {
+  if (e.key === '؟') return '?';
+  if (e.key.length === 1 && e.key.charCodeAt(0) > 127 && /^(Key|Digit)/.test(e.code))
+    return e.code.replace(/^(Key|Digit)/, '').toLowerCase();
+  return e.key;
+}
+
 export function comboOf(e: KeyboardEvent): string {
   const parts: string[] = [];
-  if (e.metaKey || e.ctrlKey) parts.push('Mod');
+  const mod = e.metaKey || e.ctrlKey;
+  if (mod) parts.push('Mod');
   if (e.altKey) parts.push('Alt');
   let key: string;
-  if ((e.altKey || e.shiftKey) && /^(Digit|Key)/.test(e.code)) key = e.code.replace(/^(Digit|Key)/, '');
-  else if (e.key === ' ') key = 'Space';
-  else if (e.key.length === 1) key = e.key.toUpperCase();
-  else key = e.key;
+  const k = latinKey(e);
+  if ((e.altKey || e.shiftKey || (mod && /^Key/.test(e.code))) && /^(Digit|Key)/.test(e.code))
+    key = e.code.replace(/^(Digit|Key)/, '');
+  else if (k === ' ') key = 'Space';
+  else if (k.length === 1) key = k.toUpperCase();
+  else key = k;
   const printable = key.length === 1 && !/[A-Z0-9]/.test(key);
   if (e.shiftKey && !printable) parts.push('Shift');
   if ((e.metaKey || e.ctrlKey) && e.shiftKey && printable) parts.push('Shift');
@@ -66,6 +82,7 @@ export function handleKey(e: KeyboardEvent): boolean {
   const cmd = list.find((c) => (!c.modes || c.modes.includes(app.mode)) && (!c.when || c.when()));
   if (!cmd) return false;
   e.preventDefault();
+  if (e.repeat && !cmd.repeat) return true;
   cmd.run();
   return true;
 }

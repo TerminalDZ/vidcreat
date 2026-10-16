@@ -166,6 +166,15 @@ describe('reelforge mcp', () => {
     expect(Buffer.from(img.data!, 'base64').subarray(0, 2).toString('hex')).toBe('ffd8');
     expect(notes.some((n) => n.method === 'notifications/progress')).toBe(true);
 
+    const scene = await tool('preview_frames', { episode: 'ep1', times: ['@bucket+0.5'], width: 180 });
+    expect(scene.isError).toBeFalsy();
+    const emptyPath = await tool('edit_episode', {
+      episode: 'ep1',
+      ops: [{ op: 'set', path: [], value: { a: 1 } }],
+    });
+    expect(emptyPath.isError).toBe(true);
+    expect(readFileSync(yamlFile, 'utf8')).not.toContain('? null');
+
     const missing = await tool('get_episode', { episode: '../../etc' });
     expect(missing.isError).toBe(true);
   });

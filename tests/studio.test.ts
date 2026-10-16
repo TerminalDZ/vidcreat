@@ -240,7 +240,7 @@ describe('studio UI', () => {
     await waitFor(() => studio.state().error);
     expect(studio.state().timeline).not.toBeNull();
     expect(studio.state().title).toBe('Hot'); // last good values are kept while the YAML is broken
-    expect(studio.state().voice?.url).toMatch(/voice\.wav$/);
+    expect(studio.state().voice?.url).toMatch(/voice\.wav\?v=\d+$/); // versioned: a new upload reloads
     writeFileSync(yamlFile, original);
     await waitFor(() => !studio.state().error);
   });

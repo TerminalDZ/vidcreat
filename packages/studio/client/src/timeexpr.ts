@@ -2,6 +2,7 @@
  * Turns times back into readable, voice-anchored time expressions: dropping an element on a word
  * writes `l3:'Idempotency'`, so it stays on that word when the line is re-recorded.
  */
+import { normalizeWord } from '../../../core/src/text.js';
 import { app } from './app.js';
 
 export interface SnapPoint {
@@ -13,10 +14,12 @@ export interface SnapPoint {
 
 const round = (n: number) => Math.round(n * 1000) / 1000;
 
+/** `l3:'word'` (with `#n` counted the way the compiler matches words), or `l3.4` when that can't be written. */
 function wordExpr(lineId: string, words: { text: string }[], i: number): string {
   const w = words[i].text;
-  if (/['"‘’]/.test(w) || !w.trim()) return `${lineId}.${i}`;
-  const n = words.slice(0, i + 1).filter((x) => x.text === w).length;
+  const norm = words.map((x) => normalizeWord(x.text));
+  if (/['"‘’]/.test(w) || !norm[i]) return `${lineId}.${i}`;
+  const n = norm.slice(0, i + 1).filter((x) => x === norm[i]).length;
   return `${lineId}:'${w}'${n > 1 ? `#${n}` : ''}`;
 }
 
