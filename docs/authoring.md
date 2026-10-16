@@ -45,7 +45,8 @@ scenes:
   - id: hook
     at: l1 # start; end defaults to the next scene's start
     glow: red # or a list: [{ at: l1, color: red }, { at: l3, color: lime }]
-    transition: crossfade # crossfade | cut | slide-up
+    transition: crossfade # crossfade | cut | slide-up | zoom | push | blur
+    camera: still # still | drift | push-in | pull-out
     layout: stage # stage (between header and captions) | full (whole canvas)
     elements:
       - use: phone
@@ -103,8 +104,35 @@ editor you can simply drag and resize elements; it writes `place` for you.
 ## 4. Animations
 
 `enter.anim`: `pop` (default), `rise`, `slide-l`, `slide-r`, `fade`, `draw`, `type`, `count`, `flip`,
-`zoom`, `glitch`, `stamp`, `none`. Parameters: `dur`, `s0`, `dy`, `dist`, `cps`, `rot`, `amp`.
-`exit.anim`: `fade`, `pop`, `rise`, `sink`, `slide-l`, `slide-r`, `zoom`, `none`.
+`zoom`, `glitch`, `stamp`, `blur`, `wipe`, `spring`, `drop`, `reveal`, `none`. Parameters: `dur`,
+`s0`, `dy`, `dist`, `cps`, `rot`, `amp`, `ease`.
+
+| Enter    | Looks like                                                     | Good for                  |
+| -------- | -------------------------------------------------------------- | ------------------------- |
+| `pop`    | scales up with a small overshoot                               | chips, icons, stamps      |
+| `rise`   | fades in while moving up (`dist`, default 40 px)               | cards, code, diagrams     |
+| `blur`   | comes into focus from a soft blur                              | calm titles, quotes       |
+| `wipe`   | revealed from the start edge (right edge in Arabic)            | timelines, meters, labels |
+| `spring` | scales up with a springy settle                                | playful callouts          |
+| `drop`   | falls in from above and bounces to rest                        | badges, "result" nodes    |
+| `reveal` | slides up out of an invisible mask, like a title card (`dist`) | big titles                |
+| `type`   | types character by character (`cps`)                           | code, terminal text       |
+
+`enter.ease` changes how the motion accelerates: `smooth` (default, ease-out), `snappy` (fast
+start, long settle), `gentle` (ease-in and out) or `linear`. `pop` and `spring` keep their own
+bounce.
+
+`exit.anim`: `fade`, `pop`, `rise`, `sink`, `slide-l`, `slide-r`, `zoom`, `blur`, `wipe`, `none`.
+
+Scene `transition` (how the scene replaces the previous one): `crossfade` (default), `cut`,
+`slide-up`, `zoom` (zooms through), `push` (pushes the previous scene off sideways) and `blur`
+(soft dissolve). Scene `camera` adds one slow, continuous move across the whole scene: `drift`,
+`push-in` (slow zoom in) or `pull-out`. Moves are eased at both ends, so they never jolt.
+
+All motion is rendered with sub-pixel precision, so slow movements stay smooth instead of stepping
+one pixel at a time. In the editor, the inspector's **Preview animation** button (and choosing a
+new animation, ease or transition) plays just that moment once.
+
 `fx[].do`: `shake` (`target: camera` shakes the whole stage), `flash` (full-frame color hit),
 `glitch`, `pulse` (`rate`), `bump`. Flashes add a `hit` sound and glitches a `glitch` sound unless
 `sound: none`.

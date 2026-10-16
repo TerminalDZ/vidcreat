@@ -31,6 +31,9 @@ export interface Meta {
   schemas: Record<string, JsonSchema>;
   enterAnims: string[];
   exitAnims: string[];
+  eases: string[];
+  transitions: string[];
+  cameras: string[];
   fxKinds: string[];
   icons: string[];
   sounds: string[];

@@ -339,6 +339,13 @@ export function applyFx(tr: Transform, f: TElement['fx'][number], t: number, see
   }
 }
 
+/** A push carries the whole frame across, so it needs a little longer than a dissolve to read. */
+function transitionDur(kind: TScene['transition'], theme: Theme): number {
+  if (kind === 'cut') return 0;
+  const d = theme.motion.crossfade;
+  return kind === 'push' ? Math.max(0.5, d * 1.5) : d;
+}
+
 export class SceneView {
   readonly el: HTMLElement;
   readonly elements: ElementView[];
@@ -364,7 +371,7 @@ export class SceneView {
     css(this.el, 'display', 'none');
     if (next && Math.abs(next.start - spec.end) < 0.05) {
       this.outKind = next.transition;
-      this.outDur = next.transition === 'cut' ? 0 : theme.motion.crossfade;
+      this.outDur = transitionDur(next.transition, theme);
     } else {
       this.outKind = 'crossfade';
       this.outDur = theme.motion.crossfade;
@@ -372,7 +379,7 @@ export class SceneView {
   }
 
   get inDur(): number {
-    return this.spec.transition === 'cut' ? 0 : this.theme.motion.crossfade;
+    return transitionDur(this.spec.transition, this.theme);
   }
 
   visibleAt(t: number): boolean {

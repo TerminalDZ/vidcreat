@@ -72,11 +72,15 @@ scenes:
         id: hook_title
         props: { text: "**Duplicate** Charge" }
         place: { x: 60, y: 380, w: 960, h: 240 }
-        enter: { at: "l2:'Duplicate'", anim: pop }
+        # pop rise reveal spring drop blur wipe slide-l slide-r fade type zoom flip stamp …
+        # ease: smooth | snappy | gentle | linear
+        enter: { at: "l2:'Duplicate'", anim: reveal }
 
   - id: fix
     at: l3
     glow: lime
+    transition: push        # crossfade | cut | slide-up | zoom | push | blur
+    camera: push-in         # still | drift | push-in | pull-out
     elements:
       - use: chip
         id: key

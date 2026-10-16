@@ -1941,3 +1941,49 @@ body.offline #top::after {
     display: none;
   }
 }
+
+/* ---------------------------------------------------------------- interface motion */
+dialog[open] {
+  animation: dlg-in 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+dialog[open]::backdrop {
+  animation: fade-in 0.2s ease-out;
+}
+#ctxmenu:not([hidden]),
+#tour:not([hidden]) {
+  animation: pop-in 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-origin: top left;
+}
+.preview-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+@keyframes dlg-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after,
+  dialog::backdrop {
+    animation-duration: 0.001s !important;
+    transition-duration: 0.001s !important;
+  }
+}

@@ -118,7 +118,11 @@ the top-left of the stage. The stage spans canvas y 270–1270 and the captions 
   title.
 
 **Animation:** `enter.anim`: pop (default), rise, slide-l, slide-r, fade, draw, type, count, flip,
-zoom, glitch, stamp, none. `exit: { at, anim }`: fade, pop, rise, sink, slide-l, slide-r, zoom.
+zoom, glitch, stamp, blur, wipe, spring, drop, reveal, none. `enter.ease`: smooth (default), snappy,
+gentle, linear. `exit: { at, anim }`: fade, pop, rise, sink, slide-l, slide-r, zoom, blur, wipe.
+Scenes: `transition`: crossfade (default), cut, slide-up, zoom, push, blur; `camera`: still, drift,
+push-in, pull-out. Use `reveal` for big titles, `spring`/`pop` for chips, a `push` or `zoom`
+transition between chapters, and vary them; the same animation everywhere looks mechanical.
 `fx: [{ at, do: shake|flash|glitch|pulse|bump }]` (`target: camera` shakes the whole frame).
 `states: [{ at, set: { status: err } }]` changes props over time.
 

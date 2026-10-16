@@ -167,7 +167,14 @@ export function applyOps(text: string, ops: EditOp[]): string {
   if (doc.errors.length)
     throw new EditError('episode.yaml has syntax errors; fix them in your editor first', 409);
   for (const op of ops) applyOne(doc, op);
-  return doc.toString({ lineWidth: 0, flowCollectionPadding: false });
+  return doc.toString({ lineWidth: 0, flowCollectionPadding: padsFlowCollections(text) });
+}
+
+/** Keeps the file's own style: `{ x: 1 }` (Prettier) or `{x: 1}`. */
+function padsFlowCollections(text: string): boolean {
+  const padded = text.match(/[{[] \S/g)?.length ?? 0;
+  const tight = text.match(/[{[][^\s\]}]/g)?.length ?? 0;
+  return padded > tight;
 }
 
 interface Change {

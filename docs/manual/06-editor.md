@@ -62,7 +62,9 @@ direction is detected automatically.
 The inspector edits **every property** of the selection:
 
 - **Position & size** (X, Y, W, H), alignment buttons, layer and stacking order.
-- **Animation & timing**: when it enters, the animation and duration, and an optional exit. The
+- **Animation & timing**: when it enters, the animation, its ease and duration, and an optional
+  exit. **Preview animation** plays just that moment once; choosing a new animation or ease
+  previews it automatically. The
   **target** button sets a time from the playhead. It writes a word-anchored time such as
   `l3:'bucket'` whenever the playhead is on a word, so the element stays on that word even after
   you re-record.
@@ -75,7 +77,7 @@ The inspector edits **every property** of the selection:
 - **YAML (advanced)**: the exact YAML of the element. Anything the format supports can be edited
   here.
 
-With a **scene** selected, the inspector edits its start and end, transition, area (stage or full
+With a **scene** selected, the inspector edits its start and end, transition, camera move (with **Preview transition**), area (stage or full
 frame), background glow and auto-layout. With a **script line** selected, it edits the text,
 caption, line breaks and cue, and lists every word (click one to jump to it). With **nothing**
 selected, it edits the episode: title, series, platform, theme, language, publishing texts, audio

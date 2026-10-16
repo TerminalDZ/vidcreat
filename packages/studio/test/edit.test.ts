@@ -32,6 +32,16 @@ describe('applyOps', () => {
     expect(out).toContain("title: 'New'");
   });
 
+  it("keeps the file's flow-map spacing style", () => {
+    const padded = applyOps(SRC, [{ op: 'set', path: ['meta', 'title'], value: 'New' }]);
+    expect(padded).toContain("props: { text: 'Hi' }");
+    expect(padded).toContain('enter: { at: l1, anim: pop }');
+    const tight = applyOps(SRC.replace(/\{ /g, '{').replace(/ \}/g, '}'), [
+      { op: 'set', path: ['meta', 'title'], value: 'New' },
+    ]);
+    expect(tight).toContain("props: {text: 'Hi'}");
+  });
+
   it('creates missing containers as compact flow maps', () => {
     const out = applyOps(SRC, [{ op: 'set', path: ['scenes', 0, 'elements', 0, 'place', 'x'], value: 40 }]);
     expect(out).toMatch(/place: \{ ?x: 40 ?\}/);

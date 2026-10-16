@@ -28,6 +28,11 @@ First public release.
 - **Examples**: the 9-episode “System Design” series in English, and the same series in Arabic.
 - **21 animated components**: title, label, code, node, arrow, chip, stamp, table, lanes, checklist,
   counter, meter, timeline, grid, bucket, phone, quote, particles, trap, cta, icon.
+- **Motion**: 17 enter and 9 exit animations (including `reveal`, `spring`, `drop`, `blur` and
+  `wipe`), per-element easing (`smooth`, `snappy`, `gentle`, `linear`), six scene transitions
+  (crossfade, cut, slide-up, zoom, push, blur) and slow camera moves (drift, push-in, pull-out).
+  Everything renders with sub-pixel precision, so slow moves stay smooth; frame-by-frame motion
+  tests guard against jumps and stutter. The inspector previews any animation with one click.
 - **Captions in English and Arabic**: word-by-word karaoke highlight, correct RTL/LTR mixing, `الـ term`
   kept together, punctuation on the correct side.
 - **Procedural sound effects** and voice mastering to −14 LUFS with ducking and a limiter.

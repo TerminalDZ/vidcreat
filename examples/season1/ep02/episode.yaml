@@ -82,7 +82,7 @@ scenes:
         id: withdrawn
         props: { text: '−$150 withdrawn', color: red, icon: card, variant: solid, size: 44 }
         place: { x: 170, y: 560, w: 740, h: 120 }
-        enter: { at: "l1:'150'", anim: pop }
+        enter: { at: "l1:'150'", anim: spring }
         fx:
           - { at: "l1:'150'", do: shake, amp: 20, target: camera }
       - use: icon
@@ -94,6 +94,8 @@ scenes:
   # ── the race, step by step ───────────────────────────────────────────────
   - id: race
     at: l2
+    transition: push
+    camera: drift
     glow: amber
     elements:
       - use: lanes
@@ -135,6 +137,7 @@ scenes:
   # ── naming it ────────────────────────────────────────────────────────────
   - id: name
     at: l8
+    transition: zoom
     glow: red
     elements:
       - use: title
@@ -146,11 +149,12 @@ scenes:
         id: aka
         props: { text: 'a.k.a. Lost Update', color: red, variant: outline, size: 40 }
         place: { x: 240, y: 560, w: 600, h: 110 }
-        enter: { at: "l8:'Lost'", anim: pop }
+        enter: { at: "l8:'Lost'", anim: spring }
 
   # ── the gap ──────────────────────────────────────────────────────────────
   - id: gap
     at: l9
+    transition: blur
     glow: violet
     elements:
       - use: code
@@ -179,7 +183,7 @@ scenes:
             - { pos: 0.5, label: 'the gap', sub: 'danger zone', at: "l10:'gap'", color: amber }
             - { pos: 0.9, label: 'write', at: "l10:'write'", color: violet }
         place: { x: 60, y: 400, w: 880, h: 240 }
-        enter: { at: "l10:'read'", anim: rise }
+        enter: { at: "l10:'read'", anim: wipe }
       - use: meter
         id: load
         props:
@@ -196,13 +200,14 @@ scenes:
   # ── 02 · fix #1: pessimistic ─────────────────────────────────────────────
   - id: pessimistic
     at: l12
+    transition: push
     glow: cyan
     elements:
       - use: title
         id: pess_t
         props: { text: '**Pessimistic** Locking', accent: cyan, size: 84 }
         place: { x: 60, y: 20, w: 960, h: 170 }
-        enter: { at: "l12:'Pessimistic'", anim: pop }
+        enter: { at: "l12:'Pessimistic'", anim: reveal }
       - use: code
         id: pess_sql
         props:
@@ -229,20 +234,21 @@ scenes:
         id: txb
         props: { title: 'Request B', sub: 'waiting for lock…', icon: hourglass, color: violet, status: busy }
         place: { x: 340, y: 670, w: 500, h: 180 }
-        enter: { at: "l14:'waits'", anim: pop }
+        enter: { at: "l14:'waits'", anim: slide-r, ease: snappy }
         states:
           - { at: "l14:'commit'", set: { status: ok, sub: 'reads 0 → rejected' } }
 
   # ── fix #2: optimistic ───────────────────────────────────────────────────
   - id: optimistic
     at: l15
+    transition: push
     glow: lime
     elements:
       - use: title
         id: opt_t
         props: { text: '**Optimistic** Locking', size: 84 }
         place: { x: 60, y: 20, w: 960, h: 170 }
-        enter: { at: "l15:'Optimistic'", anim: pop }
+        enter: { at: "l15:'Optimistic'", anim: reveal }
       - use: table
         id: acc
         props:
@@ -278,7 +284,7 @@ scenes:
         id: retry
         props: { text: 'retry', color: lime, icon: refresh, variant: solid, size: 32 }
         place: { x: 540, y: 800, w: 300, h: 90 }
-        enter: { at: "l18:'retry'", anim: pop }
+        enter: { at: "l18:'retry'", anim: spring }
 
   # ── 03 · the trap ────────────────────────────────────────────────────────
   - id: trap
@@ -310,11 +316,13 @@ scenes:
         id: db
         props: { title: 'Database', sub: 'lock · version · CHECK', icon: db, color: lime, status: ok }
         place: { x: 200, y: 620, w: 640, h: 200 }
-        enter: { at: "l22:'database'", anim: pop }
+        enter: { at: "l22:'database'", anim: drop }
 
   # ── 04 · which one? ──────────────────────────────────────────────────────
   - id: choose
     at: l23
+    transition: zoom
+    camera: push-in
     glow: violet
     elements:
       - use: meter
@@ -355,6 +363,7 @@ scenes:
   # ── CTA ──────────────────────────────────────────────────────────────────
   - id: cta
     at: l25
+    transition: blur
     glow: lime
     elements:
       - use: cta

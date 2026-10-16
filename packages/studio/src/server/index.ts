@@ -8,9 +8,11 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  CAMERAS,
   compileEpisode,
   COMPONENTS,
   cuesSchema,
+  EASES,
   ENTER_ANIMS,
   episodeJsonSchema,
   EXIT_ANIMS,
@@ -19,6 +21,7 @@ import {
   listResources,
   readCues,
   sha1,
+  TRANSITIONS,
   type CompileResult,
   type EpisodePaths,
   type Issue,
@@ -287,6 +290,9 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
       schemas: (episodeJsonSchema() as { 'x-components': Record<string, unknown> })['x-components'],
       enterAnims: ENTER_ANIMS,
       exitAnims: EXIT_ANIMS,
+      eases: EASES,
+      transitions: TRANSITIONS,
+      cameras: CAMERAS,
       fxKinds: FX_KINDS,
       icons: ICONS_LIST,
       sounds: SOUNDS,

@@ -81,6 +81,7 @@ async function loadTimeline(tl: Timeline): Promise<void> {
     fitTimeline();
   }
   renderAll();
+  app.emit('timeline');
 }
 
 // ------------------------------------------------------------------ state
@@ -259,7 +260,24 @@ function renderNow(): void {
   }
 }
 
+/** Plays [t0, t1] once and stops on t1, so an animation can be watched without leaving the clip. */
+let previewEnd: number | null = null;
+function preview(t0: number, t1: number): void {
+  clock.pause();
+  seek(t0);
+  previewEnd = Math.min(app.duration, t1);
+  void clock.play().then(renderNow);
+}
+
 function loop(): void {
+  if (previewEnd !== null) {
+    if (!clock.isPlaying) previewEnd = null;
+    else if (clock.time >= previewEnd) {
+      clock.pause();
+      seek(previewEnd);
+      previewEnd = null;
+    }
+  }
   if (clock.isPlaying) renderNow();
   requestAnimationFrame(loop);
 }
@@ -1130,7 +1148,7 @@ initCanvas({
 });
 initTimeline({ root: $('#timeline'), time, seek, redraw: renderNow, playing: () => clock.isPlaying });
 initPanels({ time, seek });
-initInspector({ time, seek, setMode });
+initInspector({ time, seek, setMode, preview });
 initCuePanel({ time, seek, redraw: renderNow });
 initReview();
 splitter('#splitL', 'left-w', 'x', false, 200, 520);

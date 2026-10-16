@@ -13,12 +13,32 @@ interface Ctx {
   time: () => number;
   seek: (t: number) => void;
   setMode: (m: 'edit' | 'cue' | 'dev') => void;
+  /** Play [t0, t1] once, then stop. */
+  preview: (t0: number, t1: number) => void;
 }
 let ctx!: Ctx;
 const open = new Map<string, boolean>();
 
+/**
+ * Choosing an animation plays it once. The range is computed from the recompiled timeline, so the
+ * preview waits for it (and is dropped if nothing recompiles within a few seconds).
+ */
+let pendingPreview: { range: () => [number, number] | null; at: number } | null = null;
+function previewSoon(range: () => [number, number] | null): void {
+  pendingPreview = { range, at: performance.now() };
+}
+function runPreview(range: () => [number, number] | null): void {
+  const r = range();
+  if (r) ctx.preview(r[0], r[1]);
+}
+
 export function initInspector(c: Ctx): void {
   ctx = c;
+  app.on('timeline', () => {
+    const p = pendingPreview;
+    pendingPreview = null;
+    if (p && performance.now() - p.at < 4000) runPreview(p.range);
+  });
   document.addEventListener('rf:focus-inspector', () => {
     document.querySelector<HTMLElement>('#inspector input:not([disabled]), #inspector textarea')?.focus();
   });
@@ -193,7 +213,13 @@ function select(
   path: Path,
   value: unknown,
   options: (string | number)[],
-  o: { def?: unknown; label: string; required?: boolean; labels?: Record<string, string> },
+  o: {
+    def?: unknown;
+    label: string;
+    required?: boolean;
+    labels?: Record<string, string>;
+    onChange?: () => void;
+  },
 ): HTMLElement {
   const s = h('select', { class: 'finput' }) as HTMLSelectElement;
   if (!o.required || value === undefined)
@@ -203,11 +229,19 @@ function select(
   s.value = value === undefined ? '' : String(value);
   s.addEventListener('keydown', (e) => e.stopPropagation());
   s.addEventListener('change', () => {
+    o.onChange?.();
     if (s.value === '') return set(path, undefined, `Reset ${o.label}`);
     const raw = options.find((x) => String(x) === s.value);
     set(path, raw, `Set ${o.label}`);
   });
   return s;
+}
+
+function previewButton(label: string, range: () => [number, number] | null): HTMLElement {
+  const b = h('button', { class: 'btn ghost sm block preview-btn', title: `${label} (plays it once)` });
+  b.innerHTML = `${icon('play', 12)}<span>${esc(label)}</span>`;
+  b.addEventListener('click', () => runPreview(range));
+  return b;
 }
 
 function colorInput(
@@ -609,6 +643,16 @@ function elementView(si: number, ej: number): Node[] {
   const sc = app.compiledScene(si);
   const id = app.elementId(si, ej);
   const out: Node[] = [];
+  const enterRange = (): [number, number] | null => {
+    const x = app.compiledElement(si, ej);
+    const scn = app.compiledScene(si);
+    if (!x || !scn) return null;
+    return [Math.max(scn.start, x.enter.t - 0.4), x.enter.t + x.enter.dur + 0.6];
+  };
+  const exitRange = (): [number, number] | null => {
+    const x = app.compiledElement(si, ej)?.exit;
+    return x ? [Math.max(0, x.t - 0.4), x.t + x.dur + 0.4] : null;
+  };
 
   const idInput = h('input', {
     class: 'finput mono',
@@ -714,7 +758,18 @@ function elementView(si: number, ej: number): Node[] {
       select([...base, 'enter', 'anim'], e.enter?.anim, app.meta?.enterAnims ?? [], {
         def: meta?.enter,
         label: 'enter animation',
+        onChange: () => previewSoon(enterRange),
       }),
+    ),
+    row(
+      'Ease',
+      select([...base, 'enter', 'ease'], e.enter?.ease, app.meta?.eases ?? [], {
+        def: 'smooth',
+        label: 'enter easing',
+        labels: { smooth: 'Smooth', snappy: 'Snappy', gentle: 'Gentle', linear: 'Linear' },
+        onChange: () => previewSoon(enterRange),
+      }),
+      'Smooth eases out · Snappy starts fast · Gentle eases in and out',
     ),
     row(
       'Duration',
@@ -725,6 +780,7 @@ function elementView(si: number, ej: number): Node[] {
         label: 'enter duration',
       }),
     ),
+    previewButton('Preview animation', enterRange),
   ];
   if (e.exit) {
     const rm = h(
@@ -751,6 +807,7 @@ function elementView(si: number, ej: number): Node[] {
         select([...base, 'exit', 'anim'], e.exit.anim, app.meta?.exitAnims ?? [], {
           def: 'fade',
           label: 'exit animation',
+          onChange: () => previewSoon(exitRange),
         }),
       ),
       row(
@@ -762,6 +819,7 @@ function elementView(si: number, ej: number): Node[] {
           label: 'exit duration',
         }),
       ),
+      previewButton('Preview exit', exitRange),
     );
   } else {
     const add = h('button', { class: 'btn ghost sm block' }, 'Add an exit at the playhead (O)');
@@ -905,6 +963,14 @@ function sceneView(si: number): Node[] {
   const s = app.scenes[si];
   const base: Path = ['scenes', si];
   const c = app.compiledScene(si);
+  const transitionRange = (): [number, number] | null => {
+    const x = app.compiledScene(si);
+    return x ? [Math.max(0, x.start - 0.6), Math.min(x.end, x.start + 1.4)] : null;
+  };
+  const cameraRange = (): [number, number] | null => {
+    const x = app.compiledScene(si);
+    return x ? [x.start, Math.min(x.end, x.start + 5)] : null;
+  };
   const out: Node[] = [
     header(
       'scene',
@@ -929,11 +995,37 @@ function sceneView(si: number): Node[] {
       ),
       row(
         'Transition',
-        select([...base, 'transition'], s.transition, ['crossfade', 'cut', 'slide-up'], {
+        select([...base, 'transition'], s.transition, app.meta?.transitions ?? [], {
           def: 'crossfade',
           label: 'transition',
+          labels: {
+            crossfade: 'Crossfade',
+            cut: 'Cut',
+            'slide-up': 'Slide up',
+            zoom: 'Zoom through',
+            push: 'Push (sideways)',
+            blur: 'Blur dissolve',
+          },
+          onChange: () => previewSoon(transitionRange),
         }),
+        'How this scene replaces the previous one',
       ),
+      row(
+        'Camera',
+        select([...base, 'camera'], s.camera, app.meta?.cameras ?? [], {
+          def: 'still',
+          label: 'camera',
+          labels: {
+            still: 'Still',
+            drift: 'Slow drift',
+            'push-in': 'Push in (slow zoom in)',
+            'pull-out': 'Pull out (slow zoom out)',
+          },
+          onChange: () => previewSoon(cameraRange),
+        }),
+        'A slow, continuous camera move across the whole scene',
+      ),
+      previewButton('Preview transition', transitionRange),
       row(
         'Area',
         select([...base, 'layout'], s.layout, ['stage', 'full'], {
