@@ -1,7 +1,7 @@
 {
   "name": "@reelforge/renderer",
   "version": "1.0.0",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE.md",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -22,5 +22,7 @@
     "@reelforge/core": "workspace:*",
     "@reelforge/runtime": "workspace:*",
     "playwright": "1.56.1"
-  }
+  },
+  "author": "Idriss Boukmouche",
+  "private": true
 }

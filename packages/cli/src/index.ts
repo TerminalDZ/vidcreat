@@ -29,7 +29,7 @@ import {
   snapFrames,
   type Progress,
 } from '@reelforge/renderer';
-import { startStudio } from '@reelforge/studio';
+import { startHub, startStudio } from '@reelforge/studio';
 import { ffmpegDecode } from './decode.js';
 import { openBrowser } from './open.js';
 import { bar, c, endStatus, fmtDur, formatIssue, statusLine, summary } from './term.js';
@@ -185,6 +185,28 @@ async function serve(
     const stop = () => {
       void studio.close().then(resolve);
     };
+    process.once('SIGINT', stop);
+    process.once('SIGTERM', stop);
+  });
+}
+
+/** The project dashboard: every episode with the whole workflow one click away. */
+async function cmdHub(o: { port?: number; open?: boolean }, g: Globals) {
+  const root = projectRoot(g.root);
+  const hub = await startHub({
+    root,
+    port: o.port,
+    decode: ffmpegDecode,
+    log: (m) => g.verbose && console.error(c.dim(m)),
+  });
+  out(g, { url: hub.url, root }, () => {
+    console.log(`${c.green('●')} ReelForge dashboard for ${c.bold(root)}`);
+    console.log(`  ${c.cyan(hub.url)}`);
+    console.log(c.dim('  listening on 127.0.0.1 only · Ctrl+C to stop'));
+  });
+  if (o.open !== false) openBrowser(hub.url);
+  await new Promise<void>((resolve) => {
+    const stop = () => void hub.close().then(resolve);
     process.once('SIGINT', stop);
     process.once('SIGTERM', stop);
   });
@@ -530,6 +552,13 @@ export function buildProgram(): Command {
     .option('--json', 'machine-readable JSON output')
     .addOption(new Option('--root <dir>', 'project root (default: $REELFORGE_ROOT or the current directory)'))
     .showHelpAfterError('(add --help for usage)');
+
+  program
+    .command('studio')
+    .description('open the project dashboard: create, record, cue, preview, validate and render episodes')
+    .option('--port <port>', 'port (default 4310 or $REELFORGE_PORT)', posInt('--port'))
+    .option('--no-open', 'do not open the browser')
+    .action((o, cmd) => cmdHub(o, globals(cmd)));
 
   program
     .command('new')

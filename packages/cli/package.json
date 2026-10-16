@@ -1,7 +1,7 @@
 {
   "name": "@reelforge/cli",
   "version": "1.0.0",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE.md",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -27,5 +27,7 @@
   },
   "bin": {
     "reelforge": "bin/reelforge.js"
-  }
+  },
+  "author": "Idriss Boukmouche",
+  "private": true
 }

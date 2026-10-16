@@ -1,7 +1,7 @@
 {
   "name": "@reelforge/core",
   "version": "1.0.0",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE.md",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -22,5 +22,7 @@
     "zod": "3.24.2",
     "zod-to-json-schema": "3.24.6",
     "@reelforge/audio": "workspace:*"
-  }
+  },
+  "author": "Idriss Boukmouche",
+  "private": true
 }

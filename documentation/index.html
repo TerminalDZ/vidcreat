@@ -1,0 +1,2231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReelForge 1.0.0 — Documentation</title>
+<style>
+:root{--bg:#07080c;--panel:#0d0f15;--card:#10131b;--line:#222735;--ink:#e8ebf2;--dim:#8a91a3;--lime:#b8ff3c;--cyan:#55dcff;--red:#ff4a5c;--amber:#ffb238}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:20px}
+body{margin:0;background:var(--bg);color:var(--ink);font:15.5px/1.65 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+a{color:var(--cyan);text-decoration:none}a:hover{text-decoration:underline}
+aside{position:fixed;inset:0 auto 0 0;width:290px;overflow:auto;background:var(--panel);border-right:1px solid var(--line);padding:22px 18px 40px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;margin-bottom:4px}
+.brand i{width:14px;height:14px;border-radius:4px;background:var(--lime);box-shadow:0 0 14px var(--lime)}
+.ver{color:var(--dim);font-size:12.5px;margin:0 0 16px}
+#q{width:100%;height:36px;border-radius:9px;border:1px solid var(--line);background:#0a0c12;color:var(--ink);padding:0 10px;font:inherit;font-size:14px;margin-bottom:14px}
+aside ul{list-style:none;margin:0;padding:0}aside>nav>ul>li{margin:2px 0}
+aside a{display:block;color:#c9cfdb;padding:4px 8px;border-radius:7px;font-size:14px}
+aside>nav>ul>li>a{font-weight:650;color:var(--ink)}
+aside li ul a{padding-left:20px;font-size:13px;color:var(--dim)}
+aside a:hover,aside a.on{background:#161a24;text-decoration:none;color:var(--ink)}
+main{margin-left:290px;max-width:1040px;padding:34px 56px 120px}
+.chapter{padding-bottom:28px;border-bottom:1px solid var(--line);margin-bottom:36px}
+h1{font-size:34px;line-height:1.2;margin:10px 0 18px;letter-spacing:-.01em}
+h2{font-size:23px;margin:34px 0 12px}h3{font-size:18px;margin:26px 0 10px}
+h1,h2,h3{position:relative}.anchor{position:absolute;left:-22px;color:var(--line);opacity:0}h1:hover .anchor,h2:hover .anchor,h3:hover .anchor{opacity:1}
+p,li{color:#d3d8e3}strong{color:#fff}
+code{font-family:ui-monospace,'JetBrains Mono',SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:#161a24;border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+pre{background:#0b0d13;border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow:auto}pre code{background:none;border:0;padding:0;font-size:13.5px;line-height:1.55}
+.table{overflow:auto;margin:14px 0}table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}th{color:var(--dim);font-weight:650;font-size:12.5px;text-transform:uppercase;letter-spacing:.06em}
+blockquote{margin:16px 0;padding:10px 16px;border-left:4px solid var(--amber);background:rgba(255,178,56,.07);border-radius:0 10px 10px 0}blockquote p{margin:4px 0}
+figure{margin:18px 0}figure img{max-width:100%;border-radius:12px;border:1px solid var(--line);display:block}figcaption{color:var(--dim);font-size:13px;margin-top:6px}
+.hide{display:none}
+@media (max-width:900px){aside{position:static;width:auto;border-right:0;border-bottom:1px solid var(--line)}main{margin:0;padding:24px 18px 80px}}
+@media print{aside{display:none}main{margin:0}body{background:#fff;color:#000}}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand"><i></i>ReelForge</div>
+  <p class="ver">Version 1.0.0 · offline documentation</p>
+  <input id="q" type="search" placeholder="Search the documentation…" aria-label="Search">
+  <nav><ul><li><a href="#introduction">Introduction</a><ul><li><a href="#highlights">Highlights</a></li><li><a href="#what-is-in-the-package">What is in the package</a></li><li><a href="#requirements">Requirements</a></li></ul></li><li><a href="#installation">Installation</a><ul><li><a href="#windows-10-11">Windows 10 / 11</a></li><li><a href="#macos">macOS</a></li><li><a href="#linux">Linux</a></li><li><a href="#check-your-setup-at-any-time">Check your setup at any time</a></li><li><a href="#updating">Updating</a></li><li><a href="#uninstalling">Uninstalling</a></li></ul></li><li><a href="#quick-start-your-first-reel">Quick start: your first reel</a><ul><li><a href="#1-create-an-episode">1. Create an episode</a></li><li><a href="#2-write-the-script">2. Write the script</a></li><li><a href="#3-record">3. Record</a></li><li><a href="#4-mark-the-cues">4. Mark the cues</a></li><li><a href="#5-describe-what-appears">5. Describe what appears</a></li><li><a href="#6-preview">6. Preview</a></li><li><a href="#7-validate-and-render">7. Validate and render</a></li></ul></li><li><a href="#the-dashboard">The dashboard</a></li><li><a href="#recording-and-cues">Recording and cues</a><ul><li><a href="#recording-tips">Recording tips</a></li><li><a href="#the-cue-marker">The cue marker</a></li><li><a href="#word-mode">Word mode</a></li></ul></li><li><a href="#live-preview">Live preview</a></li><li><a href="#writing-episodes">Writing episodes</a><ul><li><a href="#1-the-spec-at-a-glance">1. The spec at a glance</a></li><li><a href="#2-time-expressions">2. Time expressions</a></li><li><a href="#3-placing-elements">3. Placing elements</a></li><li><a href="#4-animations">4. Animations</a></li><li><a href="#5-sound-effects">5. Sound effects</a></li><li><a href="#6-themes-and-presets">6. Themes and presets</a></li><li><a href="#7-validation-rules">7. Validation rules</a></li></ul></li><li><a href="#component-reference">Component reference</a><ul><li><a href="#title">title</a></li><li><a href="#label">label</a></li><li><a href="#code">code</a></li><li><a href="#node">node</a></li><li><a href="#arrow">arrow</a></li><li><a href="#chip">chip</a></li><li><a href="#stamp">stamp</a></li><li><a href="#table">table</a></li><li><a href="#lanes">lanes</a></li><li><a href="#checklist">checklist</a></li><li><a href="#counter">counter</a></li><li><a href="#meter">meter</a></li><li><a href="#timeline">timeline</a></li><li><a href="#grid">grid</a></li><li><a href="#bucket">bucket</a></li><li><a href="#phone">phone</a></li><li><a href="#quote">quote</a></li><li><a href="#particles">particles</a></li><li><a href="#trap">trap</a></li><li><a href="#cta">cta</a></li><li><a href="#icon">icon</a></li></ul></li><li><a href="#themes-and-platform-presets">Themes and platform presets</a><ul><li><a href="#themes">Themes</a></li><li><a href="#platform-presets">Platform presets</a></li></ul></li><li><a href="#rendering-and-outputs">Rendering and outputs</a><ul><li><a href="#outputs-episodesidout">Outputs (<code>episodes/&lt;id&gt;/out/</code>)</a></li><li><a href="#options">Options</a></li><li><a href="#performance">Performance</a></li><li><a href="#uploading">Uploading</a></li></ul></li><li><a href="#command-line-reference">Command-line reference</a><ul><li><a href="#environment-variables">Environment variables</a></li></ul></li><li><a href="#troubleshooting-and-faq">Troubleshooting and FAQ</a></li><li><a href="#changelog">Changelog</a><ul><li><a href="#100-2026-10-16">1.0.0 — 2026-10-16</a></li></ul></li><li><a href="#license-and-credits">License and credits</a><ul><li><a href="#support">Support</a></li></ul></li></ul></nav>
+</aside>
+<main><section class="chapter" id="ch-introduction"><h1 id="introduction"><a class="anchor" href="#introduction" aria-hidden="true">#</a>Introduction</h1>
+<p><strong>ReelForge</strong> turns a voice recording and one YAML file into a finished vertical explainer video —
+1080×1920 at 30 fps, ready for <strong>TikTok</strong>, <strong>Instagram Reels</strong> and <strong>YouTube Shorts</strong>.</p>
+<p><figure><img src="assets/00-dashboard.jpg" alt="The ReelForge dashboard" loading="lazy"><figcaption>The ReelForge dashboard</figcaption></figure></p>
+<p>You write what you say, sentence by sentence, and describe what appears on screen and <strong>on which word</strong>.
+ReelForge animates diagrams, code, tables and titles exactly when you say them, adds word-by-word
+captions, sound effects and series branding, masters the audio and encodes platform-ready files.</p>
+<h2 id="highlights"><a class="anchor" href="#highlights" aria-hidden="true">#</a>Highlights</h2>
+<ul>
+<li><strong>No video editing.</strong> No keyframes, no timeline dragging. Re-record one sentence and everything after
+it stays in sync, because animations follow your words, not seconds.</li>
+<li><strong>Arabic first.</strong> Word-by-word captions with correct right-to-left layout when English terms are mixed in:
+<code>الـ client</code> stays together, <code>؟</code> lands on the correct side, English terms get their own color.</li>
+<li><strong>21 animated components</strong> for technical explainers: nodes and arrows with moving packets, code that types
+itself, race-condition lanes, tables, timelines, meters, counters, token buckets, a phone mock, stamps…</li>
+<li><strong>Professional sound</strong>: procedural sound effects on every hit and transition, voice mastered to −14 LUFS
+(the platforms&#39; loudness target), effects ducked under the voice.</li>
+<li><strong>Platform-ready output</strong>: an archival master MP4, a share MP4 that fits the upload limit you choose,
+SRT captions, a contact sheet and a <code>publish.md</code> with your caption, hashtags and pinned comment.</li>
+<li><strong>Offline and private.</strong> Everything runs on your computer. No account, no subscription, no upload.</li>
+<li><strong>No AI.</strong> No generated voices or images: your voice, your words, your design — consistent every time.</li>
+<li><strong>Deterministic.</strong> The same inputs always produce the same frames.</li>
+</ul>
+<h2 id="what-is-in-the-package"><a class="anchor" href="#what-is-in-the-package" aria-hidden="true">#</a>What is in the package</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Folder / file</th>
+<th>Contents</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>install.bat</code>, <code>install.sh</code></td>
+<td>One-command installers for Windows, macOS and Linux</td>
+</tr>
+<tr>
+<td><code>start.bat</code>, <code>start.sh</code>, <code>ReelForge.command</code></td>
+<td>Open the dashboard</td>
+</tr>
+<tr>
+<td><code>reelforge.cmd</code>, <code>reelforge</code></td>
+<td>The command-line interface</td>
+</tr>
+<tr>
+<td><code>examples/season1/</code></td>
+<td>Nine complete example episodes (“System Design بالعربي”)</td>
+</tr>
+<tr>
+<td><code>themes/</code>, <code>presets/</code></td>
+<td>Editable visual themes and platform layouts</td>
+</tr>
+<tr>
+<td><code>documentation/</code></td>
+<td>This documentation (offline)</td>
+</tr>
+<tr>
+<td><code>packages/</code></td>
+<td>Full TypeScript source code</td>
+</tr>
+<tr>
+<td><code>LICENSE.md</code>, <code>THIRD-PARTY-NOTICES.md</code></td>
+<td>License terms and open-source credits</td>
+</tr>
+</tbody></table>
+</div><h2 id="requirements"><a class="anchor" href="#requirements" aria-hidden="true">#</a>Requirements</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th></th>
+<th>Minimum</th>
+<th>Recommended</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Operating system</td>
+<td>Windows 10, macOS 13, Ubuntu 22.04 (or any recent Linux)</td>
+<td>Windows 11, macOS 14+, Ubuntu 24.04</td>
+</tr>
+<tr>
+<td>CPU / RAM</td>
+<td>4 cores, 8 GB</td>
+<td>8 threads or more, 16 GB (renders scale with cores)</td>
+</tr>
+<tr>
+<td>Disk</td>
+<td>2 GB free (plus ~2 GB temporary space per render)</td>
+<td>SSD</td>
+</tr>
+<tr>
+<td>Software</td>
+<td><strong>Node.js 22 LTS</strong>, <strong>ffmpeg 6+</strong></td>
+<td>installed automatically by the installer where possible</td>
+</tr>
+</tbody></table>
+</div><p>A 2-minute episode renders in roughly 5–10 minutes on an 8-thread laptop.</p>
+</section>
+<section class="chapter" id="ch-installation"><h1 id="installation"><a class="anchor" href="#installation" aria-hidden="true">#</a>Installation</h1>
+<p>Unzip the package anywhere you like (for example <code>Documents/ReelForge</code>). Avoid folders synced by OneDrive
+or iCloud for faster renders.</p>
+<h2 id="windows-10-11"><a class="anchor" href="#windows-10-11" aria-hidden="true">#</a>Windows 10 / 11</h2>
+<ol>
+<li>Install <strong>Node.js 22 LTS</strong> from <a href="https://nodejs.org">https://nodejs.org</a> (keep the default options). If it is missing, the
+installer can install it for you with <code>winget</code>.</li>
+<li>Double-click <strong><code>install.bat</code></strong>. It will:<ul>
+<li>check Node.js,</li>
+<li>offer to install <strong>ffmpeg</strong> with <code>winget</code> (answer <strong>Y</strong>),</li>
+<li>install ReelForge&#39;s dependencies,</li>
+<li>download the pinned Chromium browser used for rendering,</li>
+<li>run a full environment check.</li>
+</ul>
+</li>
+<li>Double-click <strong><code>start.bat</code></strong> to open the dashboard.</li>
+</ol>
+<blockquote>
+<p>If Windows SmartScreen warns about the script, choose <strong>More info → Run anyway</strong>. If ffmpeg was just
+installed, close and reopen <code>start.bat</code> so Windows picks up the new PATH.</p>
+</blockquote>
+<h2 id="macos"><a class="anchor" href="#macos" aria-hidden="true">#</a>macOS</h2>
+<ol>
+<li><p>Install <strong>Node.js 22 LTS</strong> from <a href="https://nodejs.org">https://nodejs.org</a> and <strong>Homebrew</strong> from <a href="https://brew.sh">https://brew.sh</a>.</p>
+</li>
+<li><p>Open <strong>Terminal</strong> in the ReelForge folder (Finder → right-click the folder → <em>New Terminal at Folder</em>) and run:</p>
+<pre><code class="language-bash">./install.sh
+</code></pre>
+<p>Answer <strong>Y</strong> when it offers <code>brew install ffmpeg</code>.</p>
+</li>
+<li><p>Double-click <strong><code>ReelForge.command</code></strong> (or run <code>./start.sh</code>) to open the dashboard.</p>
+</li>
+</ol>
+<h2 id="linux"><a class="anchor" href="#linux" aria-hidden="true">#</a>Linux</h2>
+<pre><code class="language-bash">./install.sh          # add --yes to accept every prompt
+./start.sh            # opens the dashboard
+</code></pre>
+<p>The installer uses your package manager (<code>apt</code>, <code>dnf</code>, <code>pacman</code> or <code>zypper</code>) for ffmpeg and can install
+Chromium&#39;s system libraries (it asks for <code>sudo</code>).</p>
+<h2 id="check-your-setup-at-any-time"><a class="anchor" href="#check-your-setup-at-any-time" aria-hidden="true">#</a>Check your setup at any time</h2>
+<pre><code class="language-bash">reelforge doctor          # Windows: reelforge.cmd doctor
+</code></pre>
+<p>It checks Node.js, ffmpeg (version, encoders and filters), Chromium and the bundled fonts, and prints the
+exact fix for anything missing. The dashboard shows the same check as the status pill in the top bar.</p>
+<p><figure><img src="assets/20-cli-doctor.png" alt="reelforge doctor" loading="lazy"><figcaption>reelforge doctor</figcaption></figure></p>
+<h2 id="updating"><a class="anchor" href="#updating" aria-hidden="true">#</a>Updating</h2>
+<p>Download the new version from your CodeCanyon <strong>Downloads</strong> page, unzip it next to the old one, copy your
+<code>episodes/</code> folder (and any custom <code>themes/</code> or <code>presets/</code>) into the new folder, then run the installer
+again. Your episodes are plain files: nothing else needs migrating.</p>
+<h2 id="uninstalling"><a class="anchor" href="#uninstalling" aria-hidden="true">#</a>Uninstalling</h2>
+<p>Delete the ReelForge folder. The Chromium download lives in your user cache folder
+(<code>%LOCALAPPDATA%\ms-playwright</code> on Windows, <code>~/Library/Caches/ms-playwright</code> on macOS,
+<code>~/.cache/ms-playwright</code> on Linux) and can be deleted too.</p>
+</section>
+<section class="chapter" id="ch-quick-start-your-first-reel"><h1 id="quick-start-your-first-reel"><a class="anchor" href="#quick-start-your-first-reel" aria-hidden="true">#</a>Quick start: your first reel</h1>
+<p>This walk-through takes about 15 minutes for a 30-second episode.</p>
+<h2 id="1-create-an-episode"><a class="anchor" href="#1-create-an-episode" aria-hidden="true">#</a>1. Create an episode</h2>
+<p>Open the dashboard (<code>start.bat</code> / <code>./start.sh</code>) and click <strong>+ New episode</strong>. Give it an id such as <code>ep10</code>,
+a title and your series name. ReelForge creates <code>episodes/ep10/episode.yaml</code> from a commented template.</p>
+<h2 id="2-write-the-script"><a class="anchor" href="#2-write-the-script" aria-hidden="true">#</a>2. Write the script</h2>
+<p>Open <code>episodes/ep10/episode.yaml</code> in any text editor (VS Code is recommended: the template links the
+JSON Schema, so you get autocompletion and inline errors). Put <strong>one spoken sentence per line</strong>:</p>
+<pre><code class="language-yaml">script:
+  - text: &#39;عمرك دفعت حاجة أونلاين، والنت فصل؟&#39;
+  - text: &#39;المشكلة دي اسمها Duplicate Charge&#39;
+  - text: &#39;والحل اسمه الـ Idempotency key&#39;
+</code></pre>
+<h2 id="3-record"><a class="anchor" href="#3-record" aria-hidden="true">#</a>3. Record</h2>
+<p>Record yourself reading the script with any app (phone, Audacity, OBS…). Keep a short pause between
+sentences. In the dashboard click <strong>Upload voice</strong> and choose the file — WAV, MP3, M4A, OGG, OPUS or FLAC.
+It is converted and saved as <code>voice.wav</code>.</p>
+<blockquote>
+<p>Not ready to record? Click <strong>Draft cues</strong>: ReelForge estimates timing from the text so you can design and
+preview first.</p>
+</blockquote>
+<h2 id="4-mark-the-cues"><a class="anchor" href="#4-mark-the-cues" aria-hidden="true">#</a>4. Mark the cues</h2>
+<p>Click <strong>Mark cues</strong>. Play the recording and press <strong>Space</strong> at the start of each sentence. That&#39;s it —
+see <a href="#recording-and-cues">Recording and cues</a> for nudging, re-marking and word-level marks.</p>
+<h2 id="5-describe-what-appears"><a class="anchor" href="#5-describe-what-appears" aria-hidden="true">#</a>5. Describe what appears</h2>
+<p>Add scenes and elements to <code>episode.yaml</code>. Each element appears <strong>on the word that names it</strong>:</p>
+<pre><code class="language-yaml">scenes:
+  - id: hook
+    at: l1
+    glow: red
+    elements:
+      - use: title
+        props: { text: &#39;**Duplicate** Charge&#39; }
+        place: { x: 60, y: 200, w: 960, h: 260 }
+        enter: { at: &quot;l2:&#39;Duplicate&#39;&quot;, anim: pop }
+</code></pre>
+<h2 id="6-preview"><a class="anchor" href="#6-preview" aria-hidden="true">#</a>6. Preview</h2>
+<p>Click <strong>Preview</strong>. The video plays in sync with your voice and reloads every time you save the YAML.
+Press <strong>Z</strong> to show the platform safe zones and <strong>?</strong> for all shortcuts.</p>
+<h2 id="7-validate-and-render"><a class="anchor" href="#7-validate-and-render" aria-hidden="true">#</a>7. Validate and render</h2>
+<p>Click <strong>Validate</strong> to list any problem with its line number and a fix hint, then <strong>Render</strong>. When it
+finishes, the card shows <strong>Master</strong>, <strong>Share</strong>, <strong>Captions</strong>, <strong>Contact sheet</strong> and <strong>publish.md</strong>: click
+Share to watch it, then upload it with the caption from <code>publish.md</code>.</p>
+</section>
+<section class="chapter" id="ch-the-dashboard"><h1 id="the-dashboard"><a class="anchor" href="#the-dashboard" aria-hidden="true">#</a>The dashboard</h1>
+<p><code>reelforge studio</code> (or <code>start.bat</code> / <code>start.sh</code>) opens the dashboard at <code>http://127.0.0.1:4310</code>. It lists
+<strong>your episodes</strong> (the <code>episodes/</code> folder) and the <strong>examples</strong>.</p>
+<p><figure><img src="assets/00-dashboard.jpg" alt="Dashboard" loading="lazy"><figcaption>Dashboard</figcaption></figure></p>
+<p>Each card shows a live thumbnail, the series, preset, number of lines and scenes, the duration, and status
+chips:</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Chip</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>voice 1:15</code> / <code>no voice</code></td>
+<td>Whether a recording is present, and its length</td>
+</tr>
+<tr>
+<td><code>cues 24/24</code> / <code>draft cues</code> / <code>no cues</code></td>
+<td>How many sentences are marked; draft cues are estimates</td>
+</tr>
+<tr>
+<td><code>valid</code> / <code>2 warnings</code> / <code>1 error</code></td>
+<td>Result of the static checks (hover an error to read it)</td>
+</tr>
+</tbody></table>
+</div><div class="table"><table>
+<thead>
+<tr>
+<th>Button</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Upload voice</strong></td>
+<td>Choose a recording; it is converted to <code>voice.wav</code> (48 kHz)</td>
+</tr>
+<tr>
+<td><strong>Mark cues</strong></td>
+<td>Opens the cue marker for this episode in a new tab</td>
+</tr>
+<tr>
+<td><strong>Preview</strong></td>
+<td>Opens the live preview in a new tab</td>
+</tr>
+<tr>
+<td><strong>Validate</strong></td>
+<td>Runs every check, including the headless text-overflow and caption checks</td>
+</tr>
+<tr>
+<td><strong>Render</strong></td>
+<td>Choose the platform preset, share size, SFX and speed; progress, FPS and ETA appear live; <strong>Cancel</strong> stops cleanly</td>
+</tr>
+<tr>
+<td><strong>Folder</strong></td>
+<td>Opens the episode folder in your file manager</td>
+</tr>
+<tr>
+<td><strong>Draft cues</strong></td>
+<td>(only without cues) estimates timing from the text</td>
+</tr>
+</tbody></table>
+</div><p><figure><img src="assets/23-dashboard-validate.jpg" alt="Validation results" loading="lazy"><figcaption>Validation results</figcaption></figure></p>
+<p><figure><img src="assets/24-dashboard-render-options.jpg" alt="Render options" loading="lazy"><figcaption>Render options</figcaption></figure></p>
+<p><figure><img src="assets/25-dashboard-render-progress.jpg" alt="Live render progress" loading="lazy"><figcaption>Live render progress</figcaption></figure></p>
+<p>Finished outputs appear as links on the card: videos open in a player with a <strong>Download</strong> button.
+<figure><img src="assets/26-dashboard-player.jpg" alt="Built-in player" loading="lazy"><figcaption>Built-in player</figcaption></figure></p>
+<p>Only one render runs at a time. The dashboard only listens on <code>127.0.0.1</code>: it is not reachable from other
+computers.</p>
+</section>
+<section class="chapter" id="ch-recording-and-cues"><h1 id="recording-and-cues"><a class="anchor" href="#recording-and-cues" aria-hidden="true">#</a>Recording and cues</h1>
+<h2 id="recording-tips"><a class="anchor" href="#recording-tips" aria-hidden="true">#</a>Recording tips</h2>
+<ul>
+<li>Record in a quiet room, 20–30 cm from the microphone. Any sample rate works; ReelForge masters the
+loudness for you (−14 LUFS).</li>
+<li>Read one script line per breath and leave a short pause (0.3–0.5 s) between lines. Pauses make marking
+faster and give animations room.</li>
+<li>Re-recording later? Upload the new take: ReelForge warns that the voice changed so you can re-check the
+cues.</li>
+</ul>
+<h2 id="the-cue-marker"><a class="anchor" href="#the-cue-marker" aria-hidden="true">#</a>The cue marker</h2>
+<p>A <strong>cue</strong> is the moment a script line starts. Everything in the episode is timed relative to cues, so a
+re-recorded line only needs its cue moved — every animation follows.</p>
+<p><figure><img src="assets/01-studio-cue-marker.jpg" alt="Cue marker" loading="lazy"><figcaption>Cue marker</figcaption></figure></p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Enter</strong> / <strong>K</strong></td>
+<td>Play / pause</td>
+</tr>
+<tr>
+<td><strong>1 / 2 / 3</strong></td>
+<td>Speed 0.5× / 0.75× / 1× (slower = more accurate)</td>
+</tr>
+<tr>
+<td><strong>Space</strong></td>
+<td>Mark the next unmarked line at the playhead</td>
+</tr>
+<tr>
+<td><strong>Click a line</strong> or <strong>↑ / ↓</strong></td>
+<td>Select a line to re-mark it (then press Space)</td>
+</tr>
+<tr>
+<td><strong>← / →</strong></td>
+<td>Nudge the selected cue by 50 ms (<strong>Shift</strong>: 10 ms)</td>
+</tr>
+<tr>
+<td><strong>Backspace</strong></td>
+<td>Undo the last change</td>
+</tr>
+<tr>
+<td><strong>S</strong> / <strong>A</strong></td>
+<td>Snap the selected cue to the nearest voice onset / toggle auto-snap</td>
+</tr>
+<tr>
+<td><strong>G</strong></td>
+<td>Jump to the selected cue</td>
+</tr>
+<tr>
+<td><strong>W</strong></td>
+<td>Word mode: mark each word of the selected line with Space</td>
+</tr>
+<tr>
+<td><strong>J / L</strong>, <strong>, / .</strong></td>
+<td>Back / forward 1 s, previous / next frame</td>
+</tr>
+</tbody></table>
+</div><p>Every change is saved instantly to <code>cues.json</code>. Lines out of order are shown in red.</p>
+<h2 id="word-mode"><a class="anchor" href="#word-mode" aria-hidden="true">#</a>Word mode</h2>
+<p>By default ReelForge estimates when each word starts from its length. For precise hits (a stamp landing
+exactly on “مرتين”), select the line, press <strong>W</strong>, play, and press <strong>Space</strong> on each word.</p>
+<p><figure><img src="assets/02-studio-cue-word-mode.jpg" alt="Word mode" loading="lazy"><figcaption>Word mode</figcaption></figure></p>
+</section>
+<section class="chapter" id="ch-live-preview"><h1 id="live-preview"><a class="anchor" href="#live-preview" aria-hidden="true">#</a>Live preview</h1>
+<p>The preview renders the real 1080×1920 frame (the same engine as the final render) in sync with your
+voice. Save <code>episode.yaml</code>, the theme or the cues and it reloads in under a second, keeping the playhead.</p>
+<p><figure><img src="assets/03-studio-preview-safe-zones.jpg" alt="Preview with safe zones" loading="lazy"><figcaption>Preview with safe zones</figcaption></figure></p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Overlay</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Z</strong></td>
+<td>Platform UI safe zones (where TikTok/Reels/Shorts draw buttons and captions)</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>Stage bounds and the caption line</td>
+</tr>
+<tr>
+<td><strong>E</strong></td>
+<td>Every element&#39;s box with its id</td>
+</tr>
+<tr>
+<td><strong>T</strong></td>
+<td>Time and frame readout</td>
+</tr>
+</tbody></table>
+</div><p><figure><img src="assets/04-studio-preview-element-boxes.jpg" alt="Element boxes" loading="lazy"><figcaption>Element boxes</figcaption></figure></p>
+<p>The <strong>Lint</strong> panel lists every issue; click one to jump to its time, or its <code>episode.yaml:line</code> link to
+open the file in VS Code.</p>
+<p><figure><img src="assets/08-studio-lint-panel.jpg" alt="Lint panel" loading="lazy"><figcaption>Lint panel</figcaption></figure></p>
+<p>If the YAML cannot be read (a typo, a bad indentation), an overlay shows the exact line and column and the
+preview keeps showing the last good version.</p>
+<p><figure><img src="assets/06-studio-yaml-error-overlay.jpg" alt="YAML error" loading="lazy"><figcaption>YAML error</figcaption></figure></p>
+</section>
+<section class="chapter" id="ch-writing-episodes"><h1 id="writing-episodes"><a class="anchor" href="#writing-episodes" aria-hidden="true">#</a>Writing episodes</h1>
+<p>Everything about an episode lives in <code>episodes/&lt;id&gt;/</code>:</p>
+<pre><code>episodes/ep10/
+  episode.yaml   the spec (you write this)
+  voice.wav      your recording (any sample rate, mono or stereo; other formats are converted with ffmpeg)
+  cues.json      line start times (written by `reelforge cue`)
+  assets/        optional images/SVGs referenced as assets/&lt;file&gt;
+  out/           generated: master, share, SRT, contact sheet, publish.md
+</code></pre>
+<h2 id="1-the-spec-at-a-glance"><a class="anchor" href="#1-the-spec-at-a-glance" aria-hidden="true">#</a>1. The spec at a glance</h2>
+<pre><code class="language-yaml">meta:
+  id: ep10 # slug
+  series: &#39;SYSTEM DESIGN&#39; # header text
+  title: &#39;Idempotency&#39;
+  episode: 10
+  preset: tiktok # tiktok | reels | shorts (presets/*.preset.yaml)
+  theme: season1 # themes/&lt;name&gt;.theme.yaml, or a relative path
+  lang: ar-EG
+  publish: { cover: &#39;…&#39;, caption: &#39;…&#39;, hashtags: [&#39;#systemdesign&#39;], pinned: &#39;…&#39; }
+
+audio:
+  voice: voice.wav
+  sfx: auto # auto | none | manual (only audio.extra and element sfx lists)
+  sfx_gain_db: -16
+  duck: true # duck SFX under the voice
+  extra: [{ at: &quot;l9:&#39;boom&#39;&quot;, sound: hit, gain_db: -3 }]
+
+script: # one spoken sentence per line; ids default to l1, l2, …
+  - text: &#39;عمرك دفعت حاجة أونلاين، والنت فصل؟&#39;
+  - id: twice
+    text: &#39;اتخصم منك مرتين&#39;
+    break: [&#39;مرتين&#39;] # force a caption break before this word
+    caption: auto # auto | none | &quot;custom caption text&quot;
+
+chapters:
+  - { at: l1, label: &#39;01 · THE PROBLEM&#39; }
+
+scenes:
+  - id: hook
+    at: l1 # start; end defaults to the next scene&#39;s start
+    glow: red # or a list: [{ at: l1, color: red }, { at: l3, color: lime }]
+    transition: crossfade # crossfade | cut | slide-up
+    layout: stage # stage (between header and captions) | full (whole canvas)
+    elements:
+      - use: phone
+        id: phone
+        props: { title: &#39;Checkout&#39;, amount: &#39;$49.00&#39; }
+        place: { x: 320, y: 30, w: 440, h: 880 }
+        enter: { at: l1, anim: rise, dur: 0.6 }
+        exit: { at: l3, anim: fade }
+        states:
+          - { at: &quot;l1:&#39;فصل&#39;&quot;, set: { offline: true } }
+        fx:
+          - { at: &quot;twice:&#39;مرتين&#39;&quot;, do: shake, amp: 22 }
+          - { at: &quot;twice:&#39;مرتين&#39;&quot;, do: flash, color: red }
+</code></pre>
+<h2 id="2-time-expressions"><a class="anchor" href="#2-time-expressions" aria-hidden="true">#</a>2. Time expressions</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Form</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>12.5s</code> (or a YAML number <code>12.5</code>)</td>
+<td>absolute seconds</td>
+</tr>
+<tr>
+<td><code>l7</code></td>
+<td>cue start of line <code>l7</code></td>
+</tr>
+<tr>
+<td><code>l7.end</code></td>
+<td>start of the next line − 0.15 s</td>
+</tr>
+<tr>
+<td><code>l7:&#39;timeout&#39;</code></td>
+<td>first word matching &quot;timeout&quot; (punctuation, tatweel and diacritics ignored)</td>
+</tr>
+<tr>
+<td><code>l7:&#39;الاتنين&#39;#2</code></td>
+<td>second match</td>
+</tr>
+<tr>
+<td><code>l7:&quot;Conway&#39;s&quot;</code></td>
+<td>use double quotes when the word contains <code>&#39;</code></td>
+</tr>
+<tr>
+<td><code>l7:&#39;Duplicate Charge&#39;</code></td>
+<td>a multi-word phrase (time of its first word)</td>
+</tr>
+<tr>
+<td><code>l7.3</code></td>
+<td>the 4th word (0-based)</td>
+</tr>
+<tr>
+<td><code>@hook</code>, <code>@hook.end</code></td>
+<td>a scene&#39;s start / end</td>
+</tr>
+<tr>
+<td>any of the above <code>+0.4</code> / <code>-0.2</code></td>
+<td>offset in seconds</td>
+</tr>
+</tbody></table>
+</div><p>Word times come from your manual word marks (cue marker, word mode) or are estimated by letter count
+within the line. Every expression is validated; errors name the closest valid alternative.</p>
+<h2 id="3-placing-elements"><a class="anchor" href="#3-placing-elements" aria-hidden="true">#</a>3. Placing elements</h2>
+<p>Stage coordinates: 1080 wide × 1000 high, origin at the top-left of the stage (canvas y = 270 for TikTok).</p>
+<ul>
+<li><code>place: { x, y, w, h }</code> — explicit box (integers)</li>
+<li><code>place: { center: true, w, h }</code> — centered</li>
+<li><code>place: { anchor: top|bottom|left|right|center, w, h, margin }</code></li>
+<li>no <code>place</code> → centered at the component&#39;s default size, or laid out by a scene helper:<ul>
+<li><code>row: { gap, align, y, h }</code> — elements side by side</li>
+<li><code>column: { gap, align, x, w }</code> — stacked</li>
+<li><code>columns: 2</code> (+ <code>gutter</code>, element <code>col: 0|1</code>) — lanes</li>
+</ul>
+</li>
+<li><code>size: { w, h }</code> overrides the default size inside helpers.</li>
+<li><code>layer: overlay</code> puts an element on top and exempts it from the overlap rule (V-8).</li>
+</ul>
+<p>Keep content out of the platform UI: the studio&#39;s <strong>Z</strong> overlay shows the safe zones of the preset.</p>
+<h2 id="4-animations"><a class="anchor" href="#4-animations" aria-hidden="true">#</a>4. Animations</h2>
+<p><code>enter.anim</code>: <code>pop</code> (default), <code>rise</code>, <code>slide-l</code>, <code>slide-r</code>, <code>fade</code>, <code>draw</code>, <code>type</code>, <code>count</code>, <code>flip</code>,
+<code>zoom</code>, <code>glitch</code>, <code>stamp</code>, <code>none</code>. Parameters: <code>dur</code>, <code>s0</code>, <code>dy</code>, <code>dist</code>, <code>cps</code>, <code>rot</code>, <code>amp</code>.
+<code>exit.anim</code>: <code>fade</code>, <code>pop</code>, <code>rise</code>, <code>sink</code>, <code>slide-l</code>, <code>slide-r</code>, <code>zoom</code>, <code>none</code>.
+<code>fx[].do</code>: <code>shake</code> (<code>target: camera</code> shakes the whole stage), <code>flash</code> (full-frame color hit),
+<code>glitch</code>, <code>pulse</code> (<code>rate</code>), <code>bump</code>. Flashes add a <code>hit</code> sound and glitches a <code>glitch</code> sound unless
+<code>sound: none</code>.</p>
+<p>States: <code>states: [{ at, set: { … } }]</code> — each component documents the keys it reacts to
+(for example <code>node.status</code>, <code>phone.offline</code>, <code>chip.strike</code>, <code>grid.tiles</code>). See <a href="#component-reference">components.md</a>.</p>
+<h2 id="5-sound-effects"><a class="anchor" href="#5-sound-effects" aria-hidden="true">#</a>5. Sound effects</h2>
+<p>With <code>audio.sfx: auto</code> components emit their default sounds (title → whoosh, stamp → hit, table row → ding,
+lane step → tick, …). Disable per element with <code>sfx: none</code>, or give a list
+<code>sfx: [{ at: l4, sound: ding }]</code>. Sounds: <code>whoosh hit ding err glitch tick tap typing</code>. Events of the
+same sound closer than 80 ms are merged.</p>
+<h2 id="6-themes-and-presets"><a class="anchor" href="#6-themes-and-presets" aria-hidden="true">#</a>6. Themes and presets</h2>
+<p>Themes (<code>themes/*.theme.yaml</code>) hold every color, font, size and motion token and can <code>extends:</code>
+another theme. <code>chrome.grain_fps</code> (default 0, a static texture) controls how often the film grain
+changes; animated grain multiplies the file size (see ADR-011). Presets (<code>presets/*.preset.yaml</code>) hold the canvas, header/stage/caption positions,
+safe-zone rectangles, share size and maximum duration — edit them without touching code.</p>
+<h2 id="7-validation-rules"><a class="anchor" href="#7-validation-rules" aria-hidden="true">#</a>7. Validation rules</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Level</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>V-1</td>
+<td>error</td>
+<td>schema violation (with did-you-mean)</td>
+</tr>
+<tr>
+<td>V-2</td>
+<td>error</td>
+<td>unresolvable time expression</td>
+</tr>
+<tr>
+<td>V-3</td>
+<td>error</td>
+<td>missing/out-of-order cues</td>
+</tr>
+<tr>
+<td>V-4</td>
+<td>warn</td>
+<td>voice changed since cues were marked, or voice missing</td>
+</tr>
+<tr>
+<td>V-5</td>
+<td>error</td>
+<td>exit before enter, or enter outside the scene</td>
+</tr>
+<tr>
+<td>V-6</td>
+<td>warn</td>
+<td>element box outside the stage/canvas</td>
+</tr>
+<tr>
+<td>V-7</td>
+<td>warn</td>
+<td>element in a platform UI zone</td>
+</tr>
+<tr>
+<td>V-8</td>
+<td>warn</td>
+<td>two visible base elements overlap &gt; 15%</td>
+</tr>
+<tr>
+<td>V-9</td>
+<td>warn</td>
+<td>text overflows its box (headless measurement)</td>
+</tr>
+<tr>
+<td>V-10</td>
+<td>warn</td>
+<td>caption wraps over <code>max_lines</code></td>
+</tr>
+<tr>
+<td>V-11</td>
+<td>info</td>
+<td>nothing enters in a scene&#39;s first 1.5 s</td>
+</tr>
+<tr>
+<td>V-12</td>
+<td>warn</td>
+<td>element enters &lt; 0.1 s before its scene ends</td>
+</tr>
+<tr>
+<td>V-13</td>
+<td>error</td>
+<td>unknown component or font</td>
+</tr>
+</tbody></table>
+</div><p><code>reelforge validate &lt;id&gt; --strict</code> fails on warnings too (use it in CI).</p>
+</section>
+<section class="chapter" id="ch-component-reference"><h1 id="component-reference"><a class="anchor" href="#component-reference" aria-hidden="true">#</a>Component reference</h1>
+<p>Generated from the schemas in <code>packages/core/src/components/schemas.ts</code> by
+<code>node scripts/gen-components-doc.mjs</code>. Props are strict: unknown keys are errors with a
+&quot;did you mean&quot; hint.</p>
+<p>Conventions:</p>
+<ul>
+<li>Keys named <code>at</code> and <code>until</code> (at any depth), and <code>strike</code>/<code>highlight</code> when not booleans, are
+<strong>time expressions</strong>: <code>12.5s</code>, <code>l7</code>, <code>l7+0.4</code>, <code>l7.end</code>, <code>l7:&#39;word&#39;</code>, <code>l7:&#39;word&#39;#2</code>, <code>l7.3</code>, <code>@scene.end</code>.</li>
+<li>Keys named <code>color</code>, <code>accent</code>, <code>danger</code> and <code>colors[]</code> take a <strong>theme color name</strong>
+(<code>lime</code>, <code>cyan</code>, <code>red</code>, <code>amber</code>, <code>violet</code>, <code>ink</code>, <code>dim</code>, …) or a CSS color.</li>
+<li><code>from</code>/<code>to</code> endpoints are an element id (<code>api</code>), an element side (<code>api.left|right|top|bottom|center</code>)
+or a point <code>{x, y}</code> in stage coordinates.</li>
+<li>Every element also takes the common keys: <code>id, place, size, col, layer, z, enter, exit, states, fx, sfx</code>
+(see <a href="#writing-episodes">authoring.md</a>).</li>
+</ul>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Default size</th>
+<th>Default enter</th>
+<th>Layer</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="#title"><code>title</code></a></td>
+<td>960×240</td>
+<td>rise</td>
+<td>base</td>
+<td>Big display text; <strong>accent</strong> markup colors words with the accent color.</td>
+</tr>
+<tr>
+<td><a href="#label"><code>label</code></a></td>
+<td>640×60</td>
+<td>fade</td>
+<td>base</td>
+<td>Small uppercase monospace label.</td>
+</tr>
+<tr>
+<td><a href="#code"><code>code</code></a></td>
+<td>960×520</td>
+<td>rise</td>
+<td>base</td>
+<td>Code card with token colors that types itself.</td>
+</tr>
+<tr>
+<td><a href="#node"><code>node</code></a></td>
+<td>300×170</td>
+<td>pop</td>
+<td>base</td>
+<td>Box with a title and a sub-status; status changes its color.</td>
+</tr>
+<tr>
+<td><a href="#arrow"><code>arrow</code></a></td>
+<td>200×40</td>
+<td>draw</td>
+<td>overlay</td>
+<td>Straight, elbow or curved arrow with an optional label and moving packets.</td>
+</tr>
+<tr>
+<td><a href="#chip"><code>chip</code></a></td>
+<td>340×84</td>
+<td>pop</td>
+<td>base</td>
+<td>Pill/tag, optionally struck through.</td>
+</tr>
+<tr>
+<td><a href="#stamp"><code>stamp</code></a></td>
+<td>680×260</td>
+<td>stamp</td>
+<td>overlay</td>
+<td>Rotated bordered word that slams in (×2, DEADLOCK).</td>
+</tr>
+<tr>
+<td><a href="#table"><code>table</code></a></td>
+<td>960×440</td>
+<td>pop</td>
+<td>base</td>
+<td>Header + rows with animated row inserts and highlights.</td>
+</tr>
+<tr>
+<td><a href="#lanes"><code>lanes</code></a></td>
+<td>960×760</td>
+<td>pop</td>
+<td>base</td>
+<td>Parallel columns of timed steps (race conditions).</td>
+</tr>
+<tr>
+<td><a href="#checklist"><code>checklist</code></a></td>
+<td>880×460</td>
+<td>pop</td>
+<td>base</td>
+<td>Items with check boxes appearing in sequence.</td>
+</tr>
+<tr>
+<td><a href="#counter"><code>counter</code></a></td>
+<td>820×320</td>
+<td>pop</td>
+<td>base</td>
+<td>Big number counting between keyframe values.</td>
+</tr>
+<tr>
+<td><a href="#meter"><code>meter</code></a></td>
+<td>880×180</td>
+<td>pop</td>
+<td>base</td>
+<td>Horizontal bar with an optional threshold marker.</td>
+</tr>
+<tr>
+<td><a href="#timeline"><code>timeline</code></a></td>
+<td>960×260</td>
+<td>pop</td>
+<td>base</td>
+<td>Axis with markers at relative positions (backoff, TTL).</td>
+</tr>
+<tr>
+<td><a href="#grid"><code>grid</code></a></td>
+<td>640×640</td>
+<td>pop</td>
+<td>base</td>
+<td>N×M tiles with per-tile states (thread pool, shards, services).</td>
+</tr>
+<tr>
+<td><a href="#bucket"><code>bucket</code></a></td>
+<td>440×560</td>
+<td>pop</td>
+<td>base</td>
+<td>Token bucket whose tokens are consumed and refilled over time.</td>
+</tr>
+<tr>
+<td><a href="#phone"><code>phone</code></a></td>
+<td>440×880</td>
+<td>pop</td>
+<td>base</td>
+<td>Phone mock with a checkout screen, button taps and notifications.</td>
+</tr>
+<tr>
+<td><a href="#quote"><code>quote</code></a></td>
+<td>940×460</td>
+<td>rise</td>
+<td>base</td>
+<td>Quote card with author; the quote types itself.</td>
+</tr>
+<tr>
+<td><a href="#particles"><code>particles</code></a></td>
+<td>1080×1000</td>
+<td>none</td>
+<td>overlay</td>
+<td>Seeded particle bursts, herds, streams, dust or confetti.</td>
+</tr>
+<tr>
+<td><a href="#trap"><code>trap</code></a></td>
+<td>1080×1000</td>
+<td>glitch</td>
+<td>overlay</td>
+<td>The series &quot;THE TRAP&quot; interstitial with warning tapes.</td>
+</tr>
+<tr>
+<td><a href="#cta"><code>cta</code></a></td>
+<td>960×560</td>
+<td>rise</td>
+<td>base</td>
+<td>&quot;Next episode&quot; title plus a comment box typing a keyword.</td>
+</tr>
+<tr>
+<td><a href="#icon"><code>icon</code></a></td>
+<td>160×160</td>
+<td>pop</td>
+<td>base</td>
+<td>Inline SVG icon from the bundled set, or an SVG from assets/.</td>
+</tr>
+</tbody></table>
+</div><h2 id="title"><a class="anchor" href="#title" aria-hidden="true">#</a>title</h2>
+<p>Big display text; <strong>accent</strong> markup colors words with the accent color.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>text</code></td>
+<td>string</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>number</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>align</code></td>
+<td><code>left</code> | <code>center</code> | <code>right</code></td>
+<td><code>&quot;center&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string</td>
+<td><code>&quot;ink&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>accent</code></td>
+<td>string</td>
+<td><code>&quot;lime&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>font</code></td>
+<td><code>auto</code> | <code>display</code> | <code>arabic</code> | <code>mono</code></td>
+<td><code>&quot;auto&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>weight</code></td>
+<td>integer</td>
+<td><code>800</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>sub</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="label"><a class="anchor" href="#label" aria-hidden="true">#</a>label</h2>
+<p>Small uppercase monospace label.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>text</code></td>
+<td>string</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string</td>
+<td><code>&quot;dim&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>number</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>align</code></td>
+<td><code>left</code> | <code>center</code> | <code>right</code></td>
+<td><code>&quot;left&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>dot</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="code"><a class="anchor" href="#code" aria-hidden="true">#</a>code</h2>
+<p>Code card with token colors that types itself.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>title</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>lang</code></td>
+<td>string</td>
+<td><code>&quot;ts&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>lines</code></td>
+<td>(string | { text, color, at, dim })[]</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>fontSize</code></td>
+<td>number</td>
+<td><code>30</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>cps</code></td>
+<td>number</td>
+<td><code>28</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>caret</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>numbers</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>typing</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>highlight</code></td>
+<td>{ line, at, until, color }[]</td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="node"><a class="anchor" href="#node" aria-hidden="true">#</a>node</h2>
+<p>Box with a title and a sub-status; status changes its color.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>title</code></td>
+<td>string</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>sub</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string</td>
+<td><code>&quot;cyan&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td><code>idle</code> | <code>ok</code> | <code>err</code> | <code>warn</code> | <code>busy</code> | <code>off</code></td>
+<td><code>&quot;idle&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>icon</code></td>
+<td><code>lock</code> | <code>unlock</code> | <code>bell</code> | <code>clock</code> | <code>warn</code> | <code>bubble</code> | <code>bomb</code> | <code>check</code> | <code>x</code> | <code>server</code> | <code>db</code> | <code>user</code> | <code>users</code> | <code>bolt</code> | <code>card</code> | <code>wifi</code> | <code>wifi-off</code> | <code>cloud</code> | <code>key</code> | <code>mail</code> | <code>cart</code> | <code>cpu</code> | <code>queue</code> | <code>shield</code> | <code>fire</code> | <code>refresh</code> | <code>hourglass</code> | <code>phone</code> | <code>code</code> | <code>globe</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>badge</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="arrow"><a class="anchor" href="#arrow" aria-hidden="true">#</a>arrow</h2>
+<p>Straight, elbow or curved arrow with an optional label and moving packets.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>from</code></td>
+<td>string | { x, y }</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>to</code></td>
+<td>string | { x, y }</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>label</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string</td>
+<td><code>&quot;dim&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>dashed</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>route</code></td>
+<td><code>straight</code> | <code>elbow</code> | <code>curve</code></td>
+<td><code>&quot;straight&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>width</code></td>
+<td>number</td>
+<td><code>5</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>head</code></td>
+<td><code>end</code> | <code>start</code> | <code>both</code> | <code>none</code></td>
+<td><code>&quot;end&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>packet</code></td>
+<td>boolean | { at, dur, color, reverse, label }</td>
+<td><code>false</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>packets</code></td>
+<td>{ at, dur, color, reverse, label }[]</td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>gap</code></td>
+<td>number</td>
+<td><code>14</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="chip"><a class="anchor" href="#chip" aria-hidden="true">#</a>chip</h2>
+<p>Pill/tag, optionally struck through.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>text</code></td>
+<td>string</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string</td>
+<td><code>&quot;lime&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>strike</code></td>
+<td>boolean | string | number</td>
+<td><code>false</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>icon</code></td>
+<td><code>lock</code> | <code>unlock</code> | <code>bell</code> | <code>clock</code> | <code>warn</code> | <code>bubble</code> | <code>bomb</code> | <code>check</code> | <code>x</code> | <code>server</code> | <code>db</code> | <code>user</code> | <code>users</code> | <code>bolt</code> | <code>card</code> | <code>wifi</code> | <code>wifi-off</code> | <code>cloud</code> | <code>key</code> | <code>mail</code> | <code>cart</code> | <code>cpu</code> | <code>queue</code> | <code>shield</code> | <code>fire</code> | <code>refresh</code> | <code>hourglass</code> | <code>phone</code> | <code>code</code> | <code>globe</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>variant</code></td>
+<td><code>solid</code> | <code>outline</code> | <code>soft</code></td>
+<td><code>&quot;soft&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>number</td>
+<td><code>34</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="stamp"><a class="anchor" href="#stamp" aria-hidden="true">#</a>stamp</h2>
+<p>Rotated bordered word that slams in (×2, DEADLOCK).</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>text</code></td>
+<td>string</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string</td>
+<td><code>&quot;red&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>number</td>
+<td><code>120</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>rot</code></td>
+<td>number</td>
+<td><code>-5</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="table"><a class="anchor" href="#table" aria-hidden="true">#</a>table</h2>
+<p>Header + rows with animated row inserts and highlights.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>columns</code></td>
+<td>string[]</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>rows</code></td>
+<td>{ cells, at, highlight, color, strike }[]</td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>widths</code></td>
+<td>number[]</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>fontSize</code></td>
+<td>number</td>
+<td><code>28</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>accent</code></td>
+<td>string</td>
+<td><code>&quot;lime&quot;</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="lanes"><a class="anchor" href="#lanes" aria-hidden="true">#</a>lanes</h2>
+<p>Parallel columns of timed steps (race conditions).</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>lanes</code></td>
+<td>{ title, color, steps }[]</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>interleave</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>fontSize</code></td>
+<td>number</td>
+<td><code>26</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="checklist"><a class="anchor" href="#checklist" aria-hidden="true">#</a>checklist</h2>
+<p>Items with check boxes appearing in sequence.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>title</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>items</code></td>
+<td>{ text, at, ok }[]</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>fontSize</code></td>
+<td>number</td>
+<td><code>36</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string</td>
+<td><code>&quot;lime&quot;</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="counter"><a class="anchor" href="#counter" aria-hidden="true">#</a>counter</h2>
+<p>Big number counting between keyframe values.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>keyframes</code></td>
+<td>{ at, value, dur }[]</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>from</code></td>
+<td>number</td>
+<td><code>0</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>prefix</code></td>
+<td>string</td>
+<td><code>&quot;&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>suffix</code></td>
+<td>string</td>
+<td><code>&quot;&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>decimals</code></td>
+<td>integer</td>
+<td><code>0</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>separator</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>label</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string</td>
+<td><code>&quot;ink&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>number</td>
+<td><code>180</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="meter"><a class="anchor" href="#meter" aria-hidden="true">#</a>meter</h2>
+<p>Horizontal bar with an optional threshold marker.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>keyframes</code></td>
+<td>{ at, value, dur }[]</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>from</code></td>
+<td>number</td>
+<td><code>0</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>max</code></td>
+<td>number</td>
+<td><code>100</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>threshold</code></td>
+<td>number</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>label</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>unit</code></td>
+<td>string</td>
+<td><code>&quot;&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string</td>
+<td><code>&quot;lime&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>danger</code></td>
+<td>string</td>
+<td><code>&quot;red&quot;</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="timeline"><a class="anchor" href="#timeline" aria-hidden="true">#</a>timeline</h2>
+<p>Axis with markers at relative positions (backoff, TTL).</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>markers</code></td>
+<td>{ pos, label, sub, at, color }[]</td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>start</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>end</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string</td>
+<td><code>&quot;cyan&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>cursor</code></td>
+<td>{ at, pos, dur }[]</td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="grid"><a class="anchor" href="#grid" aria-hidden="true">#</a>grid</h2>
+<p>N×M tiles with per-tile states (thread pool, shards, services).</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>cols</code></td>
+<td>integer</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>rows</code></td>
+<td>integer</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>tiles</code></td>
+<td>(string | { label, state })[]</td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>steps</code></td>
+<td>{ at, set }[]</td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>gap</code></td>
+<td>number</td>
+<td><code>14</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>label</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="bucket"><a class="anchor" href="#bucket" aria-hidden="true">#</a>bucket</h2>
+<p>Token bucket whose tokens are consumed and refilled over time.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>capacity</code></td>
+<td>integer</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>keyframes</code></td>
+<td>{ at, tokens }[]</td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>label</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>rate</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string</td>
+<td><code>&quot;lime&quot;</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="phone"><a class="anchor" href="#phone" aria-hidden="true">#</a>phone</h2>
+<p>Phone mock with a checkout screen, button taps and notifications.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>title</code></td>
+<td>string</td>
+<td><code>&quot;Checkout&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>amount</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>item</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>button</code></td>
+<td>string</td>
+<td><code>&quot;Pay now&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>notifications</code></td>
+<td>{ title, text, at, color, icon }[]</td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>taps</code></td>
+<td>{ at }[]</td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>offline</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>loading</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>success</code></td>
+<td>boolean | string</td>
+<td><code>false</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="quote"><a class="anchor" href="#quote" aria-hidden="true">#</a>quote</h2>
+<p>Quote card with author; the quote types itself.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>text</code></td>
+<td>string</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>author</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>highlight</code></td>
+<td>string[]</td>
+<td><code>[]</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>cps</code></td>
+<td>number</td>
+<td><code>32</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string</td>
+<td><code>&quot;lime&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>number</td>
+<td><code>56</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="particles"><a class="anchor" href="#particles" aria-hidden="true">#</a>particles</h2>
+<p>Seeded particle bursts, herds, streams, dust or confetti.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>kind</code></td>
+<td><code>burst</code> | <code>herd</code> | <code>stream</code> | <code>dust</code> | <code>confetti</code></td>
+<td><code>&quot;burst&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>from</code></td>
+<td>string | { x, y }</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>to</code></td>
+<td>string | { x, y }</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>count</code></td>
+<td>integer</td>
+<td><code>40</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>at</code></td>
+<td>time</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>dur</code></td>
+<td>number</td>
+<td><code>1.2</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string</td>
+<td><code>&quot;lime&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>colors</code></td>
+<td>string[]</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>number</td>
+<td><code>10</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>spread</code></td>
+<td>number</td>
+<td><code>140</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>seed</code></td>
+<td>integer</td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="trap"><a class="anchor" href="#trap" aria-hidden="true">#</a>trap</h2>
+<p>The series &quot;THE TRAP&quot; interstitial with warning tapes.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>title</code></td>
+<td>string</td>
+<td><code>&quot;THE TRAP&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>sub</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>at</code></td>
+<td>time</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>until</code></td>
+<td>time</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string</td>
+<td><code>&quot;amber&quot;</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="cta"><a class="anchor" href="#cta" aria-hidden="true">#</a>cta</h2>
+<p>&quot;Next episode&quot; title plus a comment box typing a keyword.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>label</code></td>
+<td>string</td>
+<td><code>&quot;NEXT EPISODE&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>next</code></td>
+<td>string</td>
+<td></td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>keyword</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>prompt</code></td>
+<td>string</td>
+<td><code>&quot;Comment&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>at</code></td>
+<td>time</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string</td>
+<td><code>&quot;lime&quot;</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div><h2 id="icon"><a class="anchor" href="#icon" aria-hidden="true">#</a>icon</h2>
+<p>Inline SVG icon from the bundled set, or an SVG from assets/.</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Prop</th>
+<th>Type</th>
+<th>Default</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>name</code></td>
+<td><code>lock</code> | <code>unlock</code> | <code>bell</code> | <code>clock</code> | <code>warn</code> | <code>bubble</code> | <code>bomb</code> | <code>check</code> | <code>x</code> | <code>server</code> | <code>db</code> | <code>user</code> | <code>users</code> | <code>bolt</code> | <code>card</code> | <code>wifi</code> | <code>wifi-off</code> | <code>cloud</code> | <code>key</code> | <code>mail</code> | <code>cart</code> | <code>cpu</code> | <code>queue</code> | <code>shield</code> | <code>fire</code> | <code>refresh</code> | <code>hourglass</code> | <code>phone</code> | <code>code</code> | <code>globe</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>src</code></td>
+<td>string</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>number</td>
+<td><code>140</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>color</code></td>
+<td>string</td>
+<td><code>&quot;ink&quot;</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>pulse</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>ring</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td></td>
+</tr>
+</tbody></table>
+</div></section>
+<section class="chapter" id="ch-themes-and-platform-presets"><h1 id="themes-and-platform-presets"><a class="anchor" href="#themes-and-platform-presets" aria-hidden="true">#</a>Themes and platform presets</h1>
+<h2 id="themes"><a class="anchor" href="#themes" aria-hidden="true">#</a>Themes</h2>
+<p>A theme (<code>themes/&lt;name&gt;.theme.yaml</code>) holds every color, font size and motion token. Episodes choose one
+with <code>meta.theme</code>. A theme can <code>extends:</code> another and override only what changes:</p>
+<pre><code class="language-yaml">name: myseries
+extends: default
+colors:
+  lime: &#39;#3cc8ff&#39; # the accent color (titles, active caption word)
+  bg: &#39;#070c0e&#39;
+chrome: { grain: 0.05, waveform: true }
+captions: { active: lime, english: cyan, max_chars: 34 }
+</code></pre>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Tokens</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>colors</code></td>
+<td><code>bg ink dim line card lime cyan red amber violet</code> (add your own names freely)</td>
+</tr>
+<tr>
+<td><code>fonts</code></td>
+<td><code>display</code> (Space Grotesk), <code>mono</code> (JetBrains Mono), <code>arabic</code> (Cairo)</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>font sizes: <code>caption title h2 body label</code></td>
+</tr>
+<tr>
+<td><code>chrome</code></td>
+<td><code>header progress waveform grid</code> (on/off), <code>grain</code> (0–1), <code>grain_fps</code> (0 = static), <code>vignette</code> (0–1)</td>
+</tr>
+<tr>
+<td><code>motion</code></td>
+<td><code>pop_overshoot default_dur crossfade</code></td>
+</tr>
+<tr>
+<td><code>captions</code></td>
+<td><code>active english</code> colors, <code>future_opacity</code>, <code>max_lines</code>, <code>max_chars</code>, <code>scrim</code></td>
+</tr>
+</tbody></table>
+</div><p>Generate a complete palette from one color:</p>
+<pre><code class="language-bash">reelforge theme new myseries --accent &quot;#3cc8ff&quot;
+</code></pre>
+<p>ReelForge warns when a caption color has less than 7:1 contrast against the background.</p>
+<h2 id="platform-presets"><a class="anchor" href="#platform-presets" aria-hidden="true">#</a>Platform presets</h2>
+<p><code>presets/tiktok.preset.yaml</code>, <code>reels.preset.yaml</code> and <code>shorts.preset.yaml</code> define the header, stage and
+caption positions, the safe-zone rectangles, the default share size and the maximum duration. Edit them
+freely or add your own (<code>presets/&lt;name&gt;.preset.yaml</code>), then select it with <code>meta.preset</code> or
+<code>--preset</code> when rendering.</p>
+</section>
+<section class="chapter" id="ch-rendering-and-outputs"><h1 id="rendering-and-outputs"><a class="anchor" href="#rendering-and-outputs" aria-hidden="true">#</a>Rendering and outputs</h1>
+<p>Render from the dashboard (<strong>Render</strong> on a card) or the command line:</p>
+<pre><code class="language-bash">reelforge render ep10
+reelforge render ep10 --preset reels --share-size 50
+reelforge render ep10 --from 12 --to 20      # quick partial check → out/ep10.part.mp4
+reelforge render --all                       # every episode in episodes/
+</code></pre>
+<p><figure><img src="assets/22-cli-render.png" alt="Render output" loading="lazy"><figcaption>Render output</figcaption></figure></p>
+<h2 id="outputs-episodesidout"><a class="anchor" href="#outputs-episodesidout" aria-hidden="true">#</a>Outputs (<code>episodes/&lt;id&gt;/out/</code>)</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>&lt;id&gt;.master.mp4</code></td>
+<td>Archival quality: H.264 High, CRF 18, AAC 192 kb/s</td>
+</tr>
+<tr>
+<td><code>&lt;id&gt;.share.mp4</code></td>
+<td><strong>Upload this one.</strong> Two-pass encoded to fit the share size (default 28 MB)</td>
+</tr>
+<tr>
+<td><code>&lt;id&gt;.srt</code></td>
+<td>Captions for YouTube or accessibility</td>
+</tr>
+<tr>
+<td><code>&lt;id&gt;.sheet.jpg</code></td>
+<td>12-frame contact sheet for a quick review</td>
+</tr>
+<tr>
+<td><code>publish.md</code></td>
+<td>Your cover text, caption, hashtags, pinned comment and chapters, ready to paste</td>
+</tr>
+<tr>
+<td><code>&lt;id&gt;.cover.png</code></td>
+<td>Cover image (<code>reelforge snap &lt;id&gt; &lt;time&gt; --cover</code>)</td>
+</tr>
+</tbody></table>
+</div><p>Every video is verified after encoding: H.264 High profile, yuv420p, 30 fps constant frame rate, AAC
+48 kHz, “fast start” (plays while downloading) and the size limit.</p>
+<h2 id="options"><a class="anchor" href="#options" aria-hidden="true">#</a>Options</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--preset tiktok|reels|shorts</code></td>
+<td>Platform layout and safe zones</td>
+</tr>
+<tr>
+<td><code>--share-size &lt;MB&gt;</code></td>
+<td>Size cap of the share file</td>
+</tr>
+<tr>
+<td><code>--workers &lt;n&gt;</code></td>
+<td>Parallel render processes (default: CPU cores − 1)</td>
+</tr>
+<tr>
+<td><code>--fast</code></td>
+<td>Faster final encoding (slightly larger master)</td>
+</tr>
+<tr>
+<td><code>--no-sfx</code></td>
+<td>Without sound effects</td>
+</tr>
+<tr>
+<td><code>--silent</code></td>
+<td>Allow rendering without a recording (for previews)</td>
+</tr>
+<tr>
+<td><code>--no-share</code></td>
+<td>Master only</td>
+</tr>
+<tr>
+<td><code>--lossless</code></td>
+<td>PNG frame capture instead of JPEG (slower, for archiving)</td>
+</tr>
+</tbody></table>
+</div><h2 id="performance"><a class="anchor" href="#performance" aria-hidden="true">#</a>Performance</h2>
+<p>Rendering uses all your cores. Approximate times for a 2-minute episode: 4 cores ≈ 10 min, 8 threads ≈
+5–6 min. Press <strong>Ctrl+C</strong> (or <strong>Cancel</strong> in the dashboard) at any time: partial files are removed.</p>
+<h2 id="uploading"><a class="anchor" href="#uploading" aria-hidden="true">#</a>Uploading</h2>
+<ul>
+<li><strong>TikTok</strong>: upload <code>share.mp4</code>; paste the caption and hashtags from <code>publish.md</code>.</li>
+<li><strong>Instagram Reels</strong>: render with <code>--preset reels</code> for its safe zones.</li>
+<li><strong>YouTube Shorts</strong>: render with <code>--preset shorts</code> (max 3 minutes); upload <code>&lt;id&gt;.srt</code> as subtitles.</li>
+</ul>
+</section>
+<section class="chapter" id="ch-command-line-reference"><h1 id="command-line-reference"><a class="anchor" href="#command-line-reference" aria-hidden="true">#</a>Command-line reference</h1>
+<p>On Windows use <code>reelforge.cmd</code>; on macOS/Linux <code>./reelforge</code> (or add the folder to your PATH).</p>
+<p><figure><img src="assets/19-cli-help.png" alt="CLI help" loading="lazy"><figcaption>CLI help</figcaption></figure></p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>reelforge studio</code></td>
+<td>Open the project dashboard</td>
+</tr>
+<tr>
+<td><code>reelforge new &lt;id&gt; [--series &lt;name&gt;] [--episode &lt;n&gt;]</code></td>
+<td>Create <code>episodes/&lt;id&gt;/episode.yaml</code></td>
+</tr>
+<tr>
+<td><code>reelforge cue &lt;id&gt; [--draft]</code></td>
+<td>Open the cue marker (<code>--draft</code> writes estimated cues instead)</td>
+</tr>
+<tr>
+<td><code>reelforge dev &lt;id&gt;</code></td>
+<td>Open the live preview</td>
+</tr>
+<tr>
+<td><code>reelforge validate &lt;id&gt; [--strict] [--no-measure]</code></td>
+<td>Check everything; exit code 1 on errors (or warnings with <code>--strict</code>)</td>
+</tr>
+<tr>
+<td><code>reelforge render &lt;id&gt; [options]</code> / <code>--all</code></td>
+<td>Render (see <a href="#rendering-and-outputs">Rendering</a>)</td>
+</tr>
+<tr>
+<td><code>reelforge snap &lt;id&gt; &lt;times…&gt; [--every 5] [--cover]</code></td>
+<td>PNG frames + contact sheet; times may be <code>12.5</code>, <code>l7</code>, <code>&quot;l7:&#39;word&#39;&quot;</code></td>
+</tr>
+<tr>
+<td><code>reelforge doctor [--fix]</code></td>
+<td>Check the environment; <code>--fix</code> downloads Chromium</td>
+</tr>
+<tr>
+<td><code>reelforge theme new &lt;name&gt; --accent &lt;#hex&gt;</code></td>
+<td>Generate a theme</td>
+</tr>
+<tr>
+<td><code>reelforge schema [--out &lt;file&gt;]</code></td>
+<td>Write the JSON Schema for editor autocompletion</td>
+</tr>
+</tbody></table>
+</div><p>Global options: <code>--json</code> (machine-readable output, progress events while rendering), <code>--verbose</code>,
+<code>--root &lt;folder&gt;</code> (project folder; default: the current folder).</p>
+<p><figure><img src="assets/21-cli-validate.png" alt="validate" loading="lazy"><figcaption>validate</figcaption></figure></p>
+<h2 id="environment-variables"><a class="anchor" href="#environment-variables" aria-hidden="true">#</a>Environment variables</h2>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>REELFORGE_ROOT</code></td>
+<td>Project folder</td>
+</tr>
+<tr>
+<td><code>REELFORGE_PRESET</code></td>
+<td>Default preset</td>
+</tr>
+<tr>
+<td><code>REELFORGE_WORKERS</code></td>
+<td>Render processes</td>
+</tr>
+<tr>
+<td><code>REELFORGE_SHARE_SIZE</code></td>
+<td>Share size in MB</td>
+</tr>
+<tr>
+<td><code>REELFORGE_JPEG_QUALITY</code></td>
+<td>Frame capture quality (default 95)</td>
+</tr>
+<tr>
+<td><code>REELFORGE_PORT</code></td>
+<td>Dashboard / studio port</td>
+</tr>
+<tr>
+<td><code>REELFORGE_NO_OPEN</code></td>
+<td>Do not open the browser automatically</td>
+</tr>
+<tr>
+<td><code>REELFORGE_FFMPEG</code>, <code>REELFORGE_FFPROBE</code></td>
+<td>Paths to ffmpeg / ffprobe</td>
+</tr>
+<tr>
+<td><code>REELFORGE_CHROMIUM</code></td>
+<td>Path to a Chromium executable</td>
+</tr>
+<tr>
+<td><code>NO_COLOR</code></td>
+<td>Disable colors</td>
+</tr>
+</tbody></table>
+</div></section>
+<section class="chapter" id="ch-troubleshooting-and-faq"><h1 id="troubleshooting-and-faq"><a class="anchor" href="#troubleshooting-and-faq" aria-hidden="true">#</a>Troubleshooting and FAQ</h1>
+<p><strong>The dashboard says “setup issues”.</strong> Click the pill: each failed check shows its fix. Most often ffmpeg is
+missing (Windows: <code>winget install Gyan.FFmpeg</code>, macOS: <code>brew install ffmpeg</code>, Linux: your package
+manager) — then restart <code>start.bat</code> / <code>start.sh</code>.</p>
+<p><strong>“Cannot launch Chromium”.</strong> Run <code>reelforge doctor --fix</code>. On Linux, also run the installer again and
+accept the system libraries prompt.</p>
+<p><strong>“ffmpeg not found” although I installed it (Windows).</strong> Close every terminal and <code>start.bat</code>, then
+reopen: Windows only picks up the new PATH in new windows.</p>
+<p><strong>A word reference fails: <code>Word &quot;x&quot; not found in line l7</code>.</strong> The error shows the closest word in that
+line. Words are matched without punctuation and diacritics. For a word containing an apostrophe use double
+quotes: <code>l7:&quot;Conway&#39;s&quot;</code>. You can also use the word index: <code>l7.3</code> (4th word).</p>
+<p><strong>The caption wraps over three lines (V-10).</strong> Add <code>break: [&quot;word&quot;]</code> to the script line to split the
+caption before that word, or lower <code>captions.max_chars</code> in the theme.</p>
+<p><strong>Text overflows its box (V-9).</strong> Shorten the text, lower <code>fontSize</code>, or enlarge <code>place.w/h</code>. Titles,
+quotes and stamps shrink automatically to fit.</p>
+<p><strong>An element sits under the TikTok buttons (V-7).</strong> Press <strong>Z</strong> in the preview: keep content out of the
+red zones.</p>
+<p><strong>Can I use my own fonts?</strong> v1.0 ships Cairo (Arabic), Space Grotesk and JetBrains Mono so renders never
+depend on system fonts. Custom fonts are on the roadmap.</p>
+<p><strong>Does ReelForge need the internet?</strong> Only during installation (dependencies, Chromium, ffmpeg). Creating,
+previewing and rendering are fully offline.</p>
+<p><strong>Can I render on a server / in CI?</strong> Yes: everything is available from the command line (<code>--json</code> gives
+machine-readable output) and works headless on Linux.</p>
+<p><strong>Can I sell the videos I make?</strong> Yes — the videos are yours, including for clients and monetized channels.
+See <a href="#license-and-credits">License</a>.</p>
+<p><strong>Where are my files?</strong> Each episode is a folder in <code>episodes/</code> containing <code>episode.yaml</code>, <code>voice.wav</code>,
+<code>cues.json</code>, <code>assets/</code> and <code>out/</code>. Back it up like any other folder (Git works great).</p>
+</section>
+<section class="chapter" id="ch-changelog"><h1 id="changelog"><a class="anchor" href="#changelog" aria-hidden="true">#</a>Changelog</h1>
+<p>All notable changes to ReelForge are documented here. The project follows
+<a href="https://semver.org/">Semantic Versioning</a>.</p>
+<h2 id="100-2026-10-16"><a class="anchor" href="#100-2026-10-16" aria-hidden="true">#</a>1.0.0 — 2026-10-16</h2>
+<p>First public release.</p>
+<h3 id="highlights-2"><a class="anchor" href="#highlights-2" aria-hidden="true">#</a>Highlights</h3>
+<ul>
+<li><strong>Project dashboard</strong> (<code>reelforge studio</code>): create episodes, upload recordings (WAV, MP3, M4A, OGG,
+FLAC…), mark cues, preview, validate and render with live progress, play and download the results.</li>
+<li><strong>Cue marker</strong>: mark sentence starts with Space at 0.5×–1× speed, nudge by 50/10 ms, re-mark any line,
+word mode, snap to onset, undo, autosave.</li>
+<li><strong>Live preview</strong>: true 1080×1920 preview synced to the audio, hot reload on save, platform safe-zone,
+stage and element-box overlays, lint panel with click-to-seek, error overlay that keeps the last good frame.</li>
+<li><strong>21 animated components</strong>: title, label, code, node, arrow, chip, stamp, table, lanes, checklist,
+counter, meter, timeline, grid, bucket, phone, quote, particles, trap, cta, icon.</li>
+<li><strong>Arabic-first captions</strong>: word-by-word karaoke highlight, correct RTL/LTR mixing, <code>الـ term</code> kept
+together, punctuation on the correct side.</li>
+<li><strong>Procedural sound effects</strong> and voice mastering to −14 LUFS with ducking and a limiter.</li>
+<li><strong>Rendering</strong>: deterministic parallel frame capture; H.264 master (CRF 18) and a size-capped share
+file for TikTok, Reels and Shorts, plus SRT captions, a contact sheet and <code>publish.md</code>; every output is
+verified (codec, profile, pixel format, frame rate, AAC 48 kHz, faststart, size).</li>
+<li><strong>Validation</strong>: 13 rules with <code>file:line:col</code> locations and fix hints.</li>
+<li><strong>Themes and presets</strong> in editable YAML; <code>reelforge theme new --accent #hex</code>.</li>
+<li><strong>CLI</strong>: <code>studio</code>, <code>new</code>, <code>cue</code>, <code>dev</code>, <code>validate</code>, <code>render</code> (<code>--all</code>), <code>snap</code> (<code>--cover</code>), <code>doctor</code>,
+<code>schema</code>, <code>theme new</code>.</li>
+<li><strong>Nine example episodes</strong> (Season 1 of &quot;System Design بالعربي&quot;).</li>
+<li>One-command installers for Windows, macOS and Linux.</li>
+</ul>
+</section>
+<section class="chapter" id="ch-license-and-credits"><h1 id="license-and-credits"><a class="anchor" href="#license-and-credits" aria-hidden="true">#</a>License and credits</h1>
+<p>ReelForge is sold on <strong>Envato Market (CodeCanyon)</strong> under the Regular or Extended License you purchased.
+The videos you create with it are yours, for any use. The full terms are in <code>LICENSE.md</code>.</p>
+<p>ReelForge is built on excellent open-source software, used under its own licenses (full texts in
+<code>THIRD-PARTY-NOTICES.md</code>):</p>
+<div class="table"><table>
+<thead>
+<tr>
+<th>Component</th>
+<th>License</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Cairo, JetBrains Mono, Space Grotesk fonts</td>
+<td>SIL Open Font License 1.1</td>
+</tr>
+<tr>
+<td>Playwright</td>
+<td>Apache-2.0</td>
+</tr>
+<tr>
+<td>zod, commander, ws</td>
+<td>MIT</td>
+</tr>
+<tr>
+<td>yaml, zod-to-json-schema</td>
+<td>ISC</td>
+</tr>
+</tbody></table>
+</div><p>FFmpeg and Chromium are installed separately and are not distributed with ReelForge.</p>
+<h2 id="support"><a class="anchor" href="#support" aria-hidden="true">#</a>Support</h2>
+<p>Use the <strong>Support</strong> tab on the CodeCanyon item page. Please include your operating system, the output of
+<code>reelforge doctor --json</code> and the command you ran with <code>--verbose</code>. Details in <code>SUPPORT.md</code>.</p>
+</section></main>
+<script>
+const q=document.getElementById('q');const secs=[...document.querySelectorAll('.chapter')];
+q.addEventListener('input',()=>{const v=q.value.trim().toLowerCase();secs.forEach(s=>s.classList.toggle('hide',v&&!s.textContent.toLowerCase().includes(v)));});
+const links=[...document.querySelectorAll('aside a')];const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id));}})},{rootMargin:'0px 0px -75% 0px'});
+document.querySelectorAll('h1[id],h2[id]').forEach(h=>obs.observe(h));
+</script>
+</body>
+</html>

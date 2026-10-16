@@ -1,11 +1,13 @@
 # Screenshots
 
-All captured from this repository with `reelforge` itself (studio via Playwright, video frames via
+Regenerate with `node scripts/screenshots.mjs`. All captured from this repository with `reelforge` itself (studio via Playwright, video frames via
 `reelforge snap`). The examples ship with draft cues; the studio shots use a synthetic test voice so
 the waveform is visible.
 
 | File                                    | What it shows                                                                 |
 | --------------------------------------- | ----------------------------------------------------------------------------- |
+| `00-dashboard.jpg`                      | Project dashboard: episodes with thumbnails, status chips, outputs            |
+| `23…26-dashboard-*.jpg`                 | Dashboard: validation, render options, live render progress, built-in player  |
 | `01-studio-cue-marker.jpg`              | Cue marker: script list, zoomed waveform with cue lines, playhead             |
 | `02-studio-cue-word-mode.jpg`           | Word mode: marking individual word starts of a selected line                  |
 | `03-studio-preview-safe-zones.jpg`      | Live preview with the TikTok UI safe-zone overlay                             |

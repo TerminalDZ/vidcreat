@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# ReelForge command-line interface (run ./reelforge --help).
+exec node "$(dirname "$0")/packages/cli/bin/reelforge.js" "$@"

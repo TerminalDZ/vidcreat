@@ -2,9 +2,8 @@
  * Studio server (SRS §8): 127.0.0.1 only, serves the project folder read-only, a WebSocket for
  * change events and a single write endpoint `PUT /cues` (IR-1, IR-2, NFR-9).
  */
-import { createReadStream, existsSync, readFileSync, statSync, watch, type FSWatcher } from 'node:fs';
+import { existsSync, readFileSync, watch, type FSWatcher } from 'node:fs';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
-import type { AddressInfo } from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -21,6 +20,8 @@ import {
 import type { PcmAudio } from '@reelforge/audio';
 import { RUNTIME_DIR } from '@reelforge/runtime';
 import { WebSocketServer, type WebSocket } from 'ws';
+import { listen, readBody, safeJoin, sendFile } from './http.js';
+export { startHub, type Hub, type HubOptions, type EpisodeSummary, type Job } from './hub.js';
 
 const CLIENT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'client');
 
@@ -54,81 +55,6 @@ export interface Studio {
   port: number;
   state(): StudioState;
   close(): Promise<void>;
-}
-
-const TYPES: Record<string, string> = {
-  '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.woff2': 'font/woff2',
-  '.json': 'application/json; charset=utf-8',
-  '.svg': 'image/svg+xml',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.webp': 'image/webp',
-  '.wav': 'audio/wav',
-  '.mp3': 'audio/mpeg',
-  '.m4a': 'audio/mp4',
-  '.map': 'application/json',
-  '.txt': 'text/plain; charset=utf-8',
-};
-
-function safeJoin(base: string, rel: string): string | undefined {
-  let decoded: string;
-  try {
-    decoded = decodeURIComponent(rel);
-  } catch {
-    return undefined;
-  }
-  const root = path.resolve(base);
-  const p = path.resolve(root, `.${path.posix.normalize(`/${decoded}`)}`);
-  return p === root || p.startsWith(root + path.sep) ? p : undefined;
-}
-
-function sendFile(req: IncomingMessage, res: ServerResponse, file: string | undefined): void {
-  if (!file || !existsSync(file) || !statSync(file).isFile()) {
-    res.writeHead(404, { 'content-type': 'text/plain' }).end('Not found');
-    return;
-  }
-  const size = statSync(file).size;
-  const type = TYPES[path.extname(file).toLowerCase()] ?? 'application/octet-stream';
-  const range = req.headers.range?.match(/bytes=(\d*)-(\d*)/);
-  const headers = { 'content-type': type, 'accept-ranges': 'bytes', 'cache-control': 'no-cache' };
-  if (range) {
-    const start = range[1] ? Number(range[1]) : Math.max(0, size - Number(range[2]));
-    const end = range[1] && range[2] ? Math.min(size - 1, Number(range[2])) : size - 1;
-    if (start >= size || start > end) {
-      res.writeHead(416, { 'content-range': `bytes */${size}` }).end();
-      return;
-    }
-    res.writeHead(206, {
-      ...headers,
-      'content-range': `bytes ${start}-${end}/${size}`,
-      'content-length': end - start + 1,
-    });
-    createReadStream(file, { start, end }).pipe(res);
-    return;
-  }
-  res.writeHead(200, { ...headers, 'content-length': size });
-  if (req.method === 'HEAD') res.end();
-  else createReadStream(file).pipe(res);
-}
-
-function readBody(req: IncomingMessage, limit = 1 << 20): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let size = 0;
-    const chunks: Buffer[] = [];
-    req.on('data', (c: Buffer) => {
-      size += c.length;
-      if (size > limit) {
-        reject(new Error('Body too large'));
-        req.destroy();
-      } else chunks.push(c);
-    });
-    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-    req.on('error', reject);
-  });
 }
 
 export async function startStudio(opts: StudioOptions): Promise<Studio> {
@@ -357,19 +283,4 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
       await new Promise<void>((r) => server.close(() => r()));
     },
   };
-}
-
-/** Listens on 127.0.0.1 (never 0.0.0.0), trying the next ports when busy (IR-1). */
-function listen(server: ReturnType<typeof createServer>, port: number): Promise<number> {
-  return new Promise((resolve, reject) => {
-    let attempt = 0;
-    const tryPort = (p: number) => {
-      server.once('error', (e: NodeJS.ErrnoException) => {
-        if (e.code === 'EADDRINUSE' && attempt++ < 20) tryPort(p === 0 ? 0 : p + 1);
-        else reject(e);
-      });
-      server.listen(p, '127.0.0.1', () => resolve((server.address() as AddressInfo).port));
-    };
-    tryPort(port);
-  });
 }

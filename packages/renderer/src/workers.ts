@@ -69,6 +69,10 @@ export async function renderRange(range: FrameRange, o: WorkerOptions): Promise<
   ]);
   let stderr = '';
   ff.stderr?.setEncoding('utf8').on('data', (d: string) => (stderr += d));
+  // When ffmpeg is killed (cancel, crash) a pending write fails with EPIPE: surface it as a failed
+  // write instead of an unhandled 'error' event that would take the whole process down.
+  let pipeError: Error | undefined;
+  ff.stdin?.on('error', (e) => (pipeError = e));
   const done = new Promise<void>((resolve, reject) => {
     ff.on('error', (e) => reject(new Error(`Cannot start ffmpeg: ${e.message}`)));
     ff.on('close', (code) =>
@@ -82,7 +86,8 @@ export async function renderRange(range: FrameRange, o: WorkerOptions): Promise<
   done.catch(() => undefined);
   const write = (buf: Buffer) =>
     new Promise<void>((resolve, reject) => {
-      if (!ff.stdin || ff.stdin.destroyed) return reject(new Error('ffmpeg input closed'));
+      if (!ff.stdin || ff.stdin.destroyed || pipeError)
+        return reject(pipeError ?? new Error('ffmpeg input closed'));
       ff.stdin.write(buf, (err) => (err ? reject(err) : resolve()));
     });
   try {

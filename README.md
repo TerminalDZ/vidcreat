@@ -5,13 +5,14 @@ Instagram Reels and YouTube Shorts. Animated diagrams, code that types itself, r
 stamps, word-by-word Arabic captions with correctly mixed English terms, procedural sound effects and
 platform-ready encoding.
 
-- **Offline and free.** No network after install, no paid service, open-source dependencies only.
+- **Offline, no running costs.** No network after install, no subscription, no per-video fees.
 - **No AI.** No speech recognition, no TTS, no generative models. Timing comes from cues you mark.
 - **Deterministic.** The same inputs always give the same frames (`render(t)` is a pure function).
 - **Arabic first.** RTL captions with English terms, `الـ client` kept together, punctuation on the right side.
 
 | Command                                    | What it does                                                                                                    |
 | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `reelforge studio`                         | the project dashboard: create, upload voice, mark cues, preview, validate, render, play outputs                 |
 | `reelforge new <id>`                       | create `episodes/<id>/episode.yaml` from a commented template                                                   |
 | `reelforge cue <id>`                       | studio: mark the start of each script line while listening (writes `cues.json`)                                 |
 | `reelforge dev <id>`                       | studio: live preview synced to the audio, safe-zone overlay, lint panel, hot reload                             |
@@ -31,41 +32,43 @@ every Season 1 episode, the component gallery and the CLI.
 
 ## Install
 
-Requirements: **Node.js 22+**, **pnpm 10** (`corepack enable`), **ffmpeg 6+** with libx264 and aac.
+Requirements: **Node.js 22 LTS** and **ffmpeg 6+** (the installers offer to install ffmpeg for you).
+Full instructions with screenshots: `documentation/index.html`.
 
-```bash
-git clone <this repo> reelforge && cd reelforge
-pnpm install
-pnpm build
-pnpm reelforge doctor --fix      # installs the pinned Chromium if needed and checks ffmpeg
-```
+| System        | Install                    | Open the dashboard               |
+| ------------- | -------------------------- | -------------------------------- |
+| Windows 10/11 | double-click `install.bat` | double-click `start.bat`         |
+| macOS         | `./install.sh` in Terminal | double-click `ReelForge.command` |
+| Linux         | `./install.sh`             | `./start.sh`                     |
 
-ffmpeg: `sudo apt install ffmpeg` (Debian/Ubuntu) · `brew install ffmpeg` (macOS) ·
-`winget install Gyan.FFmpeg` (Windows). To use `reelforge` without the `pnpm` prefix, run
-`pnpm link --global` once.
+The installer checks Node.js, installs ffmpeg (with your confirmation), installs the dependencies,
+downloads the pinned Chromium used for rendering and runs `reelforge doctor`. The command line is
+`reelforge.cmd` (Windows) or `./reelforge` (macOS/Linux).
+
+**From source (developers):** `corepack enable && pnpm install && pnpm build && pnpm reelforge doctor --fix`.
 
 ## Tutorial: a 30-second episode
 
 ```bash
-pnpm reelforge new ep10 --series "SYSTEM DESIGN"
+./reelforge new ep10 --series "SYSTEM DESIGN"
 ```
 
 1. **Write the script.** Open `episodes/ep10/episode.yaml`. Put one spoken sentence per `script` line.
-2. **Record** `episodes/ep10/voice.wav` with any recorder (no recording yet? `pnpm reelforge cue ep10 --draft`
+2. **Record** `episodes/ep10/voice.wav` with any recorder (no recording yet? `./reelforge cue ep10 --draft`
    writes estimated cues so you can preview anyway).
-3. **Mark cues.** `pnpm reelforge cue ep10` opens the studio. Press **Space** at the start of each line
+3. **Mark cues.** `./reelforge cue ep10` opens the studio. Press **Space** at the start of each line
    (1 / 2 / 3 switch to 0.5× / 0.75× / 1×). **Backspace** undoes, **←/→** nudge the selected cue,
    click a line to re-mark it, **W** marks individual words. Every change is saved to `cues.json`.
 4. **Describe scenes** with components (see [docs/components.md](docs/components.md)) and make
    elements enter on the words that name them: `enter: { at: "l3:'Idempotency'" }`.
-5. **Preview** with `pnpm reelforge dev ep10`. Save the YAML and the preview reloads in place.
+5. **Preview** with `./reelforge dev ep10`. Save the YAML and the preview reloads in place.
    **Z** shows the platform safe zones, **E** element boxes, **?** all shortcuts.
-6. **Validate** with `pnpm reelforge validate ep10`. Each issue has `file:line:col` and a fix hint.
-7. **Render** with `pnpm reelforge render ep10`, then upload `out/ep10.share.mp4` with the caption from
+6. **Validate** with `./reelforge validate ep10`. Each issue has `file:line:col` and a fix hint.
+7. **Render** with `./reelforge render ep10`, then upload `out/ep10.share.mp4` with the caption from
    `out/publish.md`.
 
-Try it on the bundled examples: `pnpm reelforge dev examples/season1/ep01` (they ship with draft cues;
-record a `voice.wav` and re-mark to render them, or `pnpm reelforge render examples/season1/ep01 --silent`).
+Try it on the bundled examples: `./reelforge dev examples/season1/ep01` (they ship with draft cues;
+record a `voice.wav` and re-mark to render them, or `./reelforge render examples/season1/ep01 --silent`).
 
 ## Render options
 
@@ -124,5 +127,7 @@ implementation in `packages/runtime/src/components/`, an entry in the gallery fi
 
 ## License
 
-MIT. Bundled fonts (Cairo, JetBrains Mono, Space Grotesk) are under the SIL Open Font License 1.1.
-ffmpeg is used as an external system binary.
+Commercial software sold on Envato Market (CodeCanyon) under the Regular / Extended License — see
+[LICENSE.md](LICENSE.md). The videos you make are yours. Open-source components (bundled fonts under the
+SIL OFL 1.1, npm packages under MIT / ISC / Apache-2.0) keep their own licenses — see
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md). FFmpeg and Chromium are installed separately.
