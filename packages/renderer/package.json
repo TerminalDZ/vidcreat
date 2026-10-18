@@ -1,0 +1,54 @@
+{
+  "name": "@reelforge/renderer",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "author": "Idriss Boukmouche <boukemoucheidriss@gmail.com>",
+  "homepage": "https://terminaldz.github.io/vidcreat",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TerminalDZ/vidcreat.git",
+    "directory": "packages/renderer"
+  },
+  "bugs": {
+    "url": "https://github.com/TerminalDZ/vidcreat/issues"
+  },
+  "keywords": [
+    "reelforge",
+    "video",
+    "renderer",
+    "ffmpeg",
+    "chromium",
+    "headless",
+    "mp4",
+    "deterministic-rendering"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "assets"
+  ],
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@reelforge/audio": "workspace:*",
+    "@reelforge/core": "workspace:*",
+    "@reelforge/runtime": "workspace:*",
+    "playwright": "1.56.1"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}
