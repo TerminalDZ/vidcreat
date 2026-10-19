@@ -1,0 +1,59 @@
+{
+  "name": "@reelforge/studio",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "author": "Idriss Boukmouche <boukemoucheidriss@gmail.com>",
+  "homepage": "https://terminaldz.github.io/vidcreat",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TerminalDZ/vidcreat.git",
+    "directory": "packages/studio"
+  },
+  "bugs": {
+    "url": "https://github.com/TerminalDZ/vidcreat/issues"
+  },
+  "keywords": [
+    "reelforge",
+    "video-editor",
+    "timeline-editor",
+    "local-server",
+    "dashboard"
+  ],
+  "type": "module",
+  "main": "./dist/server/index.js",
+  "types": "./dist/server/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/server/index.d.ts",
+      "default": "./dist/server/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b && vite build"
+  },
+  "dependencies": {
+    "@reelforge/assist": "workspace:*",
+    "@reelforge/audio": "workspace:*",
+    "@reelforge/core": "workspace:*",
+    "@reelforge/renderer": "workspace:*",
+    "@reelforge/runtime": "workspace:*",
+    "ws": "8.21.3",
+    "yaml": "2.8.4",
+    "zod": "3.24.2",
+    "zod-to-json-schema": "3.24.6"
+  },
+  "devDependencies": {
+    "@types/ws": "8.18.1",
+    "vite": "6.4.4"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

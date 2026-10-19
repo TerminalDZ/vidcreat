@@ -1,0 +1,418 @@
+/** Left panel: Layers (scenes → elements), Insert (component library) and Script (lines). */
+import {
+  addScene,
+  deleteLine,
+  effectiveCues,
+  insertElement,
+  insertLine,
+  insertSuggestion,
+  moveElementTo,
+  moveLine,
+  renameElement,
+  type SuggestedElement,
+} from './actions.js';
+import { app, esc, fmt, h, toast } from './app.js';
+import { GROUPS } from './component-groups.js';
+import { COMPONENT_ICON, icon } from './icons.js';
+
+interface Ctx {
+  time: () => number;
+  seek: (t: number) => void;
+}
+let ctx!: Ctx;
+let tab: 'layers' | 'insert' | 'script' = 'layers';
+const collapsed = new Set<string>();
+let query = '';
+
+export function initPanels(c: Ctx): void {
+  ctx = c;
+  const root = document.querySelector<HTMLElement>('#left')!;
+  root.innerHTML = `
+    <div class="ptabs" role="tablist">
+      <button role="tab" data-tab="layers" title="Layers (Alt+L)">${icon('layers', 15)}Layers</button>
+      <button role="tab" data-tab="insert" title="Insert a component (Alt+I)">${icon('shapes', 15)}Insert</button>
+      <button role="tab" data-tab="script" title="Script lines (Alt+S)">${icon('script', 15)}Script</button>
+    </div>
+    <div class="pbody" id="leftBody"></div>`;
+  root
+    .querySelectorAll<HTMLButtonElement>('.ptabs button')
+    .forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab as typeof tab)));
+  try {
+    tab = (localStorage.getItem('rf-left-tab') as typeof tab) || 'layers';
+  } catch {
+    /* storage unavailable */
+  }
+  setTab(tab);
+}
+
+export function setTab(t: typeof tab): void {
+  tab = t;
+  try {
+    localStorage.setItem('rf-left-tab', t);
+  } catch {
+    /* storage unavailable */
+  }
+  document.querySelectorAll<HTMLButtonElement>('#left .ptabs button').forEach((b) => {
+    b.classList.toggle('on', b.dataset.tab === t);
+    b.setAttribute('aria-selected', String(b.dataset.tab === t));
+  });
+  renderPanels();
+  if (t === 'insert') (document.querySelector('#insertSearch') as HTMLInputElement | null)?.focus();
+}
+
+export function renderPanels(force = false): void {
+  const body = document.querySelector<HTMLElement>('#leftBody');
+  if (!body) return;
+  const active = document.activeElement;
+  if (!force && active && body.contains(active) && (active as HTMLElement).matches('input, textarea')) {
+    // Don't rebuild under the user's cursor; refresh once they leave the field.
+    active.addEventListener('blur', () => setTimeout(() => renderPanels()), { once: true });
+    return;
+  }
+  if (tab === 'layers') renderLayers(body);
+  else if (tab === 'insert') renderInsert(body);
+  else renderScript(body);
+}
+
+// ------------------------------------------------------------------ layers
+function renderLayers(body: HTMLElement): void {
+  const tl = app.timeline;
+  const sel = app.selection;
+  const list = h('div', { class: 'tree', role: 'tree' });
+  const t = ctx.time();
+  app.scenes.forEach((s, si) => {
+    const c = tl?.scenes.find((x) => x.id === s.id);
+    const active = c ? t >= c.start && t < c.end : false;
+    const open = !collapsed.has(s.id);
+    const row = h('div', {
+      class: `trow scene${sel?.kind === 'scene' && sel.scene === si ? ' sel' : ''}${active ? ' live' : ''}`,
+      role: 'treeitem',
+      'aria-expanded': String(open),
+    });
+    row.innerHTML = `<button class="twist${open ? ' open' : ''}" aria-label="Expand">${icon('chevron', 12)}</button>${icon('scene', 14)}<b>${esc(s.id)}</b><span class="tm mono">${c ? fmt(c.start) : ''}</span>`;
+    row.querySelector('.twist')!.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (open) collapsed.add(s.id);
+      else collapsed.delete(s.id);
+      renderPanels();
+    });
+    row.addEventListener('click', () => {
+      app.select({ kind: 'scene', scene: si });
+      if (c && !(t >= c.start && t < c.end)) ctx.seek(c.start + 0.01);
+    });
+    list.append(row);
+    if (!open) return;
+    const els = s.elements ?? [];
+    // Top of the list = drawn last (on top), like Figma.
+    for (let ej = els.length - 1; ej >= 0; ej--) {
+      const e = els[ej];
+      const id = app.elementId(si, ej);
+      const ce = c?.elements.find((x) => x.id === id);
+      const visible = ce ? t >= ce.enter.t && (!ce.exit || t < ce.exit.t + ce.exit.dur) && active : false;
+      const isSel = sel?.kind === 'element' && sel.scene === si && sel.index === ej;
+      const item = h('div', {
+        class: `trow el${isSel ? ' sel' : ''}${visible ? ' live' : ''}`,
+        role: 'treeitem',
+        draggable: 'true',
+        title: `${id} · ${e.use}${ce ? ` · enters ${fmt(ce.enter.t)}` : ''}`,
+      });
+      item.innerHTML = `${icon(COMPONENT_ICON[e.use] ?? 'box', 14)}<span class="nm">${esc(id)}</span><span class="kind">${esc(e.use)}</span>${visible ? '<i class="dot" title="On screen now"></i>' : ''}`;
+      item.addEventListener('click', () => {
+        app.select({ kind: 'element', scene: si, index: ej });
+        // jump to a time where the element is on screen
+        if (ce && !visible) ctx.seek(Math.min((c?.end ?? ce.enter.t) - 0.01, ce.enter.t + ce.enter.dur));
+      });
+      item.addEventListener('dblclick', () => startRename(item, si, ej));
+      item.addEventListener('dragstart', (ev) => {
+        ev.dataTransfer!.setData('application/x-reelforge-layer', `${si}:${ej}`);
+        ev.dataTransfer!.effectAllowed = 'move';
+      });
+      item.addEventListener('dragover', (ev) => {
+        if (!ev.dataTransfer?.types.includes('application/x-reelforge-layer')) return;
+        ev.preventDefault();
+        item.classList.add('drop');
+      });
+      item.addEventListener('dragleave', () => item.classList.remove('drop'));
+      item.addEventListener('drop', (ev) => {
+        item.classList.remove('drop');
+        const [fs, fe] = (ev.dataTransfer?.getData('application/x-reelforge-layer') ?? '')
+          .split(':')
+          .map(Number);
+        if (fs === si && Number.isFinite(fe)) void moveElementTo(si, fe, ej);
+      });
+      list.append(item);
+    }
+    if (!els.length)
+      list.append(h('div', { class: 'trow hint' }, 'Empty scene · drag a component here from Insert'));
+  });
+  const add = h('button', { class: 'btn ghost block', title: 'Add a scene at the playhead' });
+  add.innerHTML = `${icon('plus', 14)} Add scene at playhead`;
+  add.addEventListener('click', () => void addScene(ctx.time()));
+  body.replaceChildren(list, add);
+  body.querySelector('.trow.sel')?.scrollIntoView({ block: 'nearest' });
+}
+
+function startRename(item: HTMLElement, si: number, ej: number): void {
+  const nm = item.querySelector('.nm') as HTMLElement;
+  const input = h('input', {
+    class: 'rename',
+    value: app.elementId(si, ej),
+    'aria-label': 'Element id',
+  }) as HTMLInputElement;
+  nm.replaceWith(input);
+  input.focus();
+  input.select();
+  let finished = false;
+  const done = (save: boolean) => {
+    if (finished) return;
+    finished = true;
+    if (save) void renameElement(si, ej, input.value.trim());
+    input.blur();
+    renderPanels(true);
+  };
+  input.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter') done(true);
+    if (e.key === 'Escape') done(false);
+  });
+  input.addEventListener('blur', () => done(true), { once: true });
+}
+
+// ------------------------------------------------------------------ smart insert
+interface Sug extends SuggestedElement {
+  reason: string;
+  word: string;
+}
+interface SugResult {
+  suggestions: Sug[];
+  llm?: { available: boolean; running: boolean; model: string };
+}
+/** Suggestions per line (keyed by id and text, so editing the line refreshes them). */
+const sugCache = new Map<string, Promise<SugResult>>();
+const llmCache = new Map<string, Sug[]>();
+let llmBusy = '';
+
+/** The script line playing at the playhead. */
+function lineAtPlayhead(): { id: string; text: string; start: number } | null {
+  const cues = effectiveCues();
+  const t = ctx.time() + 0.05;
+  let best: { id: string; text: string; start: number } | null = null;
+  for (const l of app.state?.script ?? []) {
+    const s = cues[l.id];
+    if (s !== undefined && s <= t && (!best || s >= best.start)) best = { ...l, start: s };
+  }
+  return (
+    best ??
+    (app.state?.script[0] ? { ...app.state.script[0], start: cues[app.state.script[0].id] ?? 0 } : null)
+  );
+}
+
+function suggestBlock(): HTMLElement {
+  const box = h('div', { class: 'sug', id: 'sugBlock' });
+  const line = lineAtPlayhead();
+  if (!line) return box;
+  const key = `${line.id}\u0000${line.text}`;
+  if (!sugCache.has(key))
+    sugCache.set(
+      key,
+      fetch(`/api/suggest?line=${encodeURIComponent(line.id)}`).then((r) => r.json() as Promise<SugResult>),
+    );
+  box.append(
+    h('div', { class: 'lib-group' }, `Suggested for ${line.id}`),
+    h('div', { class: 'sug-line', dir: 'auto', text: line.text }),
+  );
+  const list = h('div', { class: 'sug-list' });
+  box.append(list);
+  const fill = (items: Sug[], source: string) => {
+    for (const s of items) {
+      const b = h('button', {
+        class: 'sug-item',
+        title: `${s.reason}\nEnters on “${s.word}” (${s.enter.at})`,
+      });
+      b.innerHTML = `${icon(COMPONENT_ICON[s.use] ?? 'box', 16)}<b>${esc(s.use)}</b><span class="dim">on “${esc(s.word)}”</span>${source ? `<em>${esc(source)}</em>` : ''}`;
+      b.addEventListener('click', () => void insertSuggestion(s, line.start));
+      list.append(b);
+    }
+  };
+  void sugCache.get(key)!.then((r) => {
+    if (!box.isConnected) return;
+    fill(r.suggestions ?? [], '');
+    const ai = llmCache.get(key);
+    if (ai) fill(ai, 'AI');
+    if (r.llm?.available) {
+      const ask = h('button', {
+        class: 'btn sm ghost',
+        title: `Ask the configured model (${r.llm.model}). A local model can take up to a minute on a laptop CPU.`,
+      });
+      ask.innerHTML = `${icon('sparkles', 14)}<span>${llmBusy === key ? 'Thinking… (local AI)' : ai ? 'Ask local AI again' : 'Ask local AI'}</span>`;
+      ask.toggleAttribute('disabled', Boolean(llmBusy));
+      ask.addEventListener('click', async () => {
+        llmBusy = key;
+        renderPanels(true);
+        try {
+          const res = await fetch('/api/suggest/llm', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ line: line.id }),
+          });
+          const j = (await res.json()) as { suggestions?: Sug[]; error?: string; ms?: number };
+          if (!res.ok) throw new Error(j.error ?? res.statusText);
+          llmCache.set(key, j.suggestions ?? []);
+          toast(
+            `Local AI: ${(j.suggestions ?? []).length} idea(s) in ${((j.ms ?? 0) / 1000).toFixed(0)} s`,
+            'ok',
+          );
+        } catch (e) {
+          toast(`Local AI: ${(e as Error).message}`, 'err');
+        } finally {
+          llmBusy = '';
+          renderPanels(true);
+        }
+      });
+      box.append(ask);
+    }
+  });
+  return box;
+}
+
+function renderInsert(body: HTMLElement): void {
+  const comps = app.meta?.components ?? [];
+  const search = h('input', {
+    id: 'insertSearch',
+    class: 'search',
+    type: 'search',
+    placeholder: 'Search components…',
+    value: query,
+    'aria-label': 'Search components',
+  }) as HTMLInputElement;
+  search.addEventListener('input', () => {
+    query = search.value;
+    const pos = search.selectionStart;
+    renderPanels(true);
+    const s = document.querySelector<HTMLInputElement>('#insertSearch');
+    s?.focus();
+    s?.setSelectionRange(pos, pos);
+  });
+  search.addEventListener('keydown', (e) => {
+    e.stopPropagation();
+    if (e.key === 'Enter') body.querySelector<HTMLElement>('.comp')?.click();
+    if (e.key === 'Escape') (e.target as HTMLElement).blur();
+  });
+  const q = query.trim().toLowerCase();
+  const wrap = h('div', { class: 'lib' });
+  if (!q) wrap.append(suggestBlock());
+  for (const [group, names] of GROUPS) {
+    const items = names
+      .map((n) => comps.find((c) => c.name === n))
+      .filter((c): c is NonNullable<typeof c> => Boolean(c))
+      .filter(
+        (c) =>
+          !q ||
+          c.name.includes(q) ||
+          c.description.toLowerCase().includes(q) ||
+          group.toLowerCase().includes(q),
+      );
+    if (!items.length) continue;
+    wrap.append(h('div', { class: 'lib-group', text: group }));
+    const grid = h('div', { class: 'lib-grid' });
+    for (const c of items) {
+      const card = h('button', {
+        class: 'comp',
+        draggable: 'true',
+        title: `${c.description}\nClick to add at the playhead, or drag onto the canvas`,
+      });
+      card.innerHTML = `<span class="ci">${icon(COMPONENT_ICON[c.name] ?? 'box', 22)}</span><b>${esc(c.name)}</b><small>${esc(c.description.replace(/\*\*/g, ''))}</small>`;
+      card.addEventListener('click', () => void insertElement(c.name, { time: ctx.time() }));
+      card.addEventListener('dragstart', (e) => {
+        e.dataTransfer!.setData('application/x-reelforge-component', c.name);
+        e.dataTransfer!.effectAllowed = 'copy';
+      });
+      grid.append(card);
+    }
+    wrap.append(grid);
+  }
+  if (!wrap.children.length)
+    wrap.append(h('p', { class: 'dim pad', text: `No component matches “${query}”.` }));
+  body.replaceChildren(search, wrap);
+}
+
+// ------------------------------------------------------------------ script
+function renderScript(body: HTMLElement): void {
+  const lines = app.spec.script ?? [];
+  const compiled = app.state?.script ?? [];
+  const tlLines = app.timeline?.script ?? [];
+  const t = ctx.time();
+  const sel = app.selection;
+  const list = h('ol', { class: 'script-list' });
+  lines.forEach((l, i) => {
+    const id = compiled[i]?.id ?? l.id ?? `l${i + 1}`;
+    const info = tlLines.find((x) => x.id === id);
+    const live = info ? t >= info.start && t < info.end : false;
+    const li = h('li', {
+      class: `${sel?.kind === 'line' && sel.index === i ? 'sel' : ''}${live ? ' live' : ''}`,
+    });
+    const head = h('div', { class: 'lhead' });
+    head.innerHTML = `<span class="lid mono">${esc(id)}</span><span class="tm mono">${info ? fmt(info.start) : '—'}</span>`;
+    const tools = h('span', { class: 'ltools' });
+    const mk = (ic: string, title: string, fn: () => void, disabled = false) => {
+      const b = h('button', { class: 'tbtn sm', title, disabled });
+      b.innerHTML = icon(ic, 13);
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fn();
+      });
+      tools.append(b);
+    };
+    mk('up', 'Move up', () => void moveLine(i, i - 1), i === 0);
+    mk('down', 'Move down', () => void moveLine(i, i + 1), i === lines.length - 1);
+    mk('plus', 'Add a line after this one', () => void insertLine(i));
+    mk('trash', 'Delete line', () => void deleteLine(i));
+    head.append(tools);
+    const text = h('textarea', {
+      class: 'ltext',
+      dir: 'auto',
+      rows: 1,
+      'aria-label': `Line ${id}`,
+    }) as HTMLTextAreaElement;
+    text.value = l.text;
+    const grow = () => {
+      text.style.height = 'auto';
+      text.style.height = `${text.scrollHeight}px`;
+    };
+    requestAnimationFrame(grow);
+    text.addEventListener('input', grow);
+    text.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        text.blur();
+      }
+      if (e.key === 'Escape') {
+        text.value = l.text;
+        text.blur();
+      }
+    });
+    text.addEventListener('change', () => {
+      const v = text.value.trim();
+      if (v && v !== l.text)
+        void app.edit([{ op: 'set', path: ['script', i, 'text'], value: v }], `Edit line ${id}`);
+    });
+    li.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).tagName === 'TEXTAREA') return;
+      app.select({ kind: 'line', index: i });
+      if (info) ctx.seek(info.start);
+    });
+    li.append(head, text);
+    list.append(li);
+  });
+  const add = h('button', { class: 'btn ghost block' });
+  add.innerHTML = `${icon('plus', 14)} Add line at the end`;
+  add.addEventListener('click', () => void insertLine(lines.length - 1));
+  const note = h(
+    'p',
+    { class: 'dim small pad' },
+    'One spoken sentence per line. Arabic, English and mixed text are all supported; captions follow the text direction automatically.',
+  );
+  body.replaceChildren(note, list, add);
+  body.querySelector('li.sel, li.live')?.scrollIntoView({ block: 'nearest' });
+}
