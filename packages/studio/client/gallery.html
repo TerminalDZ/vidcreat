@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gallery · ReelForge</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2307080c'/%3E%3Crect x='9' y='6' width='14' height='20' rx='3' fill='none' stroke='%23b8ff3c' stroke-width='2.5'/%3E%3Cpath d='M14 12l5 4-5 4z' fill='%23b8ff3c'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./src/hub.css" />
+    <link rel="stylesheet" href="./src/connect.css" />
+    <link rel="stylesheet" href="./src/gallery.css" />
+  </head>
+  <body class="gallery">
+    <header class="top">
+      <a class="brand" href="/"><i></i>ReelForge</a>
+      <div class="spacer"></div>
+      <a class="btn ghost" href="/connect" id="connectLink" title="Use ReelForge from an AI client"
+        >Connect AI</a
+      >
+      <a class="btn ghost" href="/" id="backLink">Episodes</a>
+    </header>
+
+    <main>
+      <section class="intro">
+        <h1>Gallery</h1>
+        <p>
+          Every component you can place in a scene, every theme and every industry pack. Click a component for
+          its props and a YAML snippet; start a new episode straight from a template.
+        </p>
+      </section>
+
+      <div class="gtabs" role="tablist" aria-label="Gallery sections">
+        <button
+          role="tab"
+          class="gtab"
+          id="tab-components"
+          data-tab="components"
+          aria-controls="panel-components"
+          aria-selected="true"
+        >
+          Components <span class="count" id="countComponents"></span>
+        </button>
+        <button
+          role="tab"
+          class="gtab"
+          id="tab-themes"
+          data-tab="themes"
+          aria-controls="panel-themes"
+          aria-selected="false"
+          tabindex="-1"
+        >
+          Themes <span class="count" id="countThemes"></span>
+        </button>
+        <button
+          role="tab"
+          class="gtab"
+          id="tab-packs"
+          data-tab="packs"
+          aria-controls="panel-packs"
+          aria-selected="false"
+          tabindex="-1"
+        >
+          Packs <span class="count" id="countPacks"></span>
+        </button>
+      </div>
+
+      <section id="panel-components" role="tabpanel" aria-labelledby="tab-components">
+        <div class="toolbar">
+          <input
+            type="search"
+            id="search"
+            placeholder="Search by name or description…"
+            aria-label="Search components"
+            autocomplete="off"
+          />
+          <span class="dim small" id="matchCount" role="status" aria-live="polite"></span>
+        </div>
+        <div id="components"></div>
+      </section>
+
+      <section id="panel-themes" role="tabpanel" aria-labelledby="tab-themes" hidden>
+        <p class="dim small lead">
+          Previews are drawn from each theme's tokens. Contrast is WCAG AA (4.5:1) for every text color on the
+          background and on cards.
+        </p>
+        <div class="tgrid" id="themes"></div>
+      </section>
+
+      <section id="panel-packs" role="tabpanel" aria-labelledby="tab-packs" hidden>
+        <div class="toolbar">
+          <div class="segs" role="group" aria-label="Language">
+            <button class="seg on" data-lang="en" aria-pressed="true">English</button>
+            <button class="seg" data-lang="ar" aria-pressed="false" lang="ar">العربية</button>
+          </div>
+          <span class="dim small">Templates start a new episode with the fields filled in.</span>
+        </div>
+        <div id="packs"></div>
+      </section>
+    </main>
+
+    <dialog id="compDlg" aria-labelledby="compTitle">
+      <div class="dhead">
+        <h3 id="compTitle"></h3>
+        <button class="btn sm ghost" data-close aria-label="Close">Close</button>
+      </div>
+      <div id="compBody"></div>
+    </dialog>
+
+    <div id="toasts"></div>
+    <script type="module" src="./src/gallery.ts"></script>
+  </body>
+</html>
