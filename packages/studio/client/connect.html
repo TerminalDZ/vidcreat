@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Connect AI · ReelForge</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2307080c'/%3E%3Crect x='9' y='6' width='14' height='20' rx='3' fill='none' stroke='%23b8ff3c' stroke-width='2.5'/%3E%3Cpath d='M14 12l5 4-5 4z' fill='%23b8ff3c'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./src/hub.css" />
+    <link rel="stylesheet" href="./src/connect.css" />
+  </head>
+  <body class="connect">
+    <header class="top">
+      <a class="brand" href="/"><i></i>ReelForge <span class="ver" id="version"></span></a>
+      <div class="spacer"></div>
+      <a class="btn ghost" href="/" id="backLink">Episodes</a>
+    </header>
+
+    <main>
+      <section class="intro">
+        <h1>Connect an AI client</h1>
+        <p>
+          One set of ReelForge tools, three ways in: <b>MCP over stdio</b> (the client starts ReelForge),
+          <b>MCP over HTTP</b> (this dashboard, while it runs) and a <b>REST API</b> with an OpenAPI
+          description for any client with function calling.
+        </p>
+      </section>
+
+      <section class="panel" id="endpoints" aria-labelledby="endpointsTitle">
+        <div class="panel-head">
+          <h2 id="endpointsTitle">This server</h2>
+          <button class="btn primary" id="testBtn">Test connection</button>
+        </div>
+        <dl class="kv" id="kv"></dl>
+        <p class="test" id="testOut" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="panel" aria-labelledby="clientsTitle">
+        <div class="panel-head">
+          <h2 id="clientsTitle">Client setup</h2>
+          <label class="inline"
+            >Toolsets
+            <select id="toolsets">
+              <option value="all">all (default)</option>
+              <option value="basic">basic: create, validate, preview, cues</option>
+              <option value="basic,design">basic + design</option>
+              <option value="design">design: edit, components</option>
+              <option value="render">render: render, editor, doctor</option>
+            </select></label
+          >
+        </div>
+        <div class="clients" id="clients" role="tablist" aria-label="AI clients"></div>
+        <div id="recipe"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="guidesTitle">
+        <h2 id="guidesTitle">Guides for models</h2>
+        <div id="guides"></div>
+      </section>
+    </main>
+
+    <div id="toasts"></div>
+    <script type="module" src="./src/connect.ts"></script>
+  </body>
+</html>
