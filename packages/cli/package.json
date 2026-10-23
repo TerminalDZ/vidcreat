@@ -1,0 +1,60 @@
+{
+  "name": "@reelforge/cli",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "author": "Idriss Boukmouche <boukemoucheidriss@gmail.com>",
+  "homepage": "https://terminaldz.github.io/vidcreat",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TerminalDZ/vidcreat.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/TerminalDZ/vidcreat/issues"
+  },
+  "keywords": [
+    "reelforge",
+    "video",
+    "explainer-video",
+    "vertical-video",
+    "cli",
+    "mcp",
+    "captions",
+    "yaml",
+    "motion-graphics"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@reelforge/assist": "workspace:*",
+    "@reelforge/audio": "workspace:*",
+    "@reelforge/core": "workspace:*",
+    "@reelforge/renderer": "workspace:*",
+    "@reelforge/studio": "workspace:*",
+    "commander": "13.1.0"
+  },
+  "bin": {
+    "reelforge": "bin/reelforge.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

@@ -1,0 +1,984 @@
+/** `reelforge` command-line interface (SRS §4.1, FR-CLI-1…8). */
+import { spawnSync } from 'node:child_process';
+import { existsSync, mkdirSync, readdirSync, renameSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import path from 'node:path';
+import { Command, InvalidArgumentError, Option } from 'commander';
+import {
+  BUNDLED_FONTS,
+  compileEpisode,
+  didYouMean,
+  draftCues,
+  episodeJsonSchema,
+  episodePaths,
+  episodeTemplate,
+  fillTemplate,
+  findTemplate,
+  generateTheme,
+  INSTALL_ROOT,
+  isBundledFont,
+  listPacks,
+  normalizeWord,
+  pick,
+  projectRoot,
+  resolveEpisode,
+  resolveTime,
+  slotsSchema,
+  writeCues,
+  type EpisodePaths,
+  type Issue,
+  type Lang,
+  type TemplateSpec,
+  type Timeline,
+} from '@reelforge/core';
+import {
+  everyTimes,
+  measureTimeline,
+  RenderError,
+  renderEpisode,
+  runDoctor,
+  snapFrames,
+  type Progress,
+} from '@reelforge/renderer';
+import {
+  alignEpisode,
+  assistStatus,
+  setupAssist,
+  WHISPER_MODELS,
+  type AlignEngine,
+  type WhisperSize,
+} from '@reelforge/assist';
+import { parseToolsets, startHub, startStudio, type StudioMode, type Toolset } from '@reelforge/studio';
+import { ffmpegDecode } from './decode.js';
+import { openBrowser } from './open.js';
+import { bar, c, endStatus, fmtDur, formatIssue, statusLine, summary } from './term.js';
+
+const VERSION = '1.0.0';
+
+interface Globals {
+  verbose?: boolean;
+  json?: boolean;
+  root?: string;
+}
+
+class CliError extends Error {
+  constructor(
+    message: string,
+    readonly exitCode = 1,
+  ) {
+    super(message);
+  }
+}
+
+const num = (name: string) => (v: string) => {
+  const n = Number(v);
+  if (!Number.isFinite(n)) throw new InvalidArgumentError(`${name} must be a number`);
+  return n;
+};
+const posInt = (name: string) => (v: string) => {
+  const n = Number(v);
+  if (!Number.isInteger(n) || n < 1) throw new InvalidArgumentError(`${name} must be a positive integer`);
+  return n;
+};
+const timeArg = (v: string) => {
+  const n = Number(v.replace(/s$/, ''));
+  if (!Number.isFinite(n) || n < 0) throw new InvalidArgumentError('expected seconds, e.g. 12.5 or 12.5s');
+  return n;
+};
+
+function globals(cmd: Command): Globals {
+  return cmd.optsWithGlobals() as Globals;
+}
+
+function episode(arg: string, g: Globals): EpisodePaths {
+  const root = projectRoot(g.root);
+  const p = resolveEpisode(arg, root);
+  if (!p) {
+    throw new CliError(
+      `Episode "${arg}" not found (looked in ${path.join(root, 'episodes', arg)}, ${path.resolve(root, arg)} and examples/).\n` +
+        `Create it with \`reelforge new ${arg}\`, or pass a path to a folder containing episode.yaml.`,
+      1,
+    );
+  }
+  return p;
+}
+
+const out = (g: Globals, data: unknown, human: () => void) => {
+  if (g.json) process.stdout.write(`${JSON.stringify(data, null, 2)}\n`);
+  else human();
+};
+
+function printIssues(issues: Issue[], g: Globals): void {
+  const shown = g.verbose ? issues : issues.filter((i) => i.level !== 'info');
+  for (const i of shown) console.error(formatIssue(i));
+  const hidden = issues.length - shown.length;
+  if (hidden) console.error(c.dim(`(${hidden} info message(s) hidden; use --verbose)`));
+}
+
+// ------------------------------------------------------------------ commands
+
+interface NewFlags {
+  series?: string;
+  episode?: number;
+  lang?: string;
+  pack?: string;
+  template?: string;
+  slot?: string[];
+}
+
+/** `--slot key=value` pairs → slot values (numbers for number slots). */
+function parseSlots(pairs: string[], t: TemplateSpec): Record<string, string | number> {
+  const values: Record<string, string | number> = {};
+  for (const pair of pairs) {
+    const eq = pair.indexOf('=');
+    if (eq < 1) throw new CliError(`--slot needs key=value, got "${pair}"`, 2);
+    const key = pair.slice(0, eq).trim();
+    const raw = pair.slice(eq + 1);
+    const spec = t.slots[key];
+    if (!spec) {
+      const alt = didYouMean(key, Object.keys(t.slots), 3);
+      throw new CliError(
+        `Template "${t.id}" has no slot "${key}"${alt ? ` (did you mean "${alt}"?)` : ''}. Slots: ${Object.keys(t.slots).join(', ')}`,
+        2,
+      );
+    }
+    values[key] =
+      spec.type === 'number' && raw.trim() !== '' && Number.isFinite(Number(raw)) ? Number(raw) : raw;
+  }
+  return values;
+}
+
+async function cmdNew(id: string, o: NewFlags, g: Globals) {
+  if (o.lang && !['en', 'ar'].includes(o.lang)) throw new CliError('--lang must be "en" or "ar"', 2);
+  if (!/^[a-z0-9][a-z0-9_-]*$/i.test(id))
+    throw new CliError('Episode id must be a slug (letters, digits, "-" and "_")', 2);
+  if ((o.template || o.slot?.length) && !o.pack)
+    throw new CliError('--template and --slot need --pack (see `reelforge packs`)', 2);
+  const root = projectRoot(g.root);
+  const dir = path.join(root, 'episodes', id);
+  if (existsSync(path.join(dir, 'episode.yaml')))
+    throw new CliError(`${path.relative(process.cwd(), dir)}/episode.yaml already exists`);
+  if (o.pack) return newFromTemplate(id, dir, root, o, g);
+  mkdirSync(path.join(dir, 'assets'), { recursive: true });
+  writeFileSync(
+    path.join(dir, 'episode.yaml'),
+    episodeTemplate(id, { series: o.series, episode: o.episode, lang: o.lang === 'ar' ? 'ar' : 'en' }),
+  );
+  writeSchema(root);
+  out(g, { ok: true, dir }, () => {
+    console.log(`${c.green('✓')} created ${path.relative(process.cwd(), dir) || dir}/episode.yaml`);
+    console.log(
+      c.dim(
+        `next: \`reelforge edit ${id}\` to design it, record voice.wav into that folder, then \`reelforge cue ${id}\``,
+      ),
+    );
+  });
+}
+
+function writeSchema(root: string): void {
+  const schemaFile = path.join(root, 'schema', 'episode.schema.json');
+  if (existsSync(schemaFile)) return;
+  mkdirSync(path.dirname(schemaFile), { recursive: true });
+  writeFileSync(schemaFile, `${JSON.stringify(episodeJsonSchema(), null, 2)}\n`);
+}
+
+/** `reelforge new <id> --pack <pack> [--template <t>] [--slot k=v …]`: a filled template plus draft cues. */
+async function newFromTemplate(id: string, dir: string, root: string, o: NewFlags, g: Globals) {
+  const lang: Lang = o.lang === 'ar' ? 'ar' : 'en';
+  const { packs, errors } = listPacks(root);
+  for (const e of errors) console.error(c.yellow(`skipped pack: ${e}`));
+  let found: ReturnType<typeof findTemplate>;
+  try {
+    const pack = packs.find((p) => p.id === o.pack);
+    found = findTemplate(packs, o.pack!, o.template ?? pack?.templates[0]?.id ?? '');
+  } catch (e) {
+    throw new CliError(`${(e as Error).message}. List them with \`reelforge packs\`.`, 2);
+  }
+  const parsed = slotsSchema(found.template, lang).safeParse(parseSlots(o.slot ?? [], found.template));
+  if (!parsed.success)
+    throw new CliError(
+      `Invalid slot values: ${parsed.error.issues.map((i) => `${i.path.join('.') || '(slots)'}: ${i.message}`).join('; ')}`,
+      2,
+    );
+  const { yaml } = fillTemplate(found.pack, found.template, { lang, id, slots: parsed.data });
+  mkdirSync(path.join(dir, 'assets'), { recursive: true });
+  writeFileSync(path.join(dir, 'episode.yaml'), yaml);
+  writeSchema(root);
+  const p = episodePaths(dir, root);
+  const draft = compileEpisode(p, { draftCues: true, voice: null });
+  writeCues(p.cues, draftCues(draft.script, draft.spec?.audio.voice));
+  const issues = compileEpisode(p, { voice: null }).issues.filter(
+    (i) => !(i.rule === 'V-4' && /not found/.test(i.message)),
+  );
+  const ok = !issues.some((i) => i.level === 'error');
+  out(
+    g,
+    { ok, dir, pack: found.pack.id, template: found.template.id, lang, slots: parsed.data, issues },
+    () => {
+      printIssues(issues, g);
+      console.log(
+        `${ok ? c.green('✓') : c.red('✗')} created ${path.relative(process.cwd(), dir) || dir}/episode.yaml from ${found.pack.id}/${found.template.id} (${lang}) with draft cues`,
+      );
+      console.log(
+        c.dim(
+          `next: \`reelforge snap ${id} --every 5\` to look at it, \`reelforge edit ${id}\` to adjust, record voice.wav, then \`reelforge align ${id}\``,
+        ),
+      );
+    },
+  );
+  if (!ok) process.exitCode = 1;
+}
+
+async function cmdPacks(o: { lang?: string }, g: Globals) {
+  if (o.lang && !['en', 'ar'].includes(o.lang)) throw new CliError('--lang must be "en" or "ar"', 2);
+  const lang: Lang = o.lang === 'ar' ? 'ar' : 'en';
+  const { packs, errors } = listPacks(projectRoot(g.root));
+  const data = packs.map((p) => ({
+    id: p.id,
+    name: pick(p.name, lang),
+    description: pick(p.description, lang),
+    theme: p.theme,
+    dir: p.dir,
+    templates: p.templates.map((t) => ({
+      id: t.id,
+      title: pick(t.title, lang),
+      description: pick(t.description, lang),
+      languages: Object.keys(t.files),
+      slots: Object.fromEntries(
+        Object.entries(t.slots).map(([k, s]) => [
+          k,
+          {
+            label: s.label,
+            type: s.type,
+            ...(s.min !== undefined ? { min: s.min } : {}),
+            ...(s.max !== undefined ? { max: s.max } : {}),
+            default: typeof s.default === 'number' ? s.default : pick(s.default, lang),
+          },
+        ]),
+      ),
+    })),
+  }));
+  out(g, { packs: data, errors }, () => {
+    for (const e of errors) console.error(c.yellow(`skipped pack: ${e}`));
+    for (const p of data) {
+      console.log(`${c.bold(p.id)} ${c.dim(`· ${p.name} · theme ${p.theme}`)}`);
+      for (const t of p.templates)
+        console.log(
+          `  ${c.cyan(t.id.padEnd(22))} ${t.title} ${c.dim(`(${Object.keys(t.slots).join(', ')})`)}`,
+        );
+    }
+    console.log(
+      c.dim(
+        `\nnext: reelforge new <id> --pack <pack> --template <template> [--lang ar] [--slot key=value …]`,
+      ),
+    );
+  });
+}
+
+async function cmdCue(
+  id: string,
+  o: { draft?: boolean; port?: number; open?: boolean; preset?: string },
+  g: Globals,
+) {
+  const p = episode(id, g);
+  if (o.draft) {
+    const r = compileEpisode(p, { draftCues: true, decode: ffmpegDecode });
+    if (!r.script.length) throw new CliError('The script has no lines yet');
+    if (existsSync(p.cues))
+      throw new CliError(`${p.cues} already exists; delete it first to regenerate draft cues`);
+    const d = draftCues(r.script, r.spec?.audio.voice);
+    if (r.voice) {
+      // scale the estimate to the real recording length
+      const k = r.voice.duration / d.audio.duration;
+      for (const key of Object.keys(d.cues)) d.cues[key] = Math.round(d.cues[key] * k * 1000) / 1000;
+      d.audio.duration = Math.round(r.voice.duration * 1000) / 1000;
+    }
+    writeCues(p.cues, d);
+    out(g, { ok: true, file: p.cues, cues: d.cues }, () =>
+      console.log(
+        `${c.green('✓')} wrote draft cues to ${path.relative(process.cwd(), p.cues)} (estimated; mark real ones with \`reelforge cue ${id}\`)`,
+      ),
+    );
+    return;
+  }
+  await serve(p, 'cue', o, g);
+}
+
+interface AlignFlags {
+  engine?: AlignEngine;
+  model?: WhisperSize;
+  vad?: boolean;
+  words?: boolean;
+  force?: boolean;
+  dryRun?: boolean;
+  setup?: boolean;
+  status?: boolean;
+}
+
+async function cmdAlign(id: string | undefined, o: AlignFlags, g: Globals) {
+  if (o.status) {
+    const s = assistStatus();
+    return out(g, s, () => {
+      const yes = (b: boolean) => (b ? c.green('installed') : c.dim('not installed'));
+      console.log(`speech runtime  ${yes(s.installed)} (transformers.js ${s.version})`);
+      for (const k of Object.keys(WHISPER_MODELS) as WhisperSize[])
+        console.log(`whisper ${k.padEnd(7)} ${yes(s.whisper[k])}`);
+      console.log(`silero VAD      ${yes(s.vad)}`);
+      console.log(c.dim(`${s.dir} · ${s.sizeMb} MB`));
+    });
+  }
+  if (o.setup) {
+    const t0 = Date.now();
+    const s = await setupAssist({
+      models: [o.model ?? 'base'],
+      onLog: (m) => (g.json ? undefined : console.error(c.dim(m))),
+    });
+    out(g, s, () =>
+      console.log(
+        `${c.green('✓')} speech alignment ready (${s.sizeMb} MB in ${s.dir}, ${fmtDur((Date.now() - t0) / 1000)})`,
+      ),
+    );
+    if (!id) return;
+  }
+  if (!id) return usage('align needs an episode id (or --setup / --status)');
+  const p = episode(id, g);
+  const r = await alignEpisode(p, {
+    engine: o.engine,
+    model: o.model,
+    vad: o.vad === false ? false : undefined,
+    words: o.words,
+    force: o.force,
+    write: !o.dryRun,
+    decode: ffmpegDecode,
+    onProgress: (s) => g.verbose && !g.json && console.error(c.dim(`${s}…`)),
+  });
+  out(g, r, () => {
+    const how = `${r.engine}${r.engine === 'whisper' ? ` ${o.model ?? 'base'}` : ''}${r.vad ? ' + VAD' : ''}`;
+    const matched = r.matched !== undefined ? `, ${Math.round(r.matched * 100)}% of words matched` : '';
+    const lines = Object.keys(r.cues.cues).length;
+    console.log(
+      `${c.green('✓')} aligned ${lines} line(s) with ${how}${matched} in ${fmtDur(r.ms.total / 1000)}${r.written ? ` → ${path.relative(process.cwd(), r.file)}` : ' (dry run)'}`,
+    );
+    if (r.note) console.log(c.yellow(`  ${r.note}`));
+    const shaky = Object.entries(r.confidence).filter(([, v]) => v < 0.5);
+    if (shaky.length)
+      console.log(
+        `  ${c.yellow('check by ear:')} ${shaky.map(([k, v]) => `${k} (${Math.round(v * 100)}%)`).join(', ')}`,
+      );
+    for (const ps of r.pauses)
+      console.log(
+        c.dim(`  ${ps.len.toFixed(1)} s of silence at ${ps.at}s${ps.before ? ` before ${ps.before}` : ''}`),
+      );
+    console.log(c.dim(`next: listen through in \`reelforge cue ${id}\` and fix any line with Space`));
+  });
+}
+
+async function serve(
+  p: EpisodePaths,
+  mode: StudioMode,
+  o: { port?: number; open?: boolean; preset?: string },
+  g: Globals,
+) {
+  const studio = await startStudio({
+    paths: p,
+    mode,
+    port: o.port,
+    preset: o.preset,
+    decode: ffmpegDecode,
+    measure:
+      mode !== 'cue'
+        ? (tl: Timeline) =>
+            measureTimeline(tl, { cacheDir: path.join(p.out, '.cache'), assetsDir: p.assets, file: p.yaml })
+        : undefined,
+    log: (m) => g.verbose && console.error(c.dim(m)),
+  });
+  out(g, { url: studio.url }, () => {
+    console.log(
+      `${c.green('●')} ReelForge editor (${{ edit: 'Edit mode', cue: 'Cues mode', dev: 'Review mode' }[mode]}) for ${c.bold(p.id)}`,
+    );
+    console.log(`  ${c.cyan(studio.url)}`);
+    console.log(
+      c.dim('  listening on 127.0.0.1 only · press ? in the editor for shortcuts · Ctrl+C to stop'),
+    );
+  });
+  if (o.open !== false) openBrowser(studio.url);
+  await new Promise<void>((resolve) => {
+    const stop = () => {
+      void studio.close().then(resolve);
+    };
+    process.once('SIGINT', stop);
+    process.once('SIGTERM', stop);
+  });
+}
+
+/** The project dashboard: every episode with the whole workflow one click away. */
+async function cmdHub(o: { port?: number; open?: boolean; host?: string }, g: Globals) {
+  const root = projectRoot(g.root);
+  const hub = await startHub({
+    root,
+    port: o.port,
+    host: o.host,
+    decode: ffmpegDecode,
+    log: (m) => g.verbose && console.error(c.dim(m)),
+  });
+  out(g, { url: hub.url, root, host: hub.host, tokenRequired: hub.tokenRequired }, () => {
+    console.log(`${c.green('●')} ReelForge dashboard for ${c.bold(root)}`);
+    console.log(`  ${c.cyan(hub.url)}`);
+    console.log(c.dim(`  AI clients: ${hub.url}mcp (MCP) · ${hub.url}api/v1 (REST) · ${hub.url}connect`));
+    if (hub.host === '127.0.0.1') console.log(c.dim('  listening on 127.0.0.1 only · Ctrl+C to stop'));
+    else
+      console.log(
+        c.yellow(
+          `  listening on ${hub.host}: other computers can reach /mcp and /api/v1 with the token in ${hub.tokenFile} · Ctrl+C to stop`,
+        ),
+      );
+  });
+  if (o.open !== false) openBrowser(hub.url);
+  await new Promise<void>((resolve) => {
+    const stop = () => void hub.close().then(resolve);
+    process.once('SIGINT', stop);
+    process.once('SIGTERM', stop);
+  });
+}
+
+async function cmdValidate(
+  id: string,
+  o: { strict?: boolean; measure?: boolean; preset?: string },
+  g: Globals,
+) {
+  const p = episode(id, g);
+  const r = compileEpisode(p, { preset: o.preset, decode: ffmpegDecode });
+  const issues = [...r.issues];
+  let measured = false;
+  if (r.timeline && o.measure !== false && !issues.some((i) => i.level === 'error' && i.rule === 'V-1')) {
+    try {
+      issues.push(
+        ...(await measureTimeline(r.timeline, {
+          cacheDir: path.join(p.out, '.cache'),
+          assetsDir: p.assets,
+          file: p.yaml,
+        })),
+      );
+      measured = true;
+    } catch (e) {
+      issues.push({
+        rule: 'V-9',
+        level: 'info',
+        message: `Skipped headless checks V-9/V-10: ${(e as Error).message.split('\n')[0]}`,
+        hint: 'Run `reelforge doctor`',
+      });
+    }
+  }
+  const errors = issues.filter((i) => i.level === 'error').length;
+  const warns = issues.filter((i) => i.level === 'warn').length;
+  const failed = errors > 0 || (o.strict && warns > 0);
+  out(g, { ok: !failed, episode: p.id, measured, issues }, () => {
+    printIssues(issues, g);
+    const tl = r.timeline;
+    const info = tl
+      ? c.dim(
+          ` · ${tl.duration.toFixed(1)} s · ${tl.scenes.length} scenes · ${tl.scenes.reduce((n, s) => n + s.elements.length, 0)} elements · ${tl.captions.length} captions`,
+        )
+      : '';
+    console.error(`${failed ? c.red('✗') : c.green('✓')} ${p.id}: ${summary(issues)}${info}`);
+  });
+  if (failed) process.exitCode = 1;
+}
+
+interface RenderFlags {
+  preset?: string;
+  workers?: number;
+  from?: number;
+  to?: number;
+  shareSize?: number;
+  sfx?: boolean;
+  lossless?: boolean;
+  fast?: boolean;
+  keepTmp?: boolean;
+  silent?: boolean;
+  share?: boolean;
+  measure?: boolean;
+  denoise?: boolean;
+}
+
+async function cmdRender(id: string, o: RenderFlags, g: Globals) {
+  const p = episode(id, g);
+  const ac = new AbortController();
+  const onSig = () => {
+    if (ac.signal.aborted) process.exit(130);
+    endStatus();
+    console.error(c.yellow('\naborting… (press Ctrl+C again to force)'));
+    ac.abort();
+  };
+  process.on('SIGINT', onSig);
+  process.on('SIGTERM', onSig);
+  const labels: Record<string, string> = {
+    validate: 'validate',
+    frames: 'frames  ',
+    concat: 'concat  ',
+    audio: 'audio   ',
+    master: 'master  ',
+    share: 'share   ',
+    extras: 'extras  ',
+  };
+  let lastPhase = '';
+  const onProgress = (pr: Progress) => {
+    if (g.json) {
+      process.stdout.write(`${JSON.stringify({ event: 'progress', ...pr })}\n`);
+      return;
+    }
+    if (pr.phase === 'done') return endStatus();
+    if (pr.phase !== lastPhase) {
+      if (lastPhase) endStatus();
+      lastPhase = pr.phase;
+      if (!process.stderr.isTTY) console.error(`${labels[pr.phase] ?? pr.phase}…`);
+    }
+    const extra =
+      pr.phase === 'frames'
+        ? ` ${pr.done}/${pr.total} · ${(pr.fps ?? 0).toFixed(1)} fps · ETA ${fmtDur(pr.eta ?? NaN)}`
+        : '';
+    statusLine(`${c.cyan(labels[pr.phase] ?? pr.phase)} ${bar(pr.done, pr.total)}${extra}`);
+  };
+  try {
+    const r = await renderEpisode(p, {
+      preset: o.preset,
+      workers: o.workers,
+      from: o.from,
+      to: o.to,
+      shareMb: o.shareSize,
+      sfx: o.sfx,
+      lossless: o.lossless,
+      fast: o.fast,
+      keepTmp: o.keepTmp,
+      silent: o.silent,
+      skipShare: o.share === false,
+      measure: o.measure,
+      denoise: o.denoise,
+      signal: ac.signal,
+      onProgress,
+      onLog: (m) => {
+        if (g.json) process.stdout.write(`${JSON.stringify({ event: 'log', message: m })}\n`);
+        else if (g.verbose) {
+          endStatus();
+          console.error(c.dim(m));
+        }
+      },
+      compile: { decode: ffmpegDecode },
+    });
+    endStatus();
+    out(g, { event: 'result', ...r }, () => {
+      printIssues(
+        r.issues.filter((i) => i.level !== 'info'),
+        g,
+      );
+      const rel = (f?: string) => (f ? path.relative(process.cwd(), f) : '');
+      for (const [k, f] of Object.entries(r.outputs)) {
+        const comp = r.compliance[k as keyof typeof r.compliance];
+        const mark = comp ? (comp.ok ? c.green('✓') : c.red('✗')) : c.green('✓');
+        const size = comp ? c.dim(` ${(comp.info.size / 1048576).toFixed(2)} MB`) : '';
+        console.error(`${mark} ${k.padEnd(7)} ${rel(f)}${size}`);
+        if (comp && !comp.ok) for (const pb of comp.problems) console.error(`     ${c.red(pb)}`);
+      }
+      console.error(
+        c.dim(
+          `${r.frames} frames in ${fmtDur(r.seconds)}${r.shareKbps ? ` · share video ${r.shareKbps} kb/s` : ''}`,
+        ),
+      );
+    });
+    if (!r.ok) process.exitCode = 1;
+  } catch (e) {
+    endStatus();
+    if (e instanceof RenderError) {
+      if (g.json)
+        process.stdout.write(`${JSON.stringify({ event: 'error', message: e.message, issues: e.issues })}\n`);
+      else {
+        printIssues(e.issues, g);
+        console.error(c.red(`✗ ${e.message}`));
+      }
+      process.exitCode = ac.signal.aborted ? 130 : 1;
+      return;
+    }
+    throw e;
+  } finally {
+    process.off('SIGINT', onSig);
+    process.off('SIGTERM', onSig);
+  }
+}
+
+function usage(msg: string): never {
+  throw new CliError(msg, 2);
+}
+
+/** v1.1 batch render: every folder with an episode.yaml, in name order. */
+async function cmdRenderAll(dirArg: string | undefined, o: RenderFlags, g: Globals) {
+  const root = projectRoot(g.root);
+  const base = path.resolve(root, dirArg ?? 'episodes');
+  if (!existsSync(base)) throw new CliError(`No such folder: ${base}`);
+  const eps = readdirSync(base)
+    .filter((d) => existsSync(path.join(base, d, 'episode.yaml')))
+    .sort();
+  if (!eps.length) throw new CliError(`No episodes (folders with episode.yaml) in ${base}`);
+  const failed: string[] = [];
+  for (const ep of eps) {
+    if (!g.json) console.error(c.bold(`\n▶ ${ep}`));
+    process.exitCode = 0;
+    await cmdRender(path.join(base, ep), o, g);
+    if (process.exitCode) failed.push(ep);
+  }
+  process.exitCode = failed.length ? 1 : 0;
+  if (!g.json)
+    console.error(
+      failed.length
+        ? c.red(`\n✗ failed: ${failed.join(', ')}`)
+        : c.green(`\n✓ rendered ${eps.length} episode(s)`),
+    );
+}
+
+async function cmdSnap(
+  id: string,
+  times: string[],
+  o: { every?: number; out?: string; preset?: string; cover?: boolean },
+  g: Globals,
+) {
+  const p = episode(id, g);
+  if (o.cover && times.length !== 1)
+    throw new CliError('--cover takes exactly one time, e.g. `reelforge snap ep01 l3 --cover`', 2);
+  const r = compileEpisode(p, { draftCues: true, preset: o.preset, decode: ffmpegDecode });
+  if (!r.timeline || r.issues.some((i) => i.level === 'error' && (i.rule === 'V-1' || i.rule === 'V-13'))) {
+    printIssues(r.issues, g);
+    throw new CliError('Cannot snap: the episode does not compile');
+  }
+  const tl = r.timeline;
+  let ts: number[];
+  if (o.every) ts = everyTimes(tl.duration, o.every);
+  else if (times.length) {
+    const lines = new Map(
+      tl.script.map((l) => [
+        l.id,
+        {
+          id: l.id,
+          start: l.start,
+          next: l.end,
+          words: l.words.map((w) => ({ ...w, norm: normalizeWord(w.text) })),
+        },
+      ]),
+    );
+    ts = times.map((x) => {
+      try {
+        return resolveTime(/^\d+(\.\d+)?$/.test(x) ? `${x}s` : x, { lines, duration: tl.duration });
+      } catch (e) {
+        throw new CliError(`Invalid time "${x}": ${(e as Error).message}`, 2);
+      }
+    });
+  } else throw new CliError('Give times (e.g. `reelforge snap ep01 0 l7 12.5s`) or --every <seconds>', 2);
+  const dir = o.out ? path.resolve(o.out) : o.cover ? p.out : path.join(p.out, 'snaps');
+  const res = await snapFrames(tl, ts, dir, { assetsDir: p.assets, sheet: !o.cover });
+  if (o.cover) {
+    const cover = path.join(dir, `${tl.meta.id}.cover.png`);
+    renameSync(res.frames[0], cover);
+    res.frames = [cover];
+  }
+  out(g, res, () => {
+    for (const f of res.frames) console.log(`${c.green('✓')} ${path.relative(process.cwd(), f)}`);
+    if (res.sheet)
+      console.log(`${c.green('✓')} ${path.relative(process.cwd(), res.sheet)} ${c.dim('(contact sheet)')}`);
+  });
+}
+
+async function cmdDoctor(o: { fix?: boolean }, g: Globals) {
+  let checks = await runDoctor();
+  if (o.fix && checks.some((x) => !x.ok && x.name.startsWith('Playwright'))) {
+    const require = createRequire(import.meta.url);
+    const cli = path.join(
+      path.dirname(
+        require.resolve('playwright/package.json', {
+          paths: [path.dirname(require.resolve('@reelforge/renderer'))],
+        }),
+      ),
+      'cli.js',
+    );
+    console.error(c.cyan('installing the pinned Chromium (npx playwright install chromium)…'));
+    spawnSync(process.execPath, [cli, 'install', 'chromium'], { stdio: 'inherit' });
+    checks = await runDoctor();
+  }
+  const ok = checks.every((x) => x.ok);
+  out(g, { ok, checks, platform: process.platform, installRoot: INSTALL_ROOT }, () => {
+    for (const x of checks) {
+      console.log(`${x.ok ? c.green('✓') : c.red('✗')} ${x.name.padEnd(52)} ${c.dim(x.detail)}`);
+      if (!x.ok && x.fix) console.log(`    ${c.yellow('fix:')} ${x.fix}`);
+    }
+    console.log(
+      ok
+        ? c.green('\nAll checks passed. Ready to render.')
+        : c.red('\nSome checks failed (see fixes above).'),
+    );
+  });
+  if (!ok) process.exitCode = 1;
+}
+
+/** Theme generator: a full theme (all color tokens, WCAG AA text contrast) from one accent color. */
+async function cmdThemeNew(
+  name: string,
+  o: { accent: string; mode?: string; font?: string; out?: string },
+  g: Globals,
+) {
+  if (!/^[a-z0-9][a-z0-9_-]*$/i.test(name)) throw new CliError('Theme name must be a slug', 2);
+  if (!/^#?[0-9a-f]{6}$/i.test(o.accent)) throw new CliError('--accent must be a hex color like #b8ff3c', 2);
+  if (o.mode !== undefined && o.mode !== 'dark' && o.mode !== 'light')
+    throw new CliError('--mode must be light or dark', 2);
+  if (o.font !== undefined && !isBundledFont(o.font)) {
+    const alt = didYouMean(o.font, BUNDLED_FONTS, 3);
+    throw new CliError(
+      `Font "${o.font}" is not bundled${alt ? ` (did you mean "${alt}"?)` : ''}. Bundled: ${BUNDLED_FONTS.join(', ')}`,
+      2,
+    );
+  }
+  const { yaml } = generateTheme({
+    name,
+    accent: o.accent,
+    mode: o.mode as 'dark' | 'light' | undefined,
+    font: o.font,
+  });
+  const file = path.resolve(o.out ?? path.join(projectRoot(g.root), 'themes', `${name}.theme.yaml`));
+  if (existsSync(file)) throw new CliError(`${file} already exists`);
+  mkdirSync(path.dirname(file), { recursive: true });
+  writeFileSync(file, yaml);
+  out(g, { ok: true, file }, () =>
+    console.log(`${c.green('✓')} wrote ${path.relative(process.cwd(), file)} (set meta.theme: ${name})`),
+  );
+}
+
+async function cmdSchema(o: { out?: string }, g: Globals) {
+  const file = path.resolve(o.out ?? path.join(projectRoot(g.root), 'schema', 'episode.schema.json'));
+  mkdirSync(path.dirname(file), { recursive: true });
+  writeFileSync(file, `${JSON.stringify(episodeJsonSchema(), null, 2)}\n`);
+  out(g, { ok: true, file }, () =>
+    console.log(`${c.green('✓')} wrote ${path.relative(process.cwd(), file)}`),
+  );
+}
+
+// ------------------------------------------------------------------ program
+
+export function buildProgram(): Command {
+  const program = new Command();
+  program.exitOverride(); // inherited by subcommands: usage errors become exit code 2
+  program
+    .name('reelforge')
+    .description(
+      'Your voice → finished vertical explainer videos. Offline and deterministic; AI assistants optional (MCP).',
+    )
+    .version(VERSION)
+    .option('--verbose', 'more output (info messages, logs)')
+    .option('--json', 'machine-readable JSON output')
+    .addOption(new Option('--root <dir>', 'project root (default: $REELFORGE_ROOT or the current directory)'))
+    .showHelpAfterError('(add --help for usage)');
+
+  program
+    .command('studio')
+    .description(
+      'open the project dashboard: create episodes, upload voice, open the editor, validate and render',
+    )
+    .option('--port <port>', 'port (default 4310 or $REELFORGE_PORT)', posInt('--port'))
+    .option(
+      '--host <address>',
+      'bind address (default 127.0.0.1 or $REELFORGE_HOST); other addresses require the bearer token',
+    )
+    .option('--no-open', 'do not open the browser')
+    .action((o, cmd) => cmdHub(o, globals(cmd)));
+
+  program
+    .command('new')
+    .description('create episodes/<id>/episode.yaml from a commented template')
+    .argument('<id>', 'episode id (slug)')
+    .option('--series <name>', 'series name shown in the header')
+    .option('--episode <n>', 'episode number', posInt('--episode'))
+    .option('--lang <en|ar>', 'language of the template script (default en)')
+    .option('--pack <id>', 'start from an industry pack template (see `reelforge packs`)')
+    .option('--template <id>', "template of the pack (default: the pack's first template)")
+    .option(
+      '--slot <key=value>',
+      'template slot value (repeatable); missing slots keep their defaults',
+      (v: string, prev: string[] = []) => [...prev, v],
+    )
+    .action((id, o, cmd) => cmdNew(id, o, globals(cmd)));
+
+  program
+    .command('packs')
+    .description('list industry packs and their templates with slots')
+    .option('--lang <en|ar>', 'language of names and slot defaults (default en)')
+    .action((o, cmd) => cmdPacks(o, globals(cmd)));
+
+  program
+    .command('cue')
+    .description('open the editor in Cues mode: mark when each line starts (writes cues.json)')
+    .argument('<id>', 'episode id or path')
+    .option('--draft', 'write estimated cues instead (preview before recording)')
+    .option('--port <port>', 'port (default 4317 or $REELFORGE_PORT)', posInt('--port'))
+    .option('--preset <name>', 'override meta.preset')
+    .option('--no-open', 'do not open the browser')
+    .action((id, o, cmd) => cmdCue(id, o, globals(cmd)));
+
+  program
+    .command('align')
+    .description('mark cues automatically from the voice recording (lines and words; writes cues.json)')
+    .argument('[id]', 'episode id or path')
+    .addOption(
+      new Option('--engine <name>', 'auto: whisper when installed, else dsp').choices([
+        'auto',
+        'dsp',
+        'whisper',
+      ]),
+    )
+    .addOption(
+      new Option('--model <size>', 'whisper model size (default base)').choices(['tiny', 'base', 'small']),
+    )
+    .option('--no-vad', 'detect speech by energy only (skip Silero VAD)')
+    .option('--no-words', 'only line cues')
+    .option('--force', 'replace cues you marked by hand')
+    .option('--dry-run', 'print the result without writing cues.json')
+    .option('--setup', 'install the optional speech models (one time, ~180 MB in the user cache)')
+    .option('--status', 'show which speech models are installed')
+    .action((id, o, cmd) => cmdAlign(id, o, globals(cmd)));
+
+  program
+    .command('edit')
+    .description('open the visual editor: canvas, layers, inspector and timeline (writes episode.yaml)')
+    .argument('<id>', 'episode id or path')
+    .option('--port <port>', 'port (default 4317 or $REELFORGE_PORT)', posInt('--port'))
+    .option('--preset <name>', 'override meta.preset')
+    .option('--no-open', 'do not open the browser')
+    .action((id, o, cmd) => serve(episode(id, globals(cmd)), 'edit', o, globals(cmd)));
+
+  program
+    .command('dev')
+    .description('open the editor in Review mode: checks, safe zones, element outlines')
+    .argument('<id>', 'episode id or path')
+    .option('--port <port>', 'port (default 4317 or $REELFORGE_PORT)', posInt('--port'))
+    .option('--preset <name>', 'override meta.preset')
+    .option('--no-open', 'do not open the browser')
+    .action((id, o, cmd) => serve(episode(id, globals(cmd)), 'dev', o, globals(cmd)));
+
+  program
+    .command('validate')
+    .description('check schema, cues, timing, layout, safe zones and text overflow')
+    .argument('<id>', 'episode id or path')
+    .option('--strict', 'fail on warnings too')
+    .option('--preset <name>', 'override meta.preset')
+    .option('--no-measure', 'skip the headless V-9/V-10 checks')
+    .action((id, o, cmd) => cmdValidate(id, o, globals(cmd)));
+
+  program
+    .command('render')
+    .description('render master + share MP4, SRT, contact sheet and publish.md')
+    .argument('[id]', 'episode id or path (or a folder of episodes with --all)')
+    .option('--all', 'render every episode in episodes/ (or in the given folder)')
+    .option('--preset <name>', 'tiktok | reels | shorts (default: meta.preset, $REELFORGE_PRESET)')
+    .option(
+      '--workers <n>',
+      'parallel Chromium workers (default: CPU cores − 1, $REELFORGE_WORKERS)',
+      posInt('--workers'),
+    )
+    .option('--from <t>', 'partial render start (seconds) → <id>.part.mp4', timeArg)
+    .option('--to <t>', 'partial render end (seconds)', timeArg)
+    .option(
+      '--share-size <MB>',
+      'share file size cap (default 28, $REELFORGE_SHARE_SIZE)',
+      num('--share-size'),
+    )
+    .option('--no-sfx', 'render without sound effects')
+    .option('--no-share', 'skip the share file')
+    .option('--lossless', 'capture PNG frames instead of JPEG')
+    .option('--fast', 'faster master/share encoding (preset medium)')
+    .option('--silent', 'allow rendering without a voice recording')
+    .option('--keep-tmp', 'keep out/.tmp/<run-id>/ on failure')
+    .option('--no-measure', 'skip the headless V-9/V-10 checks')
+    .option('--denoise', 'remove background noise from the voice (default: audio.denoise)')
+    .option('--no-denoise', 'keep the voice as recorded, even when audio.denoise is true')
+    .action((id, o, cmd) =>
+      o.all
+        ? cmdRenderAll(id, o, globals(cmd))
+        : id
+          ? cmdRender(id, o, globals(cmd))
+          : usage('render needs an episode id, or --all'),
+    );
+
+  program
+    .command('snap')
+    .description('write PNG frames at times (seconds or time expressions) and a contact sheet')
+    .argument('<id>', 'episode id or path')
+    .argument('[times...]', 'times: 12.5, 12.5s, l7, "l7:\'word\'", l7.end+0.2')
+    .option('--every <seconds>', 'one frame every N seconds', num('--every'))
+    .option('--out <dir>', 'output folder (default out/snaps)')
+    .option('--preset <name>', 'override meta.preset')
+    .option('--cover', 'write a single 1080×1920 cover image to out/<id>.cover.png')
+    .action((id, times, o, cmd) => cmdSnap(id, times, o, globals(cmd)));
+
+  program
+    .command('doctor')
+    .description('check Node, ffmpeg, Chromium and fonts; print install steps')
+    .option('--fix', 'install the pinned Chromium if missing')
+    .action((o, cmd) => cmdDoctor(o, globals(cmd)));
+
+  const theme = program.command('theme').description('theme tools');
+  theme
+    .command('new')
+    .description('generate a complete themes/<name>.theme.yaml (WCAG AA contrast) from one accent color')
+    .argument('<name>', 'theme name (slug)')
+    .requiredOption(
+      '--accent <hex>',
+      'accent color, e.g. #b8ff3c (adjusted only if it would be hard to read)',
+    )
+    .option('--mode <mode>', 'light or dark background (default dark)')
+    .option(
+      '--font <family>',
+      `bundled font for its slot (display, mono or arabic): ${BUNDLED_FONTS.join(', ')}`,
+    )
+    .option('--out <file>', 'output file')
+    .action((name, o, cmd) => cmdThemeNew(name, o, globals(cmd)));
+
+  program
+    .command('mcp')
+    .description('run the Model Context Protocol server on stdio (for AI assistants and agents)')
+    .option('--toolsets <list>', 'only these toolsets: basic, design, render or all (default all)')
+    .action(async (o: { toolsets?: string }, cmd) => {
+      let toolsets: Toolset[] | 'all';
+      try {
+        toolsets = parseToolsets(o.toolsets);
+      } catch (e) {
+        throw new CliError((e as Error).message, 2);
+      }
+      const { startMcp } = await import('./mcp.js');
+      await startMcp({ root: projectRoot(globals(cmd).root), version: VERSION, toolsets });
+    });
+
+  program
+    .command('schema')
+    .description('write the episode JSON Schema (editor autocompletion)')
+    .option('--out <file>', 'output file (default schema/episode.schema.json)')
+    .action((o, cmd) => cmdSchema(o, globals(cmd)));
+
+  return program;
+}
+
+export async function main(argv: string[]): Promise<void> {
+  const program = buildProgram();
+  try {
+    await program.parseAsync(argv);
+  } catch (e) {
+    const err = e as { code?: string; exitCode?: number; message: string };
+    if (typeof err.code === 'string' && err.code.startsWith('commander.')) {
+      process.exitCode = err.code === 'commander.helpDisplayed' || err.code === 'commander.version' ? 0 : 2;
+      return;
+    }
+    if (e instanceof CliError) {
+      console.error(c.red(`✗ ${e.message}`));
+      process.exitCode = e.exitCode;
+      return;
+    }
+    console.error(c.red(`✗ ${(e as Error).message}`));
+    if (process.env.REELFORGE_DEBUG) console.error((e as Error).stack);
+    process.exitCode = 1;
+  }
+}
+
+export { episodePaths };
