@@ -1,0 +1,51 @@
+{
+  "name": "@reelforge/assist",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "author": "Idriss Boukmouche <boukemoucheidriss@gmail.com>",
+  "homepage": "https://terminaldz.github.io/vidcreat",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TerminalDZ/vidcreat.git",
+    "directory": "packages/assist"
+  },
+  "bugs": {
+    "url": "https://github.com/TerminalDZ/vidcreat/issues"
+  },
+  "keywords": [
+    "reelforge",
+    "speech-alignment",
+    "forced-alignment",
+    "voice-activity-detection",
+    "subtitles",
+    "offline"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "runtime"
+  ],
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@reelforge/audio": "workspace:*",
+    "@reelforge/core": "workspace:*"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "description": "Optional ReelForge authoring helpers: cue alignment (DSP, Silero VAD, Whisper word timings) and scene suggestions."
+}
