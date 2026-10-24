@@ -1,0 +1,10 @@
+{
+  "name": "reelforge-assist-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Optional speech model runtime for ReelForge, installed by reelforge align --setup into the user cache.",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@huggingface/transformers": "4.3.2"
+  }
+}
