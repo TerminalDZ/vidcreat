@@ -1,0 +1,18 @@
+# Voyage: deep ocean with sunset accents for travel and tourism.
+name: voyage
+extends: default
+mode: dark
+colors:
+  bg: '#071318'
+  ink: '#f1f7f6'
+  dim: '#8ea6aa'
+  line: '#1f3a44'
+  card: '#0e1f26'
+  lime: '#5ee6b8'
+  cyan: '#4fd1e8'
+  red: '#ff6f61'
+  amber: '#ffb86b'
+  violet: '#c3a6ff'
+fonts: { display: 'Manrope', mono: 'JetBrains Mono', arabic: 'Readex Pro' }
+chrome: { grain: 0.04, vignette: 0.6, grid: false }
+captions: { active: amber, english: cyan }

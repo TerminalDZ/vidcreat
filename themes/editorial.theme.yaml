@@ -1,0 +1,18 @@
+# Editorial: a dark newsroom look (serif headlines, news red, newsprint white).
+name: editorial
+extends: default
+mode: dark
+colors:
+  bg: '#0c0c0c'
+  ink: '#f5f3ef'
+  dim: '#9a968f'
+  line: '#2b2b2b'
+  card: '#161616'
+  lime: '#8fd694'
+  cyan: '#7fb8ff'
+  red: '#ff4d4d'
+  amber: '#f2b84b'
+  violet: '#c4a7ff'
+fonts: { display: 'Playfair Display', mono: 'JetBrains Mono', arabic: 'Noto Naskh Arabic' }
+chrome: { grain: 0.05, vignette: 0.5, grid: false }
+captions: { active: amber, english: cyan }

@@ -1,0 +1,18 @@
+# Bistro: a warm dark look for food and restaurants (espresso, saffron, tomato, herbs).
+name: bistro
+extends: default
+mode: dark
+colors:
+  bg: '#120b08'
+  ink: '#fbf1e6'
+  dim: '#a8958a'
+  line: '#35251e'
+  card: '#1c1310'
+  lime: '#a3d65c'
+  cyan: '#7cc6c0'
+  red: '#ff6b57'
+  amber: '#ffb547'
+  violet: '#d39bd8'
+fonts: { display: 'Playfair Display', mono: 'JetBrains Mono', arabic: 'Noto Naskh Arabic' }
+chrome: { grain: 0.06, vignette: 0.7, grid: false }
+captions: { active: amber, english: lime }

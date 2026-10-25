@@ -1,0 +1,18 @@
+# Civic: a clear, light look for public services (government blue, high legibility).
+name: civic
+extends: default
+mode: light
+colors:
+  bg: '#f2f5f9'
+  ink: '#0f1c2e'
+  dim: '#4c5b70'
+  line: '#d2dae5'
+  card: '#ffffff'
+  lime: '#1e7a46'
+  cyan: '#1450a3'
+  red: '#b4262c'
+  amber: '#975800'
+  violet: '#5b3fa6'
+fonts: { display: 'Inter', mono: 'JetBrains Mono', arabic: 'Noto Kufi Arabic' }
+chrome: { grain: 0, vignette: 0, grid: false, glow: 0.45 }
+captions: { active: cyan, english: '#135830', scrim: 0.86 }
