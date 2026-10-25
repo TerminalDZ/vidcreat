@@ -1,0 +1,18 @@
+# Estate: a warm, light look for real estate (sand, deep green and brass, serif headlines).
+name: estate
+extends: default
+mode: light
+colors:
+  bg: '#f6f2ea'
+  ink: '#1c1a16'
+  dim: '#5d574c'
+  line: '#ddd3c1'
+  card: '#fffdf8'
+  lime: '#2f6b4f'
+  cyan: '#1d5f86'
+  red: '#b3362b'
+  amber: '#8f5c0a'
+  violet: '#6c4a8f'
+fonts: { display: 'Playfair Display', mono: 'JetBrains Mono', arabic: 'Noto Naskh Arabic' }
+chrome: { grain: 0.03, vignette: 0.12, grid: false, glow: 0.5 }
+captions: { active: '#24543e', english: '#18506f', scrim: 0.86 }

@@ -1,0 +1,19 @@
+# Bold: loud, saturated colors and bouncier motion for social promos.
+name: bold
+extends: default
+mode: dark
+colors:
+  bg: '#0a0614'
+  ink: '#ffffff'
+  dim: '#a99cc4'
+  line: '#2f2147'
+  card: '#160e26'
+  lime: '#c6ff3d'
+  cyan: '#3de8ff'
+  red: '#ff3d71'
+  amber: '#ffd23d'
+  violet: '#b36bff'
+fonts: { display: 'Manrope', mono: 'JetBrains Mono', arabic: 'Cairo' }
+chrome: { grain: 0, vignette: 0.55, grid: true }
+motion: { pop_overshoot: 2.3 }
+captions: { active: lime, english: cyan }

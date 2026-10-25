@@ -1,0 +1,18 @@
+# Clinical: a calm, light look for healthcare and wellbeing (teal and clinical blue on white).
+name: clinical
+extends: default
+mode: light
+colors:
+  bg: '#f3f7fa'
+  ink: '#0c1d2e'
+  dim: '#4f6274'
+  line: '#d3dde6'
+  card: '#ffffff'
+  lime: '#00796b'
+  cyan: '#0a5fae'
+  red: '#c0283a'
+  amber: '#9a5b00'
+  violet: '#6b44c2'
+fonts: { display: 'Inter', mono: 'JetBrains Mono', arabic: 'Readex Pro' }
+chrome: { grain: 0, vignette: 0, grid: true, glow: 0.5 }
+captions: { active: '#005b52', english: '#0a4f91', scrim: 0.86 }

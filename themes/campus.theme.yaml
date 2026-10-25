@@ -1,0 +1,18 @@
+# Campus: a friendly, light look for education (paper white, ink blue, chalk-board green).
+name: campus
+extends: default
+mode: light
+colors:
+  bg: '#f7f6f2'
+  ink: '#1a1c2b'
+  dim: '#555a6e'
+  line: '#dcd9cf'
+  card: '#ffffff'
+  lime: '#2f7d32'
+  cyan: '#1f5fbf'
+  red: '#c62f2f'
+  amber: '#a35a00'
+  violet: '#6d3fc0'
+fonts: { display: 'Manrope', mono: 'JetBrains Mono', arabic: 'Readex Pro' }
+chrome: { grain: 0, vignette: 0, grid: true, glow: 0.55 }
+captions: { active: '#1d4fa0', english: '#255f28', scrim: 0.86 }

@@ -1,0 +1,18 @@
+# Minimal: near-white, black type and restrained accents. No grain, grid or vignette.
+name: minimal
+extends: default
+mode: light
+colors:
+  bg: '#fafafa'
+  ink: '#111111'
+  dim: '#5c5c5c'
+  line: '#e0e0e0'
+  card: '#ffffff'
+  lime: '#1f7a3f'
+  cyan: '#1a5fb4'
+  red: '#c01c28'
+  amber: '#9c5c00'
+  violet: '#6f42c1'
+fonts: { display: 'Inter', mono: 'JetBrains Mono', arabic: 'Readex Pro' }
+chrome: { grain: 0, vignette: 0, grid: false, glow: 0.35 }
+captions: { active: '#1550a0', english: '#135e29', scrim: 0.86 }

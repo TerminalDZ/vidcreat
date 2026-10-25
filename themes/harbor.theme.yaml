@@ -1,0 +1,18 @@
+# Harbor: deep navy for ports and logistics, with signal orange and sea green.
+name: harbor
+extends: default
+mode: dark
+colors:
+  bg: '#06121d'
+  ink: '#eaf2f8'
+  dim: '#8fa3b6'
+  line: '#1e3449'
+  card: '#0d1d2c'
+  lime: '#3ddc97'
+  cyan: '#5cc8ff'
+  red: '#ff5d62'
+  amber: '#ffab40'
+  violet: '#a9a4ff'
+fonts: { display: 'Manrope', mono: 'JetBrains Mono', arabic: 'Noto Kufi Arabic' }
+chrome: { grain: 0.04, vignette: 0.6, grid: true }
+captions: { active: amber, english: cyan }

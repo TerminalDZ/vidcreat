@@ -1,0 +1,18 @@
+# Ledger: a sober dark look for finance (green-black, gain green, gold highlights).
+name: ledger
+extends: default
+mode: dark
+colors:
+  bg: '#070b0a'
+  ink: '#eef3ef'
+  dim: '#879a91'
+  line: '#213029'
+  card: '#0f1614'
+  lime: '#4ade80'
+  cyan: '#67d4e6'
+  red: '#f87171'
+  amber: '#f5c451'
+  violet: '#b4a1ff'
+fonts: { display: 'Inter', mono: 'JetBrains Mono', arabic: 'Noto Kufi Arabic' }
+chrome: { grain: 0.03, vignette: 0.6, grid: true }
+captions: { active: amber, english: cyan }

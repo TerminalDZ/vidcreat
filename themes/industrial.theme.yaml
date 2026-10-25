@@ -1,0 +1,18 @@
+# Industrial: steel greys with hazard yellow for manufacturing and engineering.
+name: industrial
+extends: default
+mode: dark
+colors:
+  bg: '#0b0c0d'
+  ink: '#eceff1'
+  dim: '#8d959c'
+  line: '#2a2e33'
+  card: '#151719'
+  lime: '#9be36b'
+  cyan: '#62b8e8'
+  red: '#ff5a4e'
+  amber: '#ffcc33'
+  violet: '#b9a3e3'
+fonts: { display: 'Space Grotesk', mono: 'JetBrains Mono', arabic: 'Noto Kufi Arabic' }
+chrome: { grain: 0.08, vignette: 0.75, grid: true }
+captions: { active: amber, english: cyan }

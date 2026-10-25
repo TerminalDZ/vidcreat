@@ -1,0 +1,18 @@
+# Retail: an energetic dark look for shops and offers (plum, hot pink, mint).
+name: retail
+extends: default
+mode: dark
+colors:
+  bg: '#0b0710'
+  ink: '#f6f0fb'
+  dim: '#998fa8'
+  line: '#2c2238'
+  card: '#150f1d'
+  lime: '#7ef29a'
+  cyan: '#5ed6ff'
+  red: '#ff5c93'
+  amber: '#ffc247'
+  violet: '#c58bff'
+fonts: { display: 'Manrope', mono: 'JetBrains Mono', arabic: 'Cairo' }
+chrome: { grain: 0.04, vignette: 0.65, grid: true }
+captions: { active: amber, english: cyan }
