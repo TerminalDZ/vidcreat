@@ -1,0 +1,920 @@
+# Component gallery: one scene per component group. Used for golden frames (SRS §12.1) and as a
+# visual reference while developing components.
+meta:
+  id: gallery
+  series: "SYSTEM DESIGN"
+  title: "Component gallery"
+  episode: 1
+  preset: tiktok
+  theme: ../golden.theme.yaml
+  lang: ar-EG
+
+audio:
+  sfx: auto
+
+script:
+  - text: "كل حاجة هنا اسمها title و chip"
+  - text: "الكود بيكتب نفسه"
+  - text: "الـ client بيكلم الـ server"
+  - text: "اتخصم منك مرتين"
+  - text: "جدول الـ ledger"
+  - text: "اتنين بيكتبوا في نفس الوقت"
+  - text: "الخطوات واحدة واحدة"
+  - text: "الـ backoff بيكبر"
+  - text: "الـ bucket بيفضى"
+  - { id: c1, text: "Bars grow, numbers count up" }
+  - { id: c2, text: "Lines draw themselves" }
+  - { id: c3, text: "Where the time goes" }
+  - { id: c4, text: "SQL vs NoSQL" }
+  - { id: c5, text: "قبل وبعد الـ cache" }
+  - { id: c6, text: "أسرع لغات البرمجة" }
+  - { id: c7, text: "Four steps to ship" }
+  - { id: c8, text: "A request flows through" }
+  - { id: c9, text: "Who reports to whom" }
+  - { id: c10, text: "شجرة الـ DOM" }
+  - { id: c11, text: "The loop never stops" }
+  - { id: c12, text: "Most visitors drop off" }
+  - { id: c13, text: "Needs stack up" }
+  - { id: c14, text: "Effort versus impact" }
+  - { id: d1, text: "Goods cross the world" }
+  - { id: d2, text: "رحلة من القاهرة لدبي" }
+  - { id: d3, text: "The truck is on its way" }
+  - { id: d4, text: "Find the kitchen" }
+  - { id: d5, text: "Floor by floor" }
+  - { id: d6, text: "Stacked at the port" }
+  - { id: d7, text: "مواعيد الشهر ده" }
+  - { id: d8, text: "Ten seconds left" }
+  - { id: d9, text: "Your flight is delayed" }
+  - { id: d10, text: "Meet your doctor" }
+  - { id: d11, text: "الـ chat بيرد عليك" }
+  - { id: d12, text: "New messages pile up" }
+  - { id: d13, text: "Live from the harbor" }
+  - { id: d14, text: "Ship faster than ever" }
+  - { id: d15, text: "Three things to remember" }
+  - { id: d16, text: "Look at this one" }
+  - { id: d17, text: "Old way versus new way" }
+  - { id: d18, text: "Pick a plan" }
+  - { id: d19, text: "Now twenty percent off" }
+  - { id: d20, text: "Scan to book" }
+  - { id: d21, text: "Heart rate climbs" }
+  - { id: l10, text: "التليفون والنت فصل" }
+  - { id: l11, text: "There are only two hard things" }
+  - { id: l12, text: "خلي بالك من الفخ" }
+  - { id: l13, text: "الحلقة الجاية" }
+
+chapters:
+  - { at: l1, label: "01 · TEXT" }
+  - { at: l3, label: "02 · DIAGRAMS" }
+  - { at: l5, label: "03 · DATA" }
+  - { at: c1, label: "03 · CHARTS" }
+  - { at: c7, label: "03 · STRUCTURE" }
+  - { at: d1, label: "03 · PLACES" }
+  - { at: d7, label: "03 · TIME & PEOPLE" }
+  - { at: d13, label: "03 · MEDIA" }
+  - { at: l10, label: "04 · SCREENS" }
+
+scenes:
+  - id: text
+    at: l1
+    glow: violet
+    elements:
+      - use: label
+        id: lbl
+        props: { text: "Chapter one", dot: true, color: lime }
+        place: { x: 60, y: 60, w: 600, h: 60 }
+      - use: title
+        id: ttl
+        props: { text: "The **Idempotency** Key", sub: "exactly-once effects" }
+        place: { x: 60, y: 180, w: 960, h: 360 }
+        enter: { anim: type, cps: 30 }
+      - use: chip
+        id: chip_ok
+        props: { text: "Idempotency-Key", color: lime, icon: key }
+        place: { x: 160, y: 640, w: 560, h: 96 }
+        enter: { at: "l1:'chip'" }
+      - use: chip
+        id: chip_bad
+        props: { text: "retry blindly", color: red, strike: "l1:'chip'+0.6", variant: outline }
+        place: { x: 160, y: 780, w: 560, h: 96 }
+        enter: { at: "l1:'chip'+0.2" }
+
+  - id: code
+    at: l2
+    glow: cyan
+    elements:
+      - use: code
+        id: snippet
+        props:
+          title: "payments.ts"
+          lines:
+            - "async function charge(req: Request) {"
+            - "  const key = req.headers['idempotency-key'];"
+            - "  if (await seen(key)) return cached(key);"
+            - "  return pay(req.body.amount, 42);"
+            - "}"
+          highlight: [{ line: 3, at: "l2+1.6" }]
+          cps: 60
+        place: { x: 40, y: 140, w: 1000, h: 520 }
+
+  - id: diagram
+    at: l3
+    glow: cyan
+    elements:
+      - use: node
+        id: client
+        props: { title: "Client", sub: "mobile app", icon: phone }
+        place: { x: 60, y: 160, w: 340, h: 170 }
+      - use: node
+        id: server
+        props: { title: "Server", sub: "POST /pay", icon: server, color: violet }
+        place: { x: 640, y: 160, w: 340, h: 170 }
+        states:
+          - { at: "l3+1.6", set: { status: busy, sub: "processing…" } }
+      - use: node
+        id: db
+        props: { title: "DB", sub: "payments", icon: db, color: amber, status: ok }
+        place: { x: 640, y: 620, w: 340, h: 170 }
+      - use: arrow
+        id: a1
+        props: { from: client, to: server, label: "request", color: cyan, packet: { at: "l3+0.9", dur: 0.9 } }
+        enter: { at: "l3+0.3" }
+      - use: arrow
+        id: a2
+        props: { from: server.bottom, to: db.top, color: amber, dashed: true }
+        enter: { at: "l3+0.6" }
+      - use: arrow
+        id: a3
+        props: { from: client.bottom, to: db.left, route: elbow, color: dim, label: "retry", head: end }
+        enter: { at: "l3+0.9" }
+      - use: icon
+        id: ic
+        props: { name: lock, size: 140, color: lime, ring: true }
+        place: { x: 150, y: 760, w: 160, h: 160 }
+
+  - id: hits
+    at: l4
+    glow: red
+    elements:
+      - use: counter
+        id: cnt
+        props: { keyframes: [{ at: l4, value: 49 }, { at: "l4+1.2", value: 98 }], prefix: "$", decimals: 2, label: "charged" }
+        place: { x: 130, y: 120, w: 820, h: 320 }
+      - use: stamp
+        id: st
+        props: { text: "×2", color: red }
+        place: { x: 290, y: 520, w: 500, h: 260 }
+        enter: { at: "l4+1.2" }
+
+  - id: table
+    at: l5
+    glow: lime
+    elements:
+      - use: table
+        id: ledger
+        props:
+          columns: ["account", "debit", "credit"]
+          widths: [2, 1, 1]
+          rows:
+            - { cells: ["cash", "100", ""] }
+            - { cells: ["revenue", "", "100"], at: "l5+0.6" }
+            - { cells: ["refund", { text: "-40", color: red }, ""], at: "l5+1.2", highlight: "l5+1.8" }
+        place: { x: 60, y: 200, w: 960, h: 380 }
+
+  - id: lanes
+    at: l6
+    glow: amber
+    elements:
+      - use: lanes
+        id: race
+        props:
+          lanes:
+            - title: "Tx A"
+              color: cyan
+              steps:
+                - { text: "read balance=100", at: l6 }
+                - { text: "write 50", at: "l6+1.0" }
+            - title: "Tx B"
+              color: violet
+              steps:
+                - { text: "read balance=100", at: "l6+0.5" }
+                - { text: "write 70", at: "l6+1.5", mark: err }
+        place: { x: 60, y: 80, w: 960, h: 760 }
+
+  - id: lists
+    at: l7
+    glow: lime
+    elements:
+      - use: checklist
+        id: cl
+        props:
+          title: "before you retry"
+          items:
+            - { text: "Idempotency key", at: l7 }
+            - { text: "Timeout", at: "l7+0.6" }
+            - { text: "Retry forever", at: "l7+1.2", ok: false }
+        place: { x: 100, y: 40, w: 880, h: 440 }
+      - use: meter
+        id: mt
+        props: { label: "requests / s", keyframes: [{ at: l7, value: 40 }, { at: "l7+1.4", value: 130 }], max: 150, threshold: 100 }
+        place: { x: 100, y: 620, w: 880, h: 180 }
+
+  - id: time
+    at: l8
+    glow: violet
+    elements:
+      - use: timeline
+        id: tlx
+        props:
+          start: "0s"
+          end: "16s"
+          markers:
+            - { pos: 0.0625, label: "1s", at: l8 }
+            - { pos: 0.125, label: "2s", at: "l8+0.4" }
+            - { pos: 0.25, label: "4s", at: "l8+0.8" }
+            - { pos: 0.5, label: "8s", at: "l8+1.2", color: amber, sub: "+ jitter" }
+        place: { x: 60, y: 60, w: 960, h: 260 }
+      - use: grid
+        id: pool
+        props:
+          label: "thread pool"
+          cols: 4
+          rows: 2
+          tiles: ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8"]
+          steps:
+            - { at: "l8+0.6", set: { "0-3": busy } }
+            - { at: "l8+1.4", set: { "4-6": busy, "7": err } }
+        place: { x: 220, y: 400, w: 640, h: 440 }
+
+  - id: bucket
+    at: l9
+    glow: lime
+    elements:
+      - use: bucket
+        id: bk
+        props: { capacity: 10, label: "token bucket", rate: "+1 token / 100ms", keyframes: [{ at: "l9+0.5", tokens: 6 }, { at: "l9+1.2", tokens: 2 }] }
+        place: { x: 320, y: 80, w: 440, h: 560 }
+
+  - id: bars
+    at: c1
+    glow: cyan
+    elements:
+      - use: bar-chart
+        id: bc
+        props:
+          title: "Requests per region"
+          bars:
+            - { label: "EU", value: 420 }
+            - { label: "US", value: 610 }
+            - { label: "Asia", value: 380 }
+            - { label: "Africa", value: 150, keyframes: [{ at: "c1+1.6", value: 290, dur: 0.6 }] }
+            - { label: "LATAM", value: 240 }
+          focus: { index: 1, at: "c1+1.4" }
+          suffix: "k"
+        place: { x: 60, y: 30, w: 960, h: 520 }
+      - use: stat-card
+        id: sc_up
+        props: { label: "Uptime", value: 99.98, decimals: 2, suffix: "%", delta: 0.4, icon: shield, sub: "vs last month" }
+        place: { x: 60, y: 610, w: 400, h: 250 }
+        enter: { at: "c1+0.3" }
+      - use: stat-card
+        id: sc_lat
+        props: { label: "p99 latency", value: 182, suffix: " ms", delta: -12, good: down, accent: amber, icon: clock }
+        place: { x: 500, y: 610, w: 400, h: 250 }
+        enter: { at: "c1+0.5" }
+
+  - id: lines
+    at: c2
+    glow: violet
+    elements:
+      - use: line-chart
+        id: lc
+        props:
+          labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+          series:
+            - { label: "p50", values: [120, 135, 128, 160, 150, 175, 168] }
+            - { label: "p99", values: [220, 260, 240, 410, 300, 380, 330], color: amber }
+          suffix: " ms"
+        place: { x: 60, y: 30, w: 960, h: 540 }
+      - use: progress-ring
+        id: pr
+        props: { value: 72, label: "SLO budget" }
+        place: { x: 340, y: 620, w: 320, h: 320 }
+        enter: { at: "c2+0.6" }
+
+  - id: donut
+    at: c3
+    glow: lime
+    elements:
+      - use: donut-chart
+        id: dc
+        props:
+          label: "ms per request"
+          segments:
+            - { label: "Database", value: 48 }
+            - { label: "Network", value: 22 }
+            - { label: "Rendering", value: 18 }
+            - { label: "Auth", value: 12 }
+        place: { x: 60, y: 100, w: 960, h: 500 }
+
+  - id: compare
+    at: c4
+    glow: cyan
+    elements:
+      - use: comparison
+        id: cmp
+        props:
+          a: { title: "SQL", icon: db }
+          b: { title: "NoSQL", icon: cloud }
+          rows:
+            - { label: "Transactions", a: true, b: false }
+            - { label: "Horizontal scale", a: false, b: true }
+            - { label: "Schema", a: "strict", b: "flexible" }
+            - { label: "Joins", a: true, b: false }
+          winner: a
+        place: { x: 60, y: 60, w: 960, h: 540 }
+
+  - id: wipe
+    at: c5
+    glow: red
+    elements:
+      - use: before-after
+        id: ba
+        props:
+          before: { label: "قبل", text: "كل request بيروح للـ database" }
+          after: { label: "بعد", text: "الـ cache بيرد في 2ms" }
+        place: { x: 60, y: 100, w: 960, h: 480 }
+
+  - id: ranking
+    at: c6
+    glow: amber
+    elements:
+      - use: ranking
+        id: rk
+        props:
+          items:
+            - { label: "بايثون", value: 31 }
+            - { label: "Rust", value: 96 }
+            - { label: "جافا", value: 68 }
+            - { label: "Go", value: 88, icon: bolt }
+            - { label: "جافاسكريبت", value: 54 }
+          suffix: " pts"
+        place: { x: 60, y: 60, w: 860, h: 560 }
+
+  - id: steps
+    at: c7
+    glow: lime
+    elements:
+      - use: steps
+        id: stp
+        props:
+          items:
+            - { title: "Write the test", text: "red first" }
+            - { title: "Make it pass", text: "simplest code" }
+            - { title: "Refactor", text: "keep it green" }
+            - { title: "Ship it", icon: bolt }
+        place: { x: 60, y: 40, w: 860, h: 580 }
+
+  - id: flow
+    at: c8
+    glow: cyan
+    elements:
+      - use: flow
+        id: fl
+        props:
+          stages:
+            - { label: "Client", icon: phone }
+            - { label: "Gateway", icon: shield }
+            - { label: "Service", icon: server }
+            - { label: "DB", icon: db, sub: "postgres" }
+          token: { dur: 0.4 }
+        place: { x: 60, y: 60, w: 960, h: 300 }
+      - use: steps
+        id: stp_h
+        props:
+          orient: horizontal
+          color: cyan
+          stagger: 0.3
+          fontSize: 30
+          items:
+            - { title: "Auth", text: "JWT" }
+            - { title: "Route", text: "/orders" }
+            - { title: "Query", text: "SELECT" }
+        place: { x: 60, y: 480, w: 860, h: 260 }
+        enter: { at: "c8+0.4" }
+
+  - id: org
+    at: c9
+    glow: violet
+    elements:
+      - use: org-chart
+        id: oc
+        props:
+          people:
+            - { id: ceo, name: "Amina", role: "CEO" }
+            - { id: cto, parent: ceo, name: "Leo", role: "CTO" }
+            - { id: cfo, parent: ceo, name: "Sara", role: "CFO", icon: card }
+            - { parent: cto, name: "Omar", role: "Backend" }
+            - { parent: cto, name: "Mia", role: "Frontend" }
+            - { parent: cfo, name: "Yusuf", role: "Finance" }
+        place: { x: 60, y: 60, w: 960, h: 540 }
+
+  - id: tree
+    at: c10
+    glow: violet
+    elements:
+      - use: tree
+        id: dom_tree
+        props:
+          orient: right
+          nodes:
+            - label: "html"
+              children:
+                - label: "head"
+                  children: [{ label: "title" }]
+                - label: "body"
+                  children: [{ label: "header" }, { label: "main" }, { label: "footer" }]
+        place: { x: 60, y: 40, w: 860, h: 620 }
+
+  - id: cycle
+    at: c11
+    glow: lime
+    elements:
+      - use: cycle
+        id: cy
+        props:
+          center: "CI/CD"
+          stages:
+            - { label: "Plan" }
+            - { label: "Code", icon: code }
+            - { label: "Build" }
+            - { label: "Test", icon: check }
+            - { label: "Deploy", icon: cloud }
+        place: { x: 160, y: 40, w: 760, h: 760 }
+
+  - id: funnel
+    at: c12
+    glow: cyan
+    elements:
+      - use: funnel
+        id: fn
+        props:
+          rate: true
+          stages:
+            - { label: "Visitors", value: 12000 }
+            - { label: "Sign-ups", value: 3400 }
+            - { label: "Trials", value: 1200 }
+            - { label: "Paid", value: 380 }
+        place: { x: 60, y: 60, w: 860, h: 600 }
+
+  - id: pyramid
+    at: c13
+    glow: amber
+    elements:
+      - use: pyramid
+        id: py
+        props:
+          levels:
+            - { label: "Self-actualization" }
+            - { label: "Esteem", sub: "respect, status" }
+            - { label: "Belonging", sub: "friends, family" }
+            - { label: "Safety", sub: "security, health" }
+            - { label: "Physiological", sub: "food, water, sleep" }
+        place: { x: 60, y: 60, w: 860, h: 640 }
+
+  - id: matrix
+    at: c14
+    glow: violet
+    elements:
+      - use: matrix-2x2
+        id: mx
+        props:
+          x: { label: "Effort" }
+          y: { label: "Impact" }
+          quadrants:
+            - { title: "Quick wins", color: lime }
+            - { title: "Big bets", color: cyan }
+            - { title: "Fill-ins", color: dim }
+            - { title: "Money pit", color: red }
+          items:
+            - { label: "Cache", x: 0.2, y: 0.82 }
+            - { label: "Rewrite", x: 0.85, y: 0.7 }
+            - { label: "Typos", x: 0.15, y: 0.2 }
+            - { label: "Microservices", x: 0.9, y: 0.28 }
+        place: { x: 160, y: 40, w: 760, h: 760 }
+
+  - id: map
+    at: d1
+    glow: cyan
+    elements:
+      - use: label
+        id: map_lbl
+        props: { text: "Global shipping", dot: true, color: cyan }
+        place: { x: 60, y: 60, w: 600, h: 60 }
+      - use: map
+        id: world_map
+        props:
+          countries: [EG, NLD, { code: CN, color: amber }, BR]
+          pins:
+            - { id: sha, label: "Shanghai", lon: 121.5, lat: 31.2 }
+            - { id: rtm, label: "Rotterdam", lon: 4.5, lat: 51.9 }
+            - { id: sao, label: "Santos", lon: -46.3, lat: -23.9 }
+          routes:
+            - { from: sha, to: rtm, vehicle: plane, at: "d1+0.8", dur: 1.4 }
+            - { from: sao, to: rtm, dashed: true, at: "d1+1.2", dur: 1.2 }
+        place: { x: 60, y: 150, w: 960, h: 440 }
+
+  - id: map_region
+    at: d2
+    glow: amber
+    elements:
+      - use: map
+        id: me_map
+        props:
+          view: middle-east
+          countries: [EGY, { code: ARE, color: amber }, SA]
+          pins:
+            - { id: cai, label: "القاهرة", lon: 31.2, lat: 30.0 }
+            - { id: dxb, label: "دبي", lon: 55.3, lat: 25.2, color: amber }
+            - { id: ruh, label: "الرياض", lon: 46.7, lat: 24.7 }
+          routes:
+            - { from: cai, to: dxb, vehicle: plane, at: "d2+0.6", dur: 1.6 }
+        place: { x: 60, y: 80, w: 860, h: 760 }
+
+  - id: route
+    at: d3
+    glow: lime
+    elements:
+      - use: route
+        id: rt
+        props:
+          vehicle: truck
+          stops:
+            - { label: "Warehouse", sub: "08:00" }
+            - { label: "Hub", sub: "10:30" }
+            - { label: "Port", sub: "13:00" }
+            - { label: "Store", sub: "15:45" }
+          progress: [{ at: "d3+0.3", value: 0.72, dur: 2.2 }]
+        place: { x: 60, y: 120, w: 960, h: 440 }
+      - use: route
+        id: rt_amb
+        props:
+          vehicle: ambulance
+          color: red
+          accent: red
+          curve: false
+          fontSize: 24
+          stops: [{ label: "Home" }, { label: "Hospital" }]
+          dur: 2
+        place: { x: 60, y: 640, w: 860, h: 220 }
+        enter: { at: "d3+0.2" }
+
+  - id: floor_plan
+    at: d4
+    glow: cyan
+    elements:
+      - use: floor-plan
+        id: fp
+        props:
+          cols: 12
+          rows: 9
+          rooms:
+            - { id: living, label: "Living room", x: 0, y: 0, w: 7, h: 5, icon: sofa }
+            - { id: kitchen, label: "Kitchen", x: 7, y: 0, w: 5, h: 3, icon: utensils }
+            - { label: "Bath", x: 7, y: 3, w: 5, h: 2, icon: bath }
+            - { id: bed, label: "Bedroom", x: 0, y: 5, w: 5, h: 4, icon: bed }
+            - { label: "Office", x: 5, y: 5, w: 7, h: 4, icon: briefcase }
+          highlights:
+            - { at: "d4+1.0", room: living, until: "d4+1.8" }
+            - { at: "d4+1.8", room: kitchen }
+        place: { x: 60, y: 60, w: 860, h: 640 }
+
+  - id: building
+    at: d5
+    glow: violet
+    elements:
+      - use: building
+        id: bld
+        props:
+          floors:
+            - { label: "Reception", sub: "check-in", icon: door-open }
+            - { label: "Radiology", sub: "X-ray · MRI", icon: scan-heart }
+            - { label: "Surgery", icon: hospital }
+            - { label: "Wards", sub: "beds 1–40", icon: bed }
+            - { label: "Roof garden", icon: trees }
+          highlights:
+            - { at: "d5+1.0", floor: 1 }
+            - { at: "d5+1.9", floor: 3 }
+        place: { x: 160, y: 40, w: 640, h: 820 }
+
+  - id: containers
+    at: d6
+    glow: amber
+    elements:
+      - use: container-stack
+        id: cs
+        props:
+          cols: 3
+          containers:
+            - { code: "MSKU 204871 3" }
+            - { code: "CMAU 551902 0", label: "reefer" }
+            - { code: "HLXU 318265 7" }
+            - { code: "TGHU 880134 1" }
+            - { code: "MSCU 447120 9", label: "hazmat" }
+            - { code: "OOLU 902356 4" }
+            - { code: "EGHU 610385 2" }
+          focus: { index: 4, at: "d6+1.9" }
+          stagger: 0.18
+        place: { x: 60, y: 160, w: 860, h: 560 }
+
+  - id: calendar
+    at: d7
+    glow: lime
+    elements:
+      - use: calendar
+        id: cal
+        props:
+          year: 2026
+          month: 11
+          lang: ar
+          weekStart: sat
+          days:
+            - { day: 3, label: "كشف" }
+            - { day: 12, color: amber }
+            - { day: 18, label: "تحاليل" }
+            - { day: 26, color: cyan }
+          stagger: 0.35
+        place: { x: 160, y: 60, w: 760, h: 700 }
+
+  - id: clocks
+    at: d8
+    glow: red
+    elements:
+      - use: clock
+        id: ck_analog
+        props: { time: "09:00", keyframes: [{ at: "d8+0.3", time: "17:30", dur: 2 }], label: "office hours" }
+        place: { x: 60, y: 60, w: 420, h: 460 }
+      - use: clock
+        id: ck_count
+        props: { mode: countdown, from: 10, at: d8, label: "seconds left", accent: red }
+        place: { x: 600, y: 60, w: 420, h: 460 }
+      - use: clock
+        id: ck_digital
+        props: { face: digital, time: "07:58", hours: "12", keyframes: [{ at: "d8+0.5", time: "08:00", dur: 0 }] }
+        place: { x: 160, y: 600, w: 600, h: 260 }
+
+  - id: board
+    at: d9
+    glow: amber
+    elements:
+      - use: schedule-board
+        id: sb
+        props:
+          rows:
+            - { cells: ["08:15", "DUBAI", "A12", "BOARDING"], status: ok }
+            - { cells: ["08:40", "LONDON", "B03", "ON TIME"] }
+            - { cells: ["09:05", "CAIRO", "C21", "ON TIME"] }
+            - { cells: ["09:30", "PARIS", "A07", "ON TIME"] }
+          updates:
+            - { at: "d9+1.6", row: 2, col: 3, text: "DELAYED", status: err }
+          stagger: 0.2
+        place: { x: 60, y: 140, w: 960, h: 440 }
+
+  - id: people
+    at: d10
+    glow: cyan
+    elements:
+      - use: person-card
+        id: doc
+        props: { name: "Dr. Amina Haddad", role: "Cardiologist", sub: "12 years · City Clinic", badge: "ON CALL" }
+        place: { x: 60, y: 60, w: 860, h: 240 }
+      - use: appointment
+        id: appt
+        props: { title: "Heart check-up", date: "Tue 17 Nov", time: "10:30", place: "City Clinic, room 4", person: "Dr. Haddad", status: pending }
+        place: { x: 60, y: 360, w: 860, h: 340 }
+        enter: { at: "d10+0.3" }
+        states:
+          - { at: "d10+1.6", set: { status: confirmed } }
+
+  - id: chat
+    at: d11
+    glow: violet
+    elements:
+      - use: chat
+        id: ch
+        props:
+          title: "عيادة المدينة"
+          messages:
+            - { text: "عايز أحجز كشف بكرة", from: me, time: "10:02" }
+            - { text: "تمام، الساعة ١٠ ونص مناسبة؟", at: "d11+0.5", time: "10:03" }
+            - { text: "أيوه مناسبة جدًا", from: me, at: "d11+2.0", time: "10:03" }
+          typing: 0.8
+        place: { x: 160, y: 60, w: 760, h: 760 }
+
+  - id: toasts
+    at: d12
+    glow: cyan
+    elements:
+      - use: notification
+        id: nt
+        props:
+          items:
+            - { title: "Order shipped", text: "Arrives Thursday", icon: truck, time: "now" }
+            - { title: "Payment received", text: "$49.00 from Sara", icon: wallet, color: lime, time: "now" }
+            - { title: "Low stock", text: "Only 3 left", icon: package, color: amber, time: "now" }
+          stagger: 0.6
+        place: { x: 60, y: 60, w: 860, h: 420 }
+      - use: speech-bubble
+        id: bubble
+        props: { text: "Where is my order?", tail: bottom-right }
+        place: { x: 160, y: 560, w: 600, h: 260 }
+        enter: { at: "d12+0.4" }
+
+  - id: media
+    at: d13
+    glow: amber
+    elements:
+      - use: image
+        id: img
+        props: { src: "assets/harbor.svg", caption: "Port of Rotterdam · 06:40" }
+        place: { x: 60, y: 60, w: 960, h: 560 }
+      - use: lower-third
+        id: lt
+        props: { name: "Sara Jansen", title: "Harbor master", icon: anchor }
+        place: { x: 60, y: 660, w: 860, h: 170 }
+        enter: { at: "d13+0.6" }
+
+  - id: brand
+    at: d14
+    glow: lime
+    elements:
+      - use: logo
+        id: lg
+        props: { text: "Gull**Freight**", icon: ship, tagline: "logistics, simplified" }
+        place: { x: 160, y: 60, w: 760, h: 240 }
+      - use: kinetic-text
+        id: kt
+        props: { text: "Ship **faster** than ever", style: pop, stagger: 0.2 }
+        place: { x: 60, y: 340, w: 960, h: 240 }
+        enter: { at: "d14+0.4" }
+      - use: kinetic-text
+        id: kt_hl
+        props: { text: "Track every **container** in real time", style: highlight, stagger: 0.18, size: 54 }
+        place: { x: 60, y: 640, w: 860, h: 200 }
+        enter: { at: "d14+0.8" }
+
+  - id: bullets
+    at: d15
+    glow: lime
+    elements:
+      - use: bullet-list
+        id: bl
+        props:
+          title: "Before you travel"
+          marker: number
+          items:
+            - { text: "Passport valid 6 months", sub: "check the expiry date" }
+            - "Print your boarding pass"
+            - { text: "Arrive 3 hours early", sub: "international flights" }
+          stagger: 0.4
+        place: { x: 60, y: 120, w: 860, h: 480 }
+      - use: callout
+        id: co
+        props: { to: { x: 470, y: 520 }, text: "Most people forget this" }
+        place: { x: 360, y: 720, w: 460, h: 110 }
+        enter: { at: "d15+1.4" }
+
+  - id: spotlight
+    at: d16
+    glow: violet
+    elements:
+      - use: stat-card
+        id: sp_a
+        props: { label: "Visits", value: 1240 }
+        place: { x: 60, y: 140, w: 440, h: 240 }
+      - use: stat-card
+        id: sp_b
+        props: { label: "Bookings", value: 386, accent: lime }
+        place: { x: 580, y: 140, w: 440, h: 240 }
+      - use: stat-card
+        id: sp_c
+        props: { label: "No-shows", value: 12, accent: red }
+        place: { x: 60, y: 460, w: 440, h: 240 }
+      - use: spotlight
+        id: spot
+        props: { target: sp_b, label: "Bookings doubled", at: "d16+1.0" }
+
+  - id: split
+    at: d17
+    glow: cyan
+    elements:
+      - use: split-screen
+        id: ss
+        props:
+          a: { title: "Paper forms", text: "Lost files, long queues and double data entry.", icon: file-text, color: red }
+          b: { title: "Digital check-in", text: "One tap on the phone, ready before you arrive.", icon: smartphone, color: lime }
+          badge: "VS"
+        place: { x: 60, y: 100, w: 860, h: 600 }
+
+  - id: pricing
+    at: d18
+    glow: violet
+    elements:
+      - use: pricing-table
+        id: pt
+        props:
+          plans:
+            - { name: "Basic", price: 9, period: "/mo", features: ["1 user", "5 projects", "Email support"] }
+            - { name: "Pro", price: 29, period: "/mo", featured: true, badge: "POPULAR", features: ["5 users", "Unlimited projects", "Priority support", "Analytics"] }
+            - { name: "Team", price: 79, period: "/mo", features: ["20 users", "SSO", "Dedicated manager"] }
+        place: { x: 60, y: 120, w: 860, h: 540 }
+
+  - id: price_tag
+    at: d19
+    glow: amber
+    elements:
+      - use: pricing-table
+        id: tag
+        props:
+          variant: tag
+          plans: [{ name: "Winter sale", price: 39.99, was: 49.99, badge: "-20%" }]
+        place: { x: 100, y: 80, w: 880, h: 460 }
+      - use: rating
+        id: stars
+        props: { value: 4.5, label: "Example score", note: "illustrative only" }
+        place: { x: 160, y: 620, w: 640, h: 200 }
+        enter: { at: "d19+0.5" }
+
+  - id: qr
+    at: d20
+    glow: cyan
+    elements:
+      - use: qr-code
+        id: qrc
+        props: { text: "https://example.com/book?ref=reelforge", label: "Scan to book a visit" }
+        place: { x: 290, y: 100, w: 500, h: 600 }
+
+  - id: vitals
+    at: d21
+    glow: red
+    elements:
+      - use: vitals
+        id: ecg
+        props: { bpm: 72, keyframes: [{ at: "d21+1.0", value: 128, dur: 1.2 }], threshold: 110 }
+        place: { x: 60, y: 100, w: 960, h: 380 }
+      - use: meter
+        id: gauge
+        props: { style: gauge, label: "oxygen", unit: "%", keyframes: [{ at: d21, value: 97, dur: 1.2 }], color: cyan }
+        place: { x: 220, y: 540, w: 520, h: 340 }
+
+  - id: phone
+    at: l10
+    glow: red
+    elements:
+      - use: phone
+        id: ph
+        props:
+          title: "Checkout"
+          item: "Annual plan"
+          amount: "$49.00"
+          button: "Pay $49"
+          taps: [{ at: "l10+0.3" }]
+          notifications:
+            - { title: "Bank", text: "Charged $49.00" }
+            - { title: "Bank", text: "Charged $49.00 again" }
+        place: { x: 320, y: 40, w: 440, h: 900 }
+        states:
+          - { at: "l10+0.4", set: { loading: true } }
+          - { at: "l10:'فصل'", set: { offline: true } }
+          - { at: "l10+1.6", set: { notifications: 2 } }
+
+  - id: quote
+    at: l11
+    glow: violet
+    elements:
+      - use: quote
+        id: qt
+        props: { text: "There are only two hard things in Computer Science: cache invalidation and naming things.", author: "Phil Karlton", highlight: ["cache", "invalidation"], cps: 60 }
+        place: { x: 70, y: 160, w: 940, h: 560 }
+
+  - id: trap
+    at: l12
+    glow: amber
+    elements:
+      - use: particles
+        id: herd
+        props: { kind: herd, count: 60, dur: 2, color: amber, to: { x: 540, y: 500 } }
+      - use: trap
+        id: tr
+        props: { sub: "retry without a key", at: "l12+1.0" }
+
+  - id: cta
+    at: l13
+    glow: lime
+    elements:
+      - use: cta
+        id: next
+        props: { next: "Double-entry Ledger", keyword: "ledger", prompt: "اكتب في الكومنتات" }
+        place: { x: 60, y: 160, w: 960, h: 600 }
+      - use: particles
+        id: conf
+        props: { kind: confetti, count: 80, at: "l13+1.6", colors: [lime, cyan, violet, amber] }

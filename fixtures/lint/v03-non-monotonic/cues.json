@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "audio": {
+    "file": "voice.wav",
+    "duration": 6
+  },
+  "cues": {
+    "l1": 0.2,
+    "l2": 4.5,
+    "l3": 3.0
+  },
+  "words": {}
+}
