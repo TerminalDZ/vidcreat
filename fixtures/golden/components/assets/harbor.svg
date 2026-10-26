@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b2a4a"/>
+      <stop offset="0.55" stop-color="#e2795b"/>
+      <stop offset="1" stop-color="#f6c27a"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b4d6b"/>
+      <stop offset="1" stop-color="#0d1b2a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#sky)"/>
+  <circle cx="860" cy="470" r="70" fill="#ffd9a0" opacity="0.9"/>
+  <rect y="520" width="1200" height="280" fill="url(#sea)"/>
+  <g fill="#ffd9a0" opacity="0.35">
+    <rect x="800" y="540" width="120" height="4" rx="2"/>
+    <rect x="770" y="562" width="180" height="4" rx="2"/>
+    <rect x="740" y="590" width="240" height="4" rx="2"/>
+  </g>
+  <g fill="#14161f">
+    <rect x="80" y="230" width="24" height="300"/>
+    <rect x="60" y="220" width="330" height="22"/>
+    <rect x="300" y="242" width="10" height="120"/>
+    <rect x="280" y="360" width="50" height="16"/>
+    <rect x="200" y="300" width="22" height="230"/>
+    <rect x="440" y="280" width="22" height="250"/>
+    <rect x="420" y="270" width="300" height="20"/>
+    <rect x="620" y="290" width="8" height="140"/>
+    <rect x="0" y="500" width="760" height="40"/>
+  </g>
+  <g>
+    <rect x="70" y="440" width="110" height="58" fill="#d9534f"/>
+    <rect x="185" y="440" width="110" height="58" fill="#3a7bd5"/>
+    <rect x="300" y="440" width="110" height="58" fill="#f0ad4e"/>
+    <rect x="125" y="380" width="110" height="58" fill="#5cb85c"/>
+    <rect x="240" y="380" width="110" height="58" fill="#8e5fd6"/>
+    <rect x="470" y="440" width="110" height="58" fill="#3a7bd5"/>
+    <rect x="585" y="440" width="110" height="58" fill="#d9534f"/>
+  </g>
+  <path d="M760 600 L1120 600 L1080 650 L800 650 Z" fill="#101219"/>
+  <rect x="820" y="560" width="70" height="40" fill="#d9534f"/>
+  <rect x="895" y="560" width="70" height="40" fill="#f0ad4e"/>
+  <rect x="970" y="560" width="70" height="40" fill="#3a7bd5"/>
+  <rect x="1050" y="540" width="40" height="60" fill="#e8e8e8"/>
+</svg>

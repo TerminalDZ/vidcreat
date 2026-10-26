@@ -1,0 +1,4 @@
+# Golden-frame theme: the default look without grain (keeps reference PNGs small and stable).
+name: golden
+extends: default
+chrome: { grain: 0 }

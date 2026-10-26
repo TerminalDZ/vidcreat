@@ -1,0 +1,20 @@
+# Seeded bug for rule V-14: pacing (a line too fast for captions, and a late hook).
+meta:
+  id: lint
+  series: 'LINT'
+  title: 'Seeded bug'
+  theme: default
+  lang: en-US
+script:
+  - text: 'Your API just got flooded.'
+  - text: 'A rate limiter decides which of these thousands of requests may pass through right now.'
+  - text: 'Tokens refill at a steady rate.'
+
+scenes:
+  - id: s1
+    at: l1
+    elements:
+      - use: chip
+        id: c1
+        props: { text: 'flooded' }
+        place: { x: 100, y: 100, w: 300, h: 90 }

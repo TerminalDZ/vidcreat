@@ -1,0 +1,19 @@
+# Arabic alignment fixture: a real recording by a person, timed by hand (see README.md).
+# Until voice.wav and truth.json exist, scripts/eval-align.mjs and the unit tests skip this folder.
+meta:
+  id: ar-real
+  title: Arabic alignment fixture
+  preset: tiktok
+  lang: ar-EG
+
+script:
+  - text: 'تخيل إن الـ API بتاعك وقع فجأة.'
+  - text: 'ألف request في الثانية، والـ server مش قادر يرد.'
+  - text: 'الحل بسيط: rate limiter قدام الـ backend.'
+  - text: 'كل client ياخد عدد معين من الـ tokens.'
+  - text: 'ولما الـ bucket يفضى، الطلب يستنى أو يترفض.'
+  - text: 'تابعني عشان الحلقة الجاية عن الـ caching.'
+
+scenes:
+  - id: main
+    at: l1

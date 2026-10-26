@@ -1,0 +1,19 @@
+# Seeded bug for rule V-7: safe zone.
+meta:
+  id: lint
+  series: 'LINT'
+  title: 'Seeded bug'
+  theme: default
+script:
+  - text: 'المشكلة دي اسمها Duplicate Charge'
+  - text: 'الـ client بعت الـ request مرتين'
+  - text: 'والحل؟ Idempotency key'
+
+scenes:
+  - id: s1
+    at: l1
+    elements:
+      - use: chip
+        id: c1
+        props: { text: 'ok' }
+        place: { x: 700, y: 800, w: 300, h: 90 }
