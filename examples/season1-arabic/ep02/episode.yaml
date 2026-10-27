@@ -1,0 +1,367 @@
+# Season 1 · Episode 2 — Race Conditions
+meta:
+  id: ep02
+  series: 'SYSTEM DESIGN'
+  title: 'Race Conditions'
+  episode: 2
+  preset: tiktok
+  theme: season1
+  lang: ar-EG
+  publish:
+    cover: 'معاك 100 واتسحب 150؟'
+    caption: |
+      اتنين requests في نفس اللحظة… والرصيد بقى غلط.
+      ده اسمه Race Condition، والحل مش if في الكود.
+      SELECT FOR UPDATE ولا Optimistic Locking؟ الإجابة في الفيديو.
+    hashtags: ['#systemdesign', '#racecondition', '#database', '#backend', '#برمجة', '#مبرمجين']
+    pinned: 'اكتب limit في الكومنتات عشان الحلقة الجاية عن Rate Limiting 👇'
+
+audio:
+  voice: voice.wav
+  sfx: auto
+  sfx_gain_db: -16
+
+script:
+  - text: 'عندك 100 جنيه في حسابك، واتسحب منك 150، إزاي؟'
+  - text: 'اتنين requests وصلوا في نفس اللحظة بالظبط.'
+  - text: 'الأول قرا الرصيد: 100 جنيه.'
+  - text: 'والتاني قرا الرصيد برضه: 100 جنيه.'
+  - text: 'الأول خصم 100، وكتب الرصيد صفر.'
+  - text: 'والتاني خصم 50، وكتب الرصيد 50.'
+  - text: 'الـ update بتاع الأول ضاع، والفلوس طلعت مرتين.'
+  - text: 'ده اسمه Race Condition، أو Lost Update.'
+  - text: 'المشكلة في النمط اللي اسمه read-modify-write.'
+  - text: 'بين الـ read والـ write في فجوة صغيرة جدًا.'
+  - text: 'وتحت الضغط، الفجوة دي بتتملي requests.'
+  - text: 'الحل الأول اسمه Pessimistic Locking.'
+  - text: 'تقفل الـ row وانت بتقرا، بـ SELECT FOR UPDATE.'
+  - text: 'والتاني يستنى لحد ما الأول يعمل commit.'
+  - text: 'الحل التاني اسمه Optimistic Locking.'
+  - text: 'تحط column اسمه version جنب الرصيد.'
+  - text: 'والـ UPDATE يشترط إن الـ version لسه زي ما هو.'
+  - text: 'لو حد سبقك، مفيش ولا row هيتعدل، فتعمل retry.'
+  - text: 'بس خلي بالك من الفخ ده.'
+  - text: 'ناس كتير بتحط الـ check في الكود: if balance.'
+  - text: 'ده مش بيحميك، لأن الـ check والـ write مش atomic.'
+  - text: 'الحماية لازم تكون جوه الـ database نفسها.'
+  - text: 'طب أختار إيه؟ لو الـ contention عالي، Pessimistic.'
+  - text: 'ولو الـ contention قليل، Optimistic أسرع بكتير.'
+  - text: 'الحلقة الجاية: إزاي تحمي الـ API من سيل requests.'
+  - text: 'اكتب limit في الكومنتات وأنا أعملها.'
+
+chapters:
+  - { at: l1, label: '01 · THE PROBLEM' }
+  - { at: l12, label: '02 · THE FIX' }
+  - { at: l19, label: '03 · THE TRAP' }
+  - { at: l23, label: '04 · WHICH ONE?' }
+
+scenes:
+  # ── hook ─────────────────────────────────────────────────────────────────
+  - id: hook
+    at: l1
+    glow: red
+    elements:
+      - use: label
+        id: lbl_acc
+        props: { text: 'your account', dot: true, color: cyan }
+        place: { x: 60, y: 60, w: 600, h: 60 }
+        enter: { at: l1, anim: fade }
+      - use: counter
+        id: bal0
+        props:
+          {
+            from: 100,
+            keyframes: [{ at: "l1:'100'", value: 100 }],
+            suffix: ' EGP',
+            label: 'balance',
+            color: ink,
+          }
+        place: { x: 120, y: 140, w: 840, h: 320 }
+        enter: { at: "l1:'100'", anim: pop }
+      - use: chip
+        id: withdrawn
+        props: { text: '−150 EGP withdrawn', color: red, icon: card, variant: solid, size: 44 }
+        place: { x: 170, y: 560, w: 740, h: 120 }
+        enter: { at: "l1:'150'", anim: pop }
+        fx:
+          - { at: "l1:'150'", do: shake, amp: 20, target: camera }
+      - use: icon
+        id: huh
+        props: { name: bubble, size: 120, color: amber, pulse: true }
+        place: { x: 450, y: 760, w: 180, h: 180 }
+        enter: { at: "l1:'إزاي؟'", anim: pop }
+
+  # ── the race, step by step ───────────────────────────────────────────────
+  - id: race
+    at: l2
+    glow: amber
+    elements:
+      - use: lanes
+        id: lanes
+        props:
+          fontSize: 30
+          lanes:
+            - title: 'Request A'
+              color: cyan
+              steps:
+                - { text: 'read → 100', at: "l3:'قرا'" }
+                - { text: 'write 100 − 100 = 0', at: "l5:'كتب'", mark: ok }
+            - title: 'Request B'
+              color: violet
+              steps:
+                - { text: 'read → 100', at: "l4:'قرا'" }
+                - { text: 'write 100 − 50 = 50', at: "l6:'كتب'", mark: err }
+        place: { x: 60, y: 30, w: 960, h: 560 }
+        enter: { at: "l2:'requests'", anim: rise }
+      - use: counter
+        id: bal
+        props:
+          from: 100
+          keyframes:
+            - { at: "l2:'requests'", value: 100 }
+            - { at: "l5:'صفر'", value: 0, dur: 0.5 }
+            - { at: "l6:'50'#2", value: 50, dur: 0.5 }
+          suffix: ' EGP'
+          label: 'balance in DB'
+          size: 140
+        place: { x: 120, y: 640, w: 800, h: 280 }
+        enter: { at: "l2:'requests'", anim: rise }
+      - use: stamp
+        id: lost
+        props: { text: 'LOST UPDATE', color: red, size: 80 }
+        place: { x: 190, y: 470, w: 700, h: 170 }
+        enter: { at: "l7:'ضاع'" }
+
+  # ── naming it ────────────────────────────────────────────────────────────
+  - id: name
+    at: l8
+    glow: red
+    elements:
+      - use: title
+        id: race_t
+        props: { text: '**Race** Condition', accent: amber, size: 120 }
+        place: { x: 60, y: 200, w: 960, h: 260 }
+        enter: { at: "l8:'Race'", anim: pop }
+      - use: chip
+        id: aka
+        props: { text: 'a.k.a. Lost Update', color: red, variant: outline, size: 40 }
+        place: { x: 240, y: 560, w: 600, h: 110 }
+        enter: { at: "l8:'Lost'", anim: pop }
+
+  # ── the gap ──────────────────────────────────────────────────────────────
+  - id: gap
+    at: l9
+    glow: violet
+    elements:
+      - use: code
+        id: rmw
+        props:
+          title: 'transfer.ts'
+          fontSize: 32
+          cps: 60
+          lines:
+            - { text: 'const b = await getBalance(id)', at: "l9:'read-modify-write'" }
+            - { text: 'const next = b - amount', at: "l9:'read-modify-write'+0.6" }
+            - { text: 'await setBalance(id, next)', at: "l9:'read-modify-write'+1.2" }
+          highlight:
+            - { line: 1, at: "l10:'read'", until: "l10:'write'", color: cyan }
+            - { line: 3, at: "l10:'write'", color: violet }
+        place: { x: 40, y: 30, w: 1000, h: 320 }
+        enter: { at: l9, anim: rise }
+      - use: timeline
+        id: window
+        props:
+          start: 't₀'
+          end: '+5ms'
+          color: violet
+          markers:
+            - { pos: 0.1, label: 'read', at: "l10:'read'", color: cyan }
+            - { pos: 0.5, label: 'the gap', sub: 'danger zone', at: "l10:'فجوة'", color: amber }
+            - { pos: 0.9, label: 'write', at: "l10:'write'", color: violet }
+        place: { x: 60, y: 400, w: 880, h: 240 }
+        enter: { at: "l10:'read'", anim: rise }
+      - use: meter
+        id: load
+        props:
+          label: 'concurrent requests'
+          keyframes: [{ at: "l11:'الضغط'", value: 10 }, { at: "l11:'بتتملي'", value: 92, dur: 1.2 }]
+          max: 100
+          threshold: 50
+        place: { x: 60, y: 720, w: 880, h: 180 }
+        enter: { at: "l11:'الضغط'", anim: rise }
+      - use: particles
+        id: herd
+        props: { kind: herd, count: 70, dur: 1.8, color: amber, at: "l11:'بتتملي'", to: { x: 540, y: 520 } }
+
+  # ── 02 · fix #1: pessimistic ─────────────────────────────────────────────
+  - id: pessimistic
+    at: l12
+    glow: cyan
+    elements:
+      - use: title
+        id: pess_t
+        props: { text: '**Pessimistic** Locking', accent: cyan, size: 84 }
+        place: { x: 60, y: 20, w: 960, h: 170 }
+        enter: { at: "l12:'Pessimistic'", anim: pop }
+      - use: code
+        id: pess_sql
+        props:
+          title: 'transfer.sql'
+          lang: sql
+          fontSize: 30
+          cps: 60
+          lines:
+            - { text: 'BEGIN;', at: "l13:'تقفل'" }
+            - { text: 'SELECT balance FROM accounts', at: "l13:'SELECT'" }
+            - { text: '  WHERE id = 42 FOR UPDATE;', at: "l13:'FOR'" }
+            - { text: 'UPDATE accounts SET balance = 0 …;', at: "l14:'يستنى'" }
+            - { text: 'COMMIT;', at: "l14:'commit'" }
+          highlight:
+            - { line: 3, at: "l13:'UPDATE'", color: cyan }
+        place: { x: 40, y: 220, w: 1000, h: 380 }
+        enter: { at: "l13:'تقفل'", anim: rise }
+      - use: icon
+        id: lock
+        props: { name: lock, size: 110, color: cyan, ring: true }
+        place: { x: 100, y: 670, w: 180, h: 180 }
+        enter: { at: "l13:'row'", anim: pop }
+      - use: node
+        id: txb
+        props: { title: 'Request B', sub: 'waiting for lock…', icon: hourglass, color: violet, status: busy }
+        place: { x: 340, y: 670, w: 500, h: 180 }
+        enter: { at: "l14:'يستنى'", anim: pop }
+        states:
+          - { at: "l14:'commit'", set: { status: ok, sub: 'reads 0 → rejected' } }
+
+  # ── fix #2: optimistic ───────────────────────────────────────────────────
+  - id: optimistic
+    at: l15
+    glow: lime
+    elements:
+      - use: title
+        id: opt_t
+        props: { text: '**Optimistic** Locking', size: 84 }
+        place: { x: 60, y: 20, w: 960, h: 170 }
+        enter: { at: "l15:'Optimistic'", anim: pop }
+      - use: table
+        id: acc
+        props:
+          columns: ['id', 'balance', 'version']
+          rows:
+            - {
+                cells: ['42', '100', { text: '7', color: lime }],
+                at: "l16:'version'",
+                highlight: "l16:'version'",
+              }
+        place: { x: 60, y: 220, w: 960, h: 200 }
+        enter: { at: "l16:'column'", anim: rise }
+      - use: code
+        id: opt_sql
+        props:
+          lang: sql
+          fontSize: 30
+          cps: 60
+          numbers: false
+          lines:
+            - { text: 'UPDATE accounts', at: "l17:'UPDATE'" }
+            - { text: 'SET balance = 0, version = 8', at: "l17:'يشترط'" }
+            - { text: 'WHERE id = 42 AND version = 7;', at: "l17:'version'" }
+          highlight: [{ line: 3, at: "l17:'لسه'", color: lime }]
+        place: { x: 40, y: 460, w: 900, h: 280 }
+        enter: { at: "l17:'UPDATE'", anim: rise }
+      - use: chip
+        id: zero
+        props: { text: '0 rows updated', color: amber, icon: x, size: 32 }
+        place: { x: 60, y: 800, w: 420, h: 90 }
+        enter: { at: "l18:'row'", anim: pop }
+      - use: chip
+        id: retry
+        props: { text: 'retry', color: lime, icon: refresh, variant: solid, size: 32 }
+        place: { x: 540, y: 800, w: 300, h: 90 }
+        enter: { at: "l18:'retry'", anim: pop }
+
+  # ── 03 · the trap ────────────────────────────────────────────────────────
+  - id: trap
+    at: l19
+    glow: amber
+    elements:
+      - use: trap
+        id: tr
+        props: { sub: 'checking in app code', at: "l19:'الفخ'", until: 'l20' }
+      - use: code
+        id: bad
+        props:
+          title: '❌ wallet.ts'
+          fontSize: 34
+          cps: 50
+          lines:
+            - { text: 'if (balance >= amount) {', at: "l20:'check'" }
+            - { text: '  await debit(amount)', at: "l20:'if'" }
+            - { text: '}', at: "l20:'balance'" }
+          highlight: [{ line: 1, at: "l21:'check'", color: red }]
+        place: { x: 40, y: 40, w: 1000, h: 300 }
+        enter: { at: "l20:'check'", anim: rise }
+      - use: stamp
+        id: notatomic
+        props: { text: 'NOT ATOMIC', color: red, size: 90 }
+        place: { x: 200, y: 330, w: 680, h: 200 }
+        enter: { at: "l21:'atomic'" }
+      - use: node
+        id: db
+        props: { title: 'Database', sub: 'lock · version · CHECK', icon: db, color: lime, status: ok }
+        place: { x: 200, y: 620, w: 640, h: 200 }
+        enter: { at: "l22:'database'", anim: pop }
+
+  # ── 04 · which one? ──────────────────────────────────────────────────────
+  - id: choose
+    at: l23
+    glow: violet
+    elements:
+      - use: meter
+        id: contention
+        props:
+          label: 'contention'
+          keyframes:
+            - { at: "l23:'contention'", value: 85, dur: 0.8 }
+            - { at: "l24:'قليل'", value: 15, dur: 0.8 }
+          max: 100
+          threshold: 50
+          color: cyan
+          danger: violet
+        place: { x: 60, y: 60, w: 960, h: 180 }
+        enter: { at: l23, anim: rise }
+      - use: chip
+        id: pick_p
+        props: { text: 'Pessimistic → wait', color: violet, icon: lock, size: 30 }
+        place: { x: 60, y: 320, w: 460, h: 100 }
+        enter: { at: "l23:'Pessimistic'", anim: pop }
+      - use: chip
+        id: pick_o
+        props: { text: 'Optimistic → retry', color: cyan, icon: bolt, size: 30 }
+        place: { x: 560, y: 320, w: 460, h: 100 }
+        enter: { at: "l24:'Optimistic'", anim: pop }
+      - use: checklist
+        id: rules
+        props:
+          title: 'rule of thumb'
+          fontSize: 42
+          items:
+            - { text: 'hot rows → lock them', at: "l23:'Pessimistic'" }
+            - { text: 'rare conflicts → version', at: "l24:'أسرع'" }
+            - { text: 'if in app code', at: "l24:'بكتير'", ok: false }
+        place: { x: 60, y: 480, w: 880, h: 420 }
+        enter: { at: "l23:'Pessimistic'", anim: rise }
+
+  # ── CTA ──────────────────────────────────────────────────────────────────
+  - id: cta
+    at: l25
+    glow: lime
+    elements:
+      - use: cta
+        id: next
+        props: { next: 'Rate Limiting', keyword: 'limit', prompt: 'اكتب في الكومنتات', at: "l26:'limit'" }
+        place: { x: 90, y: 160, w: 850, h: 600 }
+        enter: { at: "l25:'الجاية'", anim: rise }
+      - use: particles
+        id: conf
+        props: { kind: confetti, count: 80, at: "l26:'الكومنتات'", colors: [lime, cyan, violet, amber] }
