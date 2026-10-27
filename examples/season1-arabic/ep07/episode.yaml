@@ -1,0 +1,357 @@
+meta:
+  id: ep07
+  series: 'SYSTEM DESIGN'
+  title: 'Message Queues & At-least-once Delivery'
+  episode: 7
+  preset: tiktok
+  theme: season1
+  lang: ar-EG
+  publish:
+    cover: 'الأوردر اتشحن مرتين؟'
+    caption: |
+      الـ queue ما غلطتش، هي وعدتك إن الـ message توصل مرة على الأقل.
+      يعني ممكن توصل مرتين، والحل مش exactly-once.
+      الحل: idempotent consumer يعمل dedupe بالـ message_id.
+    hashtags: ['#systemdesign', '#messagequeue', '#kafka', '#backend', '#برمجة', '#مبرمجين']
+    pinned: 'اكتب ledger في الكومنتات وهبعتلك الحلقة الجاية أول ما تنزل'
+
+audio:
+  voice: voice.wav
+  sfx: auto
+  sfx_gain_db: -16
+
+script:
+  - text: 'الأوردر بتاعك اتشحن مرتين، والـ queue ما غلطتش.'
+  - text: 'عندك producer بيبعت message على الـ queue.'
+  - text: 'والـ consumer بياخدها ويشتغل عليها.'
+  - text: 'شكلها بسيطة، بس فيه سؤال مهم.'
+  - text: 'الـ queue تعرف منين إن الـ message خلصت؟'
+  - text: 'الـ consumer لازم يبعت ack بعد ما يخلص.'
+  - text: 'طب لو الـ consumer وقع قبل الـ ack؟'
+  - text: 'الـ queue هتستنى لحد الـ visibility timeout.'
+  - text: 'وبعدين تبعت نفس الـ message تاني.'
+  - text: 'ده اسمه at-least-once delivery.'
+  - text: 'الـ message مش هتضيع، بس ممكن توصل مرتين.'
+  - text: 'وهنا الفخ اللي ناس كتير بتقع فيه.'
+  - text: 'بيدوروا على exactly-once delivery.'
+  - text: 'بس في الـ network ده شبه مستحيل.'
+    break: ['ده']
+  - text: 'الحل الحقيقي اسمه idempotent consumer.'
+  - text: 'كل message ليها message_id ثابت.'
+  - text: 'الـ consumer يشيك الأول في جدول processed.'
+  - text: 'لو الـ id موجود، يعمل ack ويتجاهلها.'
+  - text: 'لو مش موجود، ينفذ ويسجل في نفس الـ transaction.'
+  - text: 'الـ duplicate يوصل عادي، والأثر يحصل مرة واحدة.'
+  - text: 'at-least-once مع dedupe تساوي effectively-once.'
+  - text: 'الحلقة الجاية عن الـ Double-entry ledger.'
+  - text: 'اكتب ledger في الكومنتات عشان توصلك.'
+
+chapters:
+  - { at: l1, label: '01 · THE PROBLEM' }
+  - { at: l6, label: '02 · AT-LEAST-ONCE' }
+  - { at: l12, label: '03 · THE TRAP' }
+  - { at: l15, label: '04 · THE FIX' }
+
+scenes:
+  # ─── hook ────────────────────────────────────────────────
+  - id: hook
+    at: l1
+    glow: red
+    elements:
+      - use: icon
+        id: box
+        props: { name: cart, size: 150, color: amber, ring: true }
+        place: { x: 440, y: 40, w: 200, h: 200 }
+        enter: { at: "l1:'الأوردر'", anim: pop }
+      - use: counter
+        id: shipped
+        props:
+          keyframes: [{ at: "l1:'اتشحن'", value: 1 }, { at: "l1:'مرتين'", value: 2, dur: 0.3 }]
+          prefix: '×'
+          label: 'shipments'
+          color: ink
+          size: 200
+        place: { x: 190, y: 280, w: 700, h: 320 }
+        enter: { at: "l1:'اتشحن'", anim: pop }
+        fx:
+          - { at: "l1:'مرتين'+0.3", do: shake, amp: 20 }
+          - { at: "l1:'مرتين'+0.3", do: flash, color: red }
+      - use: chip
+        id: q_ok
+        props: { text: 'queue: working as designed', color: cyan, icon: queue, size: 32 }
+        place: { x: 200, y: 680, w: 680, h: 96 }
+        enter: { at: "l1:'queue'", anim: rise }
+
+  # ─── setup: producer → queue → consumer ─────────────────
+  - id: flow
+    at: l2
+    glow: cyan
+    elements:
+      - use: node
+        id: producer
+        props: { title: 'Producer', sub: 'orders-api', icon: server, color: violet }
+        place: { x: 40, y: 40, w: 340, h: 170 }
+        enter: { at: "l2:'producer'", anim: pop }
+      - use: node
+        id: queue
+        props: { title: 'Queue', sub: 'orders.created', icon: queue, color: cyan }
+        place: { x: 370, y: 290, w: 340, h: 170 }
+        enter: { at: "l2:'queue'", anim: pop }
+      - use: node
+        id: consumer
+        props: { title: 'Consumer', sub: 'shipping', icon: cpu, color: lime }
+        place: { x: 700, y: 40, w: 340, h: 170 }
+        enter: { at: "l3:'consumer'", anim: pop }
+        states:
+          - { at: "l3:'ويشتغل'", set: { status: busy, sub: 'working…' } }
+      - use: arrow
+        id: pub
+        props:
+          {
+            from: producer.bottom,
+            to: queue.left,
+            route: elbow,
+            color: violet,
+            packet: { at: "l2:'message'", dur: 0.7, label: 'm1' },
+          }
+        enter: { at: "l2:'message'", anim: draw }
+      - use: arrow
+        id: del
+        props:
+          {
+            from: queue.right,
+            to: consumer.bottom,
+            route: elbow,
+            color: cyan,
+            packet: { at: "l3:'بياخدها'", dur: 0.7, label: 'm1' },
+          }
+        enter: { at: "l3:'consumer'", anim: draw }
+      - use: grid
+        id: buffer
+        props:
+          label: 'orders.created'
+          cols: 6
+          rows: 1
+          tiles: ['m1', 'm2', 'm3', 'm4', 'm5', 'm6']
+          steps:
+            - { at: "l2:'message'+0.7", set: { '0': ok } }
+            - { at: "l3:'بياخدها'", set: { '0': busy, '1-2': ok } }
+            - { at: "l3:'ويشتغل'", set: { '3-5': ok } }
+        place: { x: 60, y: 530, w: 840, h: 180 }
+        enter: { at: "l2:'queue'+0.3", anim: rise }
+      - use: title
+        id: q_done
+        props: { text: "how does it know it's **done**?", size: 64 }
+        place: { x: 40, y: 760, w: 880, h: 160 }
+        enter: { at: "l5:'منين'", anim: rise }
+
+  # ─── ack, crash, redelivery ─────────────────────────────
+  - id: crash
+    at: l6
+    glow: [{ at: l6, color: lime }, { at: "l7:'وقع'", color: red }, { at: 'l9', color: amber }]
+    elements:
+      - use: node
+        id: queue2
+        props: { title: 'Queue', sub: 'm1 in-flight', icon: queue, color: cyan }
+        place: { x: 40, y: 60, w: 340, h: 170 }
+        enter: { at: l6, anim: pop }
+        states:
+          - { at: "l8:'timeout'", set: { status: warn, sub: 'timeout! m1 visible' } }
+      - use: node
+        id: consumer2
+        props: { title: 'Consumer', sub: 'shipping m1', icon: cpu, color: lime, status: busy }
+        place: { x: 700, y: 60, w: 340, h: 170 }
+        enter: { at: "l6:'consumer'", anim: pop }
+        states:
+          - { at: "l7:'وقع'", set: { status: err, sub: 'crashed', badge: 'no ack' } }
+          - { at: "l9:'تبعت'+0.8", set: { status: busy, sub: 'shipping m1 again', badge: '×2' } }
+        fx:
+          - { at: "l7:'وقع'", do: shake, amp: 24 }
+      - use: arrow
+        id: ack
+        props: { from: consumer2.left, to: queue2.right, label: 'ack', color: lime, dashed: true }
+        enter: { at: "l6:'ack'", anim: draw }
+        exit: { at: "l7:'وقع'", anim: fade }
+      - use: arrow
+        id: redeliver
+        props:
+          {
+            from: queue2.right,
+            to: consumer2.left,
+            color: amber,
+            label: 'redeliver m1',
+            packet: { at: "l9:'تبعت'", dur: 0.8, label: 'm1' },
+          }
+        enter: { at: "l9:'تبعت'", anim: draw }
+      - use: stamp
+        id: noack
+        props: { text: 'NO ACK', color: red, size: 110 }
+        place: { x: 240, y: 290, w: 600, h: 200 }
+        enter: { at: "l7:'ack'", anim: stamp }
+        exit: { at: 'l9', anim: fade }
+      - use: chip
+        id: twice
+        props: { text: 'm1 delivered ×2', color: amber, icon: refresh, size: 38 }
+        place: { x: 240, y: 320, w: 600, h: 110 }
+        enter: { at: "l9:'تاني'", anim: pop }
+      - use: timeline
+        id: vis
+        props:
+          start: '0s'
+          end: '30s'
+          color: cyan
+          markers:
+            - { pos: 0.04, label: 'deliver', at: l6 }
+            - { pos: 0.3, label: 'crash', color: red, at: "l7:'وقع'" }
+            - { pos: 0.85, label: 'timeout', sub: 'visibility', color: amber, at: "l8:'timeout'" }
+          cursor:
+            - { at: l6, pos: 0.04, dur: 0 }
+            - { at: "l7:'وقع'", pos: 0.3, dur: 0.5 }
+            - { at: "l8:'هتستنى'", pos: 0.85, dur: 1.6 }
+        place: { x: 60, y: 560, w: 860, h: 260 }
+        enter: { at: "l6:'بعد'", anim: rise }
+
+  # ─── at-least-once ───────────────────────────────────────
+  - id: alo
+    at: l10
+    glow: amber
+    elements:
+      - use: label
+        id: alo_lbl
+        props: { text: 'delivery guarantee', dot: true, color: amber }
+        place: { x: 60, y: 40, w: 600, h: 60 }
+        enter: { at: l10, anim: fade }
+      - use: title
+        id: alo_t
+        props: { text: '**At-least-once** delivery', size: 96, accent: amber }
+        place: { x: 60, y: 120, w: 960, h: 240 }
+        enter: { at: "l10:'at-least-once'", anim: pop }
+      - use: chip
+        id: never_lost
+        props: { text: 'never lost', color: lime, icon: check, size: 36 }
+        place: { x: 80, y: 420, w: 420, h: 100 }
+        enter: { at: "l11:'هتضيع'", anim: pop }
+      - use: chip
+        id: maybe_twice
+        props: { text: 'maybe twice', color: red, icon: refresh, size: 36 }
+        place: { x: 560, y: 420, w: 420, h: 100 }
+        enter: { at: "l11:'مرتين'", anim: pop }
+      - use: grid
+        id: stream
+        props:
+          label: 'what the consumer sees'
+          cols: 5
+          rows: 1
+          tiles: ['m1', 'm2', 'm2', 'm3', 'm4']
+          steps:
+            - { at: "l11:'هتضيع'", set: { '0-1': ok, '3-4': ok } }
+            - { at: "l11:'مرتين'", set: { '2': err } }
+        place: { x: 80, y: 600, w: 840, h: 200 }
+        enter: { at: 'l11', anim: rise }
+
+  # ─── the trap ────────────────────────────────────────────
+  - id: trap
+    at: l12
+    glow: amber
+    elements:
+      - use: trap
+        id: tr
+        props: { sub: 'chasing exactly-once', at: l12, until: 'l13-0.1' }
+      - use: chip
+        id: eo
+        props: { text: 'exactly-once delivery', color: violet, variant: outline, size: 44 }
+        place: { x: 140, y: 200, w: 800, h: 120 }
+        enter: { at: "l13:'exactly-once'", anim: pop }
+        states:
+          - { at: "l14:'مستحيل'", set: { strike: true } }
+      - use: icon
+        id: net
+        props: { name: wifi-off, size: 140, color: red, ring: true }
+        place: { x: 440, y: 420, w: 200, h: 200 }
+        enter: { at: "l14:'network'", anim: pop }
+      - use: stamp
+        id: myth
+        props: { text: 'MYTH', color: red, size: 120 }
+        place: { x: 240, y: 680, w: 560, h: 220 }
+        enter: { at: "l14:'مستحيل'", anim: stamp }
+
+  # ─── the fix: code ───────────────────────────────────────
+  - id: fix
+    at: l15
+    glow: lime
+    elements:
+      - use: chip
+        id: idem
+        props: { text: 'idempotent consumer', color: lime, icon: shield, size: 40 }
+        place: { x: 180, y: 20, w: 720, h: 110 }
+        enter: { at: "l15:'idempotent'", anim: pop }
+      - use: code
+        id: handler
+        props:
+          title: 'consumer.ts'
+          fontSize: 27
+          cps: 60
+          lines:
+            - { text: 'async function handle(msg) {', at: 'l16' }
+            - { text: '  const id = msg.message_id;', at: "l16:'message_id'" }
+            - { text: '  if (await processed.has(id))', at: "l17:'يشيك'" }
+            - { text: '    return ack(msg); // duplicate', color: amber, at: "l18:'ack'" }
+            - { text: '  await db.tx(async (tx) => {', at: "l19:'ينفذ'" }
+            - { text: '    await ship(tx, msg.order);' }
+            - { text: '    await tx.processed.insert(id);' }
+            - { text: '  });' }
+            - { text: '  ack(msg);' }
+            - '}'
+          highlight:
+            - { line: 2, at: "l16:'message_id'", until: 'l17' }
+            - { line: 3, at: "l17:'processed'", until: "l18:'ack'" }
+            - { line: 4, at: "l18:'ack'", until: 'l19', color: amber }
+            - { line: 7, at: "l19:'transaction'" }
+        place: { x: 20, y: 180, w: 900, h: 540 }
+        enter: { at: 'l16', anim: rise }
+
+  # ─── result ──────────────────────────────────────────────
+  - id: result
+    at: l20
+    glow: lime
+    elements:
+      - use: table
+        id: processed
+        props:
+          columns: ['message_id', 'effect']
+          widths: [1, 1]
+          fontSize: 30
+          rows:
+            - { cells: ['m1', { text: 'shipped', color: lime }], at: 'l20' }
+            - { cells: ['m2', { text: 'shipped', color: lime }], at: "l20:'الـ'+0.3" }
+            - {
+                cells: ['m2', { text: 'skipped (dup)', color: amber }],
+                at: "l20:'يوصل'",
+                highlight: true,
+                color: amber,
+              }
+            - { cells: ['m3', { text: 'shipped', color: lime }], at: "l20:'واحدة'" }
+        place: { x: 80, y: 30, w: 920, h: 420 }
+        enter: { at: l20, anim: rise }
+      - use: title
+        id: formula
+        props: { text: "at-least-once + dedupe\n= **effectively-once**", size: 60 }
+        place: { x: 40, y: 560, w: 880, h: 220 }
+        enter: { at: 'l21', anim: rise }
+        fx:
+          - { at: "l21:'effectively-once'", do: pulse, color: lime }
+
+  # ─── cta ─────────────────────────────────────────────────
+  - id: cta
+    at: l22
+    glow: lime
+    elements:
+      - use: cta
+        id: next
+        props:
+          { next: 'Double-entry Ledger', keyword: 'ledger', prompt: 'اكتب في الكومنتات', at: "l23:'ledger'" }
+        place: { x: 60, y: 120, w: 860, h: 600 }
+        enter: { at: "l22:'الجاية'", anim: rise }
+      - use: particles
+        id: conf
+        props: { kind: confetti, count: 80, at: "l23:'توصلك'", colors: [lime, cyan, violet, amber] }

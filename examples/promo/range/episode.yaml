@@ -1,0 +1,149 @@
+# ReelForge · Range — one tool for every sector, made entirely with ReelForge.
+# Renders silently (captions + sound effects). All organizations are fictional.
+meta:
+  id: range
+  series: 'REELFORGE'
+  title: 'One tool, every industry'
+  episode: 2
+  preset: tiktok
+  theme: default
+  lang: en-US
+  publish:
+    cover: 'One tool. Every industry.'
+    caption: |
+      Explainers for software, hospitals, ports and real estate from one YAML file.
+      Charts, processes and comparisons that enter on the exact word you say. Open source, runs on your computer.
+    hashtags: ['#explainervideo', '#motiongraphics', '#opensource', '#datavisualization']
+    pinned: 'Which industry should get the next template? 👇'
+
+audio:
+  voice: voice.wav
+  sfx: auto
+  sfx_gain_db: -4
+
+script:
+  - text: 'One tool for every kind of explainer.'
+  - text: 'Software teams map how a request flows.'
+  - text: 'A hospital shows the patient journey, step by step.'
+  - text: 'A port puts its daily numbers on screen.'
+  - text: 'A home builder compares two plans side by side.'
+  - text: 'Same YAML, same voice, every industry. Open source.'
+
+chapters:
+  - { at: l1, label: '01 · RANGE' }
+  - { at: l2, label: '02 · TECH' }
+  - { at: l3, label: '03 · HEALTH' }
+  - { at: l4, label: '04 · PORTS' }
+  - { at: l5, label: '05 · HOMES' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: cyan
+    transition: cut
+    elements:
+      - use: label
+        id: kicker
+        props: { text: 'REELFORGE 1.0', dot: true }
+        place: { x: 60, y: 120, w: 600, h: 60 }
+        enter: { at: l1, anim: wipe }
+      - use: title
+        id: hook_title
+        props: { text: 'One tool for **every** explainer', size: 110 }
+        place: { x: 60, y: 240, w: 960, h: 360 }
+        enter: { at: "l1:'tool'", anim: reveal }
+
+  - id: tech
+    at: l2
+    glow: violet
+    transition: push
+    elements:
+      - use: title
+        id: tech_title
+        props: { text: 'Software', size: 84 }
+        place: { x: 60, y: 80, w: 960, h: 160 }
+        enter: { at: l2, anim: rise }
+      - use: flow
+        id: tech_flow
+        props:
+          stages:
+            - { label: Client, icon: user }
+            - { label: API, icon: server }
+            - { label: Queue, icon: queue }
+            - { label: DB, icon: db }
+          fontSize: 34
+        place: { x: 60, y: 330, w: 860, h: 380 }
+        enter: { at: "l2:'request'", anim: fade }
+
+  - id: health
+    at: l3
+    glow: lime
+    transition: slide-up
+    elements:
+      - use: label
+        id: health_org
+        props: { text: 'NORTHWIND HOSPITAL', dot: true }
+        place: { x: 60, y: 60, w: 760, h: 60 }
+        enter: { at: l3, anim: wipe }
+      - use: steps
+        id: health_steps
+        props:
+          items:
+            - { title: 'Book online', at: "l3:'patient'" }
+            - { title: 'Check in at the desk', at: "l3:'journey'" }
+            - { title: 'See your doctor', at: "l3:'step'" }
+            - { title: 'Follow-up reminder', at: "l3:'step'#2" }
+        place: { x: 60, y: 170, w: 860, h: 760 }
+        enter: { at: l3, anim: fade }
+
+  - id: port
+    at: l4
+    glow: cyan
+    transition: zoom
+    elements:
+      - use: bar-chart
+        id: port_bars
+        props:
+          title: 'Port of Azur · containers per day'
+          bars:
+            - { label: Mon, value: 9800 }
+            - { label: Tue, value: 11200 }
+            - { label: Wed, value: 12400 }
+            - { label: Thu, value: 10900 }
+          focus: 2
+        place: { x: 60, y: 120, w: 860, h: 760 }
+        enter: { at: "l4:'numbers'", anim: fade }
+
+  - id: homes
+    at: l5
+    glow: amber
+    transition: push
+    elements:
+      - use: comparison
+        id: homes_cmp
+        props:
+          a: { title: 'Plan A' }
+          b: { title: 'Plan B' }
+          rows:
+            - { label: Bedrooms, a: '2', b: '3', at: "l5:'compares'" }
+            - { label: Garden, a: false, b: true, at: "l5:'plans'" }
+            - { label: Price, a: '$240k', b: '$310k', at: "l5:'side'" }
+          winner: { side: b, at: "l5:'side'#2" }
+        place: { x: 60, y: 120, w: 860, h: 760 }
+        enter: { at: l5, anim: pop }
+
+  - id: outro
+    at: l6
+    glow: lime
+    transition: zoom
+    elements:
+      - use: title
+        id: outro_title
+        props: { text: 'Same YAML. **Every** industry.', size: 96 }
+        place: { x: 60, y: 180, w: 960, h: 340 }
+        enter: { at: l6, anim: reveal }
+      - use: chip
+        id: outro_chip
+        props: { text: 'Open source · Apache-2.0' }
+        place: { x: 200, y: 600, w: 600, h: 110 }
+        enter: { at: "l6:'Open'", anim: spring }

@@ -1,0 +1,318 @@
+# Season 1 · Episode 3 — Rate Limiting
+meta:
+  id: ep03
+  series: 'SYSTEM DESIGN'
+  title: 'Rate Limiting'
+  episode: 3
+  preset: tiktok
+  theme: season1
+  lang: en-US
+  publish:
+    cover: 'One script took down the API'
+    caption: |
+      A thousand requests per second from one script… and your API is down.
+      The fix is Rate Limiting, and the classic way to do it is the Token Bucket.
+      Plus the in-memory counter trap that bites almost everyone.
+    hashtags:
+      ['#systemdesign', '#ratelimiting', '#tokenbucket', '#redis', '#backend', '#coding', '#programming']
+    pinned: 'Comment cache and the next episode is all about Caching and the Cache Stampede 👇'
+
+audio:
+  voice: voice.wav
+  sfx: auto
+  sfx_gain_db: -16
+
+script:
+  - text: 'Your API just went down, and not a single real user is on it.'
+  - text: 'One script is firing a thousand requests per second.'
+  - text: 'CPU hits a hundred percent, and the database is choking.'
+  - text: 'And your real users? They just get a timeout.'
+  - text: 'The fix is called Rate Limiting.'
+  - text: 'Each client gets a cap on how many requests it sends per window.'
+  - text: 'And the most popular algorithm is the Token Bucket.'
+  - text: 'Picture a bucket holding ten tokens.'
+  - text: 'Every request takes one token and goes through.'
+  - text: 'And the bucket refills, one token every hundred milliseconds.'
+  - text: 'When a burst hits, the tokens run out fast.'
+  - text: "Once the bucket's empty, the request gets rejected with a 429."
+  - text: "That's Too Many Requests, plus a Retry-After header."
+  - text: 'The beauty is: it allows a short burst, but protects you in the long run.'
+  - text: "But careful, there's a famous trap here."
+  - text: "Storing the counter in each server's memory."
+  - text: 'Got five servers behind a load balancer?'
+  - text: 'Then your real limit just became five times higher.'
+  - text: 'The counter has to be shared, in Redis for example.'
+  - text: 'And the check and decrement happen in one atomic step.'
+  - text: 'With a Lua script, or INCR plus EXPIRE.'
+  - text: 'And limit by API key, not by IP alone.'
+  - text: 'Next episode: how your cache itself can kill your database.'
+  - text: 'Type cache in the comments.'
+
+chapters:
+  - { at: l1, label: '01 · THE PROBLEM' }
+  - { at: l5, label: '02 · TOKEN BUCKET' }
+  - { at: l15, label: '03 · THE TRAP' }
+  - { at: l19, label: '04 · PRODUCTION' }
+
+scenes:
+  # ── hook: one script takes the API down ─────────────────────────────────
+  - id: hook
+    at: l1
+    glow: red
+    elements:
+      - use: node
+        id: api
+        props: { title: 'API', sub: 'api.shop.com', icon: server, color: violet }
+        place: { x: 330, y: 30, w: 420, h: 170 }
+        enter: { at: "l1:'API'", anim: pop }
+        states:
+          - { at: "l1:'down'", set: { status: err, sub: '503 · down' } }
+        fx:
+          - { at: "l1:'down'", do: shake, amp: 18 }
+      - use: counter
+        id: rps
+        props:
+          keyframes: [{ at: "l2:'script'", value: 3 }, { at: "l2:'thousand'", value: 1000, dur: 1.0 }]
+          label: 'requests / sec · 1 IP'
+          size: 140
+          color: red
+        place: { x: 120, y: 250, w: 840, h: 260 }
+        enter: { at: "l2:'script'", anim: rise }
+      - use: particles
+        id: flood
+        props: { kind: herd, count: 90, dur: 2.0, color: red, at: "l2:'requests'", to: { x: 540, y: 115 } }
+      - use: meter
+        id: cpu
+        props:
+          label: 'CPU'
+          unit: '%'
+          keyframes: [{ at: "l3:'CPU'", value: 35 }, { at: "l3:'hundred'", value: 100, dur: 0.8 }]
+          max: 100
+          threshold: 80
+        place: { x: 60, y: 570, w: 880, h: 170 }
+        enter: { at: "l3:'CPU'", anim: rise }
+      - use: chip
+        id: db
+        props: { text: 'DB: too many connections', color: red, icon: db, size: 30 }
+        place: { x: 60, y: 780, w: 560, h: 84 }
+        enter: { at: "l3:'database'", anim: pop }
+      - use: chip
+        id: users
+        props: { text: 'users → timeout', color: amber, icon: users, size: 30 }
+        place: { x: 60, y: 890, w: 460, h: 84 }
+        enter: { at: "l4:'timeout'", anim: pop }
+
+  # ── 02 · the idea ────────────────────────────────────────────────────────
+  - id: fix
+    at: l5
+    glow: lime
+    elements:
+      - use: title
+        id: rl
+        props: { text: '**Rate** Limiting', size: 120, sub: 'N requests per window, per client' }
+        place: { x: 60, y: 60, w: 960, h: 280 }
+        enter: { at: "l5:'Rate'", anim: pop }
+      - use: table
+        id: plans
+        props:
+          columns: ['client', 'limit']
+          widths: [1, 1]
+          fontSize: 32
+          rows:
+            - { cells: ['free plan', '10 req / s'], at: "l6:'client'" }
+            - { cells: ['pro plan', '100 req / s'], at: "l6:'requests'" }
+            - { cells: ['scraper', { text: '1000 req / s', color: red }], at: "l6:'window'", strike: 'l7' }
+        place: { x: 60, y: 380, w: 880, h: 300 }
+        enter: { at: "l6:'client'", anim: rise }
+      - use: chip
+        id: tb
+        props: { text: 'Token Bucket', color: lime, icon: bolt, variant: solid, size: 44 }
+        place: { x: 220, y: 760, w: 600, h: 120 }
+        enter: { at: "l7:'Token'", anim: pop }
+
+  # ── the bucket ───────────────────────────────────────────────────────────
+  - id: bucket
+    at: l8
+    glow: lime
+    elements:
+      - use: bucket
+        id: bk
+        props:
+          capacity: 10
+          label: 'token bucket'
+          rate: '+1 token / 100ms'
+          keyframes:
+            - { at: "l8:'ten'", tokens: 10 }
+            - { at: "l9:'takes'", tokens: 9 }
+            - { at: "l10:'refills'", tokens: 10 }
+            - { at: "l11:'burst'", tokens: 6 }
+            - { at: "l11:'run'", tokens: 2 }
+            - { at: "l11:'fast'", tokens: 0 }
+        place: { x: 40, y: 30, w: 460, h: 580 }
+        enter: { at: "l8:'bucket'", anim: rise }
+      - use: chip
+        id: one
+        props: { text: '1 request = 1 token', color: cyan, icon: key, size: 28 }
+        place: { x: 560, y: 60, w: 460, h: 84 }
+        enter: { at: "l9:'token'", anim: pop }
+      - use: chip
+        id: refill
+        props: { text: 'refill: 10 / sec', color: lime, icon: refresh, size: 28 }
+        place: { x: 560, y: 170, w: 460, h: 84 }
+        enter: { at: "l10:'milliseconds'", anim: pop }
+      - use: code
+        id: resp
+        props:
+          title: 'response'
+          lang: http
+          fontSize: 26
+          cps: 60
+          numbers: false
+          lines:
+            - { text: 'HTTP/1.1 429', color: red, at: "l12:'429'" }
+            - { text: 'Too Many Requests', at: "l13:'Too'" }
+            - { text: 'Retry-After: 1', color: amber, at: "l13:'Retry-After'" }
+        place: { x: 560, y: 290, w: 460, h: 230 }
+        enter: { at: "l12:'rejected'", anim: rise }
+      - use: stamp
+        id: s429
+        props: { text: '429', color: red, size: 110 }
+        place: { x: 140, y: 230, w: 260, h: 170 }
+        enter: { at: "l12:'429'" }
+      - use: timeline
+        id: shape
+        props:
+          start: '0s'
+          end: '60s'
+          color: lime
+          markers:
+            - { pos: 0.12, label: 'burst ✓', sub: 'up to 10', at: "l14:'burst'", color: amber }
+            - { pos: 0.55, label: 'steady 10/s', at: "l14:'protects'", color: lime }
+            - { pos: 0.88, label: 'protected', at: "l14:'run'", color: cyan }
+        place: { x: 60, y: 680, w: 880, h: 240 }
+        enter: { at: "l14:'beauty'", anim: rise }
+
+  # ── 03 · the trap ────────────────────────────────────────────────────────
+  - id: trap
+    at: l15
+    glow: amber
+    elements:
+      - use: trap
+        id: tr
+        props: { sub: 'a counter per server', at: "l15:'trap'", until: 'l16' }
+      - use: node
+        id: lb
+        props: { title: 'Load Balancer', icon: globe, color: cyan }
+        place: { x: 290, y: 30, w: 500, h: 160 }
+        enter: { at: "l17:'load'", anim: pop }
+      - use: grid
+        id: fleet
+        props:
+          label: "limit = 10/s in each server's memory"
+          cols: 5
+          rows: 1
+          tiles: ['S1', 'S2', 'S3', 'S4', 'S5']
+          steps:
+            - { at: "l17:'servers'", set: { '0-4': ok } }
+            - { at: "l18:'five'", set: { '0-4': warn } }
+        place: { x: 60, y: 300, w: 960, h: 260 }
+        enter: { at: "l16:'memory'", anim: rise }
+      - use: arrow
+        id: lb_fleet
+        props:
+          from: lb.bottom
+          to: fleet.top
+          color: cyan
+          packets:
+            - { at: "l17:'balancer'", dur: 0.6 }
+            - { at: "l17:'balancer'+0.3", dur: 0.6 }
+        enter: { at: "l17:'balancer'", anim: draw }
+      - use: counter
+        id: real
+        props:
+          keyframes: [{ at: "l18:'limit'", value: 10 }, { at: "l18:'times'", value: 50, dur: 0.8 }]
+          suffix: ' / s'
+          label: 'real limit'
+          color: amber
+          size: 150
+        place: { x: 120, y: 620, w: 800, h: 300 }
+        enter: { at: "l18:'limit'", anim: rise }
+        fx:
+          - { at: "l18:'times'", do: pulse, color: amber }
+
+  # ── 04 · production ──────────────────────────────────────────────────────
+  - id: shared
+    at: l19
+    glow: violet
+    elements:
+      - use: node
+        id: s1
+        props: { title: 'S1', icon: server, color: cyan }
+        place: { x: 60, y: 30, w: 280, h: 140 }
+        enter: { at: "l19:'counter'", anim: pop }
+      - use: node
+        id: s2
+        props: { title: 'S2', icon: server, color: cyan }
+        place: { x: 400, y: 30, w: 280, h: 140 }
+        enter: { at: "l19:'counter'+0.1", anim: pop }
+      - use: node
+        id: s3
+        props: { title: 'S3', icon: server, color: cyan }
+        place: { x: 740, y: 30, w: 280, h: 140 }
+        enter: { at: "l19:'counter'+0.2", anim: pop }
+      - use: node
+        id: redis
+        props: { title: 'Redis', sub: 'rate:{api_key}', icon: db, color: red }
+        place: { x: 330, y: 300, w: 420, h: 170 }
+        enter: { at: "l19:'Redis'", anim: pop }
+        states:
+          - { at: "l20:'atomic'", set: { status: ok, sub: 'one atomic step' } }
+      - use: arrow
+        id: a1
+        props: { from: s1.bottom, to: redis.left, route: elbow, color: violet, packet: { at: "l20:'check'" } }
+        enter: { at: "l19:'Redis'", anim: draw }
+      - use: arrow
+        id: a2
+        props: { from: s2.bottom, to: redis.top, color: violet, packet: { at: "l20:'decrement'" } }
+        enter: { at: "l19:'Redis'", anim: draw }
+      - use: arrow
+        id: a3
+        props: { from: s3.bottom, to: redis.right, route: elbow, color: violet, packet: { at: "l20:'step'" } }
+        enter: { at: "l19:'Redis'", anim: draw }
+      - use: code
+        id: lua
+        props:
+          title: 'redis'
+          lang: redis
+          fontSize: 30
+          cps: 50
+          lines:
+            - { text: 'n = INCR rate:{key}', at: "l21:'INCR'" }
+            - { text: 'if n == 1: EXPIRE rate:{key} 1', at: "l21:'EXPIRE'" }
+            - { text: 'if n > 10: return 429', color: red, at: "l21:'EXPIRE'+0.8" }
+        place: { x: 40, y: 540, w: 900, h: 250 }
+        enter: { at: "l21:'Lua'", anim: rise }
+      - use: chip
+        id: bykey
+        props: { text: 'API key', color: lime, icon: key, variant: solid, size: 32 }
+        place: { x: 60, y: 850, w: 360, h: 96 }
+        enter: { at: "l22:'API'", anim: pop }
+      - use: chip
+        id: byip
+        props: { text: 'IP only', color: red, icon: globe, strike: "l22:'alone'", variant: outline, size: 32 }
+        place: { x: 480, y: 850, w: 360, h: 96 }
+        enter: { at: "l22:'IP'", anim: pop }
+
+  # ── CTA ──────────────────────────────────────────────────────────────────
+  - id: cta
+    at: l23
+    glow: lime
+    elements:
+      - use: cta
+        id: next
+        props: { next: 'Caching & Stampede', keyword: 'cache', prompt: 'Comment below', at: "l24:'cache'" }
+        place: { x: 90, y: 160, w: 850, h: 600 }
+        enter: { at: "l23:'Next'", anim: rise }
+      - use: particles
+        id: conf
+        props: { kind: confetti, count: 80, at: "l24:'comments'", colors: [lime, cyan, violet, amber] }

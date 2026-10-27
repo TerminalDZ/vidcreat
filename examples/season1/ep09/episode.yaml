@@ -1,0 +1,430 @@
+meta:
+  id: ep09
+  series: 'SYSTEM DESIGN'
+  title: 'Circuit Breaker & Timeouts'
+  episode: 9
+  preset: tiktok
+  theme: season1
+  lang: en-US
+  publish:
+    cover: 'One slow service killed everything'
+    caption: |
+      One slow service can drain your thread pool and take down the whole system.
+      A timeout alone isn't enough, and instant retries make it worse.
+      The fix: a Circuit Breaker. Closed, open, half-open.
+      Season 1 finale.
+    hashtags:
+      ['#systemdesign', '#microservices', '#resilience', '#backend', '#programming', '#softwareengineering']
+    pinned: 'Comment "season2" and tell me what you want covered next season'
+
+audio:
+  voice: voice.wav
+  sfx: auto
+  sfx_gain_db: -16
+
+script:
+  - text: 'One service got slow and took down the whole system. How?'
+    break: ['How?']
+  - text: 'Your API calls a payment service.'
+  - text: 'Suddenly, the payment service takes 30 seconds to respond.'
+  - text: 'Every request grabs a thread and just sits there waiting.'
+  - text: 'And your thread pool only has 8 threads.'
+  - text: 'One second later, the whole pool is full.'
+  - text: "Now even the healthy requests can't get a thread."
+    break: ["can't"]
+  - text: "That's called a cascading failure."
+  - text: 'First fix: a timeout. Never wait more than two seconds.'
+  - text: "But here's the trap so many people fall into."
+  - text: 'They add a timeout, then retry instantly.'
+  - text: "Now you're hammering the dying service even harder."
+  - text: 'A Circuit Breaker is the real fix.'
+  - text: "Exactly like the breaker in your home's fuse box."
+  - text: "At first it's closed, and requests flow through normally."
+  - text: 'It counts the errors and tracks the error rate.'
+  - text: 'If the error rate passes 50%, it flips to open.'
+  - text: 'While open, it rejects instantly, no waiting. Fail fast.'
+    break: ['Fail']
+  - text: 'And it returns a fallback, like the last cached response.'
+  - text: 'After a while, it goes half-open and tries one request.'
+  - text: 'If it works, back to closed. If it fails, back to open.'
+  - text: 'Your threads stay free, and the service gets room to recover.'
+  - text: 'And that was the last episode of season one.'
+  - text: 'Comment season2 if you want another season.'
+
+chapters:
+  - { at: l1, label: '01 · THE PROBLEM' }
+  - { at: l10, label: '02 · THE TRAP' }
+  - { at: l13, label: '03 · CIRCUIT BREAKER' }
+  - { at: l23, label: '04 · FINALE' }
+
+scenes:
+  # ─── hook ────────────────────────────────────────────────
+  - id: hook
+    at: l1
+    glow: [{ at: l1, color: cyan }, { at: "l1:'took'", color: red }]
+    elements:
+      - use: grid
+        id: fleet
+        props:
+          label: 'services'
+          cols: 3
+          rows: 3
+          tiles: ['api', 'auth', 'pay', 'cart', 'find', 'mail', 'users', 'feed', 'ship']
+          steps:
+            - { at: "l1:'service'", set: { '0-8': ok } }
+            - { at: "l1:'slow'", set: { '2': warn } }
+            - { at: "l1:'took'", set: { '0': err, '5': err } }
+            - { at: "l1:'system'", set: { '0-8': err } }
+        place: { x: 180, y: 30, w: 720, h: 580 }
+        enter: { at: "l1:'service'", anim: pop, dur: 0.7 }
+        fx:
+          - { at: "l1:'system'", do: shake, amp: 22 }
+          - { at: "l1:'system'", do: flash, color: red }
+      - use: title
+        id: how
+        props: { text: "1 slow service.\n**0** working services.", size: 64, accent: red }
+        place: { x: 60, y: 660, w: 860, h: 220 }
+        enter: { at: "l1:'How'", anim: rise }
+
+  # ─── setup ───────────────────────────────────────────────
+  - id: setup
+    at: l2
+    glow: cyan
+    elements:
+      - use: node
+        id: api
+        props: { title: 'API', sub: 'checkout', icon: server, color: cyan }
+        place: { x: 40, y: 60, w: 340, h: 170 }
+        enter: { at: "l2:'API'", anim: pop }
+      - use: node
+        id: pay
+        props: { title: 'Payment', sub: 'p99 120ms', icon: card, color: violet, status: ok }
+        place: { x: 700, y: 60, w: 340, h: 170 }
+        enter: { at: "l2:'payment'", anim: pop }
+        states:
+          - { at: "l3:'respond'", set: { status: warn, sub: 'p99 30s' } }
+      - use: arrow
+        id: call
+        props:
+          from: api
+          to: pay
+          color: cyan
+          packets:
+            - { at: "l2:'payment'+0.2", dur: 0.6 }
+            - { at: "l3:'Suddenly'", dur: 2.5, color: amber }
+        enter: { at: "l2:'calls'", anim: draw }
+      - use: counter
+        id: latency
+        props:
+          keyframes: [{ at: "l2:'payment'", value: 120, dur: 0.3 }, { at: "l3:'30'", value: 30000, dur: 1.2 }]
+          suffix: ' ms'
+          label: 'response time'
+          color: amber
+          size: 150
+        place: { x: 100, y: 330, w: 880, h: 300 }
+        enter: { at: "l3:'Suddenly'", anim: pop }
+      - use: icon
+        id: hg
+        props: { name: hourglass, size: 120, color: amber, pulse: true }
+        place: { x: 440, y: 680, w: 180, h: 180 }
+        enter: { at: "l3:'seconds'", anim: pop }
+
+  # ─── thread pool exhaustion ─────────────────────────────
+  - id: pool
+    at: l4
+    glow: [{ at: l4, color: amber }, { at: "l6:'full'", color: red }]
+    elements:
+      - use: grid
+        id: threads
+        props:
+          label: 'thread pool · 8 threads'
+          cols: 4
+          rows: 2
+          tiles: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8']
+          steps:
+            - { at: "l4:'thread'", set: { '0': busy } }
+            - { at: "l4:'waiting'", set: { '1-2': busy } }
+            - { at: "l6:'second'", set: { '3-5': busy } }
+            - { at: "l6:'full'", set: { '6-7': busy } }
+            - { at: "l8:'cascading'", set: { '0-7': err } }
+        place: { x: 140, y: 20, w: 800, h: 440 }
+        enter: { at: 'l4', anim: rise }
+        fx:
+          - { at: "l6:'full'", do: shake, amp: 16 }
+      - use: chip
+        id: healthy
+        props: { text: 'GET /cart → no thread', color: red, icon: x, size: 34 }
+        place: { x: 140, y: 510, w: 800, h: 100 }
+        enter: { at: "l7:'healthy'", anim: pop }
+      - use: stamp
+        id: cascade
+        props: { text: 'CASCADING FAILURE', color: red, size: 72 }
+        place: { x: 40, y: 680, w: 880, h: 180 }
+        enter: { at: "l8:'cascading'", anim: stamp }
+
+  # ─── timeout ─────────────────────────────────────────────
+  - id: timeout
+    at: l9
+    glow: lime
+    elements:
+      - use: icon
+        id: clock
+        props: { name: clock, size: 150, color: lime, ring: true }
+        place: { x: 430, y: 40, w: 220, h: 220 }
+        enter: { at: "l9:'timeout'", anim: pop }
+      - use: timeline
+        id: tl
+        props:
+          start: '0s'
+          end: '30s'
+          color: lime
+          markers:
+            - { pos: 0.07, label: '2s', sub: 'timeout', color: lime, at: "l9:'two'" }
+            - { pos: 0.97, label: '30s', sub: 'reply', color: red, at: "l9:'more'" }
+          cursor:
+            - { at: "l9:'Never'", pos: 0, dur: 0 }
+            - { at: "l9:'two'", pos: 0.07, dur: 0.4 }
+        place: { x: 40, y: 360, w: 1000, h: 240 }
+        enter: { at: "l9:'Never'", anim: rise }
+      - use: chip
+        id: freed
+        props: { text: '2s later: thread is free again', color: lime, icon: check, size: 34 }
+        place: { x: 80, y: 680, w: 840, h: 100 }
+        enter: { at: "l9:'two'+0.3", anim: pop }
+
+  # ─── the trap ────────────────────────────────────────────
+  - id: trap
+    at: l10
+    glow: amber
+    elements:
+      - use: trap
+        id: tr
+        props: { sub: 'timeout + instant retry', at: l10, until: 'l11-0.1' }
+      - use: chip
+        id: retry
+        props: { text: 'retry ×3, no backoff', color: amber, icon: refresh, size: 38 }
+        place: { x: 190, y: 40, w: 700, h: 110 }
+        enter: { at: "l11:'retry'", anim: pop }
+      - use: node
+        id: victim
+        props: { title: 'Payment', sub: 'drowning', icon: card, color: violet, status: err }
+        place: { x: 370, y: 250, w: 340, h: 170 }
+        enter: { at: "l12:'hammering'", anim: pop }
+        fx:
+          - { at: "l12:'harder'", do: shake, amp: 20 }
+      - use: counter
+        id: load
+        props:
+          {
+            keyframes:
+              [{ at: "l11:'retry'", value: 100, dur: 0 }, { at: "l12:'dying'", value: 400, dur: 1.0 }],
+            suffix: ' req/s',
+            label: 'load on payment',
+            color: red,
+            size: 120,
+          }
+        place: { x: 100, y: 520, w: 820, h: 260 }
+        enter: { at: "l11:'retry'+0.3", anim: pop }
+      - use: particles
+        id: herd
+        props: { kind: herd, count: 70, at: "l12:'hammering'", dur: 1.6, color: amber, to: victim }
+
+  # ─── the fix ─────────────────────────────────────────────
+  - id: intro
+    at: l13
+    glow: lime
+    elements:
+      - use: icon
+        id: bolt
+        props: { name: bolt, size: 170, color: lime, ring: true, pulse: true }
+        place: { x: 420, y: 60, w: 240, h: 240 }
+        enter: { at: "l13:'Circuit'", anim: pop }
+      - use: title
+        id: cb
+        props: { text: 'Circuit **Breaker**', size: 120, sub: 'like the one in your fuse box' }
+        place: { x: 40, y: 330, w: 1000, h: 280 }
+        enter: { at: "l13:'Circuit'", anim: rise }
+      - use: chip
+        id: fuse
+        props: { text: 'trips before the fire', color: amber, icon: fire, size: 34 }
+        place: { x: 180, y: 720, w: 640, h: 100 }
+        enter: { at: "l14:'fuse'", anim: pop }
+
+  # ─── closed → open ──────────────────────────────────────
+  - id: states
+    at: l15
+    glow: [{ at: l15, color: lime }, { at: "l17:'open'", color: red }, { at: 'l19', color: amber }]
+    elements:
+      - use: node
+        id: api2
+        props: { title: 'API', icon: server, color: cyan }
+        place: { x: 20, y: 40, w: 260, h: 150 }
+        enter: { at: 'l15', anim: pop }
+      - use: node
+        id: breaker
+        props: { title: 'Breaker', sub: 'CLOSED', icon: bolt, color: lime, status: ok }
+        place: { x: 380, y: 40, w: 320, h: 150 }
+        enter: { at: "l15:'closed'", anim: pop }
+        states:
+          - { at: "l17:'open'", set: { status: err, sub: 'OPEN', color: red } }
+        fx:
+          - { at: "l17:'open'", do: flash, color: red }
+      - use: node
+        id: pay2
+        props: { title: 'Pay', icon: card, color: violet, status: warn }
+        place: { x: 800, y: 40, w: 260, h: 150 }
+        enter: { at: 'l15', anim: pop }
+      - use: arrow
+        id: in
+        props:
+          from: api2
+          to: breaker
+          color: cyan
+          packets:
+            - { at: "l15:'requests'", dur: 0.5 }
+            - { at: "l18:'rejects'", dur: 0.5 }
+            - { at: "l18:'instantly'", dur: 0.5, reverse: true, color: red }
+        enter: { at: 'l15', anim: draw }
+      - use: arrow
+        id: out
+        props:
+          from: breaker
+          to: pay2
+          color: violet
+          packets:
+            - { at: "l15:'flow'", dur: 0.5 }
+            - { at: "l16:'errors'", dur: 0.5, reverse: true, color: red }
+        enter: { at: "l15:'closed'", anim: draw }
+        exit: { at: "l17:'open'", anim: fade }
+      - use: meter
+        id: err_rate
+        props:
+          label: 'error rate'
+          unit: '%'
+          max: 100
+          threshold: 50
+          color: lime
+          danger: red
+          keyframes:
+            - { at: "l16:'errors'", value: 12, dur: 0.4 }
+            - { at: "l16:'rate'", value: 38, dur: 0.6 }
+            - { at: "l17:'passes'", value: 64, dur: 0.6 }
+        place: { x: 60, y: 260, w: 960, h: 180 }
+        enter: { at: "l16:'errors'", anim: rise }
+      - use: counter
+        id: errs
+        props:
+          {
+            keyframes:
+              [
+                { at: "l16:'errors'", value: 6 },
+                { at: "l16:'rate'", value: 19 },
+                { at: "l17:'passes'", value: 32 },
+              ],
+            label: 'errors / 50 calls',
+            color: red,
+            size: 130,
+          }
+        place: { x: 40, y: 500, w: 420, h: 300 }
+        enter: { at: "l16:'counts'", anim: pop }
+      - use: chip
+        id: ff
+        props: { text: 'fail fast · 2ms', color: red, icon: bolt, size: 32 }
+        place: { x: 500, y: 540, w: 420, h: 100 }
+        enter: { at: "l18:'fail'", anim: pop }
+      - use: chip
+        id: fb
+        props: { text: 'fallback · cache', color: amber, icon: refresh, size: 30 }
+        place: { x: 500, y: 690, w: 420, h: 100 }
+        enter: { at: "l19:'fallback'", anim: pop }
+
+  # ─── half-open state machine ────────────────────────────
+  - id: machine
+    at: l20
+    glow: [{ at: l20, color: amber }, { at: 'l22', color: lime }]
+    elements:
+      - use: node
+        id: s_closed
+        props: { title: 'CLOSED', sub: 'calls pass', color: lime, status: ok }
+        place: { x: 40, y: 30, w: 320, h: 150 }
+        enter: { at: 'l20', anim: pop }
+      - use: node
+        id: s_open
+        props: { title: 'OPEN', sub: 'fail fast', color: red, status: err }
+        place: { x: 720, y: 30, w: 320, h: 150 }
+        enter: { at: 'l20', anim: pop }
+      - use: node
+        id: s_half
+        props: { title: 'HALF-OPEN', sub: '1 probe', color: amber, status: warn }
+        place: { x: 360, y: 300, w: 360, h: 150 }
+        enter: { at: "l20:'half-open'", anim: pop }
+        states:
+          - { at: "l21:'works'", set: { status: ok, sub: 'probe ok' } }
+          - { at: "l21:'fails'", set: { status: err, sub: 'probe failed' } }
+      - use: arrow
+        id: trip
+        props: { from: s_closed, to: s_open, label: 'errors > 50%', color: red }
+        enter: { at: 'l20', anim: draw }
+      - use: arrow
+        id: cool
+        props:
+          from: s_open.bottom
+          to: s_half.right
+          route: elbow
+          color: amber
+          label: 'after 30s'
+          packets:
+            - { at: "l20:'tries'", dur: 0.7, label: 'probe' }
+            - { at: "l21:'fails'", dur: 0.7, reverse: true, color: red }
+        enter: { at: "l20:'while'", anim: draw }
+      - use: arrow
+        id: heal
+        props:
+          {
+            from: s_half.left,
+            to: s_closed.bottom,
+            route: elbow,
+            color: lime,
+            label: 'success',
+            packet: { at: "l21:'back'", dur: 0.7, color: lime },
+          }
+        enter: { at: "l21:'works'", anim: draw }
+      - use: grid
+        id: threads2
+        props:
+          label: 'thread pool'
+          cols: 4
+          rows: 2
+          tiles: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8']
+          steps:
+            - { at: 'l22', set: { '0-7': busy } }
+            - { at: "l22:'free'", set: { '0-7': ok } }
+        place: { x: 140, y: 500, w: 760, h: 360 }
+        enter: { at: 'l22', anim: rise, dur: 0.7 }
+
+  # ─── season finale ───────────────────────────────────────
+  - id: finale
+    at: l23
+    glow: violet
+    elements:
+      - use: label
+        id: s1
+        props: { text: 'season 1 · complete', dot: true, color: violet }
+        place: { x: 60, y: 30, w: 600, h: 60 }
+        enter: { at: "l23:'last'", anim: fade }
+      - use: cta
+        id: next
+        props:
+          {
+            label: 'COMING NEXT',
+            next: 'Season 2',
+            keyword: 'season2',
+            prompt: 'Comment below',
+            color: violet,
+            at: "l24:'season2'",
+          }
+        place: { x: 60, y: 120, w: 860, h: 600 }
+        enter: { at: "l23:'season'", anim: rise }
+      - use: particles
+        id: conf
+        props: { kind: confetti, count: 120, at: "l24:'another'", colors: [lime, cyan, violet, amber] }
