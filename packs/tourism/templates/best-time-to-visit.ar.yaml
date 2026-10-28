@@ -1,0 +1,118 @@
+# Tourism · best time to visit, Arabic (template; slots are filled by `reelforge new --pack tourism`).
+meta:
+  id: '{{id}}'
+  series: 'دليل السفر'
+  title: 'أفضل وقت للزيارة'
+  episode: 1
+  preset: tiktok
+  theme: voyage
+  lang: ar-EG
+  publish:
+    cover: 'إمتى تزور {{place}}؟'
+    caption: 'إمتى تزور {{place}}، موسم بموسم. لأغلب الزوار، {{best}} هو أنسب وقت. راجع الفعاليات وقواعد الدخول قبل ما تحجز.'
+    hashtags: ['#سفر', '#نصائح_سفر', '#سياحة']
+    pinned: 'اكتب {{keyword}} ونبعتلك قائمة الشنطة.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'إمتى أحسن وقت تزور فيه {{place}}؟ ده بيعتمد على اللي انت عايزه.'
+  - text: 'دي أرقامنا التوضيحية على مدار السنة، موسم بموسم.'
+  - text: 'الصيف هو الأدفى، بس كمان الأزحم.'
+  - text: 'الشتا هادي وغالبًا أرخص، بس في أماكن بتقفل.'
+  - text: 'لأغلب الزوار، {{best}} هو الوقت المثالي.'
+  - text: 'راجع الفعاليات المحلية وقواعد الدخول قبل ما تحجز.'
+  - text: 'اكتب {{keyword}} ونبعتلك قائمة الشنطة.'
+
+chapters:
+  - { at: l1, label: '01 · السؤال' }
+  - { at: l2, label: '02 · المواسم' }
+  - { at: l5, label: '03 · اختيارنا' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: kicker
+        props: { text: 'أفضل وقت للزيارة', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'أحسن'", anim: wipe }
+      - use: title
+        id: place
+        props: { text: '**{{place}}**', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 240, w: 960, h: 340 }
+        enter: { at: 'l1+1.4', anim: reveal }
+      - use: icon
+        id: hook_icon
+        props: { name: clock, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'بيعتمد'", anim: pop }
+
+  - id: seasons
+    at: l2
+    transition: push
+    elements:
+      - use: bar-chart
+        id: chart
+        props:
+          title: '{{metric}}'
+          color: cyan
+          accent: '{{accent}}'
+          focus: { index: 1, at: "l3:'الصيف'" }
+          bars:
+            - { label: 'الربيع', value: {{spring}} }
+            - { label: 'الصيف', value: {{summer}} }
+            - { label: 'الخريف', value: {{autumn}} }
+            - { label: 'الشتا', value: {{winter}} }
+        place: { x: 60, y: 20, w: 960, h: 520 }
+        enter: { at: "l2:'أرقامنا'", anim: fade }
+      - use: chip
+        id: busy
+        props: { text: 'الصيف: الأدفى والأزحم', icon: users, color: '{{accent}}', size: 32 }
+        place: { x: 160, y: 590, w: 760, h: 96 }
+        enter: { at: "l3:'الأزحم'", anim: pop }
+      - use: chip
+        id: quiet
+        props: { text: 'الشتا: هادي، وأماكن بتقفل', icon: clock, color: cyan, size: 32 }
+        place: { x: 160, y: 710, w: 760, h: 96 }
+        enter: { at: "l4:'الشتا'", anim: pop }
+
+  - id: pick
+    at: l5
+    glow: '{{accent}}'
+    transition: zoom
+    elements:
+      - use: label
+        id: sweet
+        props: { text: 'الوقت المثالي', dot: true, align: center }
+        place: { x: 140, y: 140, w: 800, h: 60 }
+        enter: { at: "l5:'الزوار'", anim: wipe }
+      - use: title
+        id: best
+        props: { text: '**{{best}}**', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 210, w: 960, h: 320 }
+        enter: { at: "l5:'المثالي'", anim: reveal }
+      - use: chip
+        id: rules
+        props: { text: 'راجع الفعاليات وقواعد الدخول', icon: globe, color: dim, size: 32 }
+        place: { x: 160, y: 600, w: 760, h: 96 }
+        enter: { at: "l6:'الفعاليات'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'قريبًا'
+          prompt: 'اكتب في الكومنتات'
+          next: 'تاخد إيه معاك لـ {{place}}'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'ونبعتلك'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

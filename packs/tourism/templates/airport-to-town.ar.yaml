@@ -1,0 +1,123 @@
+# Tourism · airport to town, Arabic (template; slots are filled by `reelforge new --pack tourism`).
+meta:
+  id: '{{id}}'
+  series: 'التنقل'
+  title: 'من المطار للمدينة'
+  episode: 1
+  preset: tiktok
+  theme: voyage
+  lang: ar-EG
+  publish:
+    cover: 'قطر ولا أتوبيس ولا تاكسي؟'
+    caption: 'من {{airport}} لـ {{town}}: القطر حوالي {{train_min}} دقيقة، والأتوبيس حوالي {{bus_min}} دقيقة، أو تاكسي. المواعيد بتتغير، فراجعها قبل السفر.'
+    hashtags: ['#سفر', '#نصائح_سفر', '#مطار', '#travel']
+    pinned: 'اكتب {{keyword}} لدليل المدينة الجاي.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'لسه واصل {{airport}}؟ دي طريقة توصل بيها لـ {{town}}.'
+  - text: 'القطر هو الأسرع، حوالي {{train_min}} دقيقة لوسط البلد.'
+  - text: 'الأتوبيس بياخد حوالي {{bus_min}} دقيقة، بس بيقف جنب أغلب الفنادق.'
+  - text: 'التاكسيات مستنية برة الوصول، فاتفق على السعر أو اطلب العداد.'
+  - text: 'اشتري التذاكر من المكن قبل ما تركب.'
+  - text: 'المواعيد بتتغير، فراجعها قبل ما تسافر.'
+  - text: 'اكتب {{keyword}} لدليل المدينة الجاي.'
+
+chapters:
+  - { at: l1, label: '01 · الوصول' }
+  - { at: l2, label: '02 · اختياراتك' }
+  - { at: l5, label: '03 · نصايح' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    elements:
+      - use: node
+        id: airport
+        props: { title: '{{airport}}', sub: 'الوصول', icon: globe, color: cyan }
+        place: { x: 480, y: 140, w: 540, h: 170 }
+        enter: { at: "l1:'واصل'", anim: pop }
+      - use: node
+        id: town
+        props: { title: '{{town}}', sub: 'إقامتك', icon: key, color: '{{accent}}' }
+        place: { x: 60, y: 420, w: 540, h: 170 }
+        enter: { at: "l1:'توصل'", anim: pop }
+      - use: arrow
+        id: way
+        props:
+          from: airport.bottom
+          to: town.right
+          route: elbow
+          color: '{{accent}}'
+          packet: { at: "l1:'توصل'+0.3", dur: 1.4, color: '{{accent}}' }
+        enter: { at: "l1:'توصل'+0.1", anim: draw }
+
+  - id: options
+    at: l2
+    transition: push
+    elements:
+      - use: comparison
+        id: compare
+        props:
+          a: { title: 'القطر', color: '{{accent}}', icon: bolt }
+          b: { title: 'الأتوبيس', color: cyan, icon: users }
+          rows:
+            - { label: 'دقايق', a: '{{train_min}}', b: '{{bus_min}}', at: "l2:'البلد'" }
+            - { label: 'الأسرع', a: true, b: false, at: "l2:'الأسرع'" }
+            - { label: 'جنب الفنادق', a: false, b: true, at: "l3:'الفنادق'" }
+          fontSize: 34
+        place: { x: 60, y: 40, w: 960, h: 520 }
+        enter: { at: "l2:'القطر'", anim: rise }
+      - use: chip
+        id: bus
+        props: { text: 'الأتوبيس جنب أغلب الفنادق', icon: users, color: cyan, size: 32 }
+        place: { x: 160, y: 640, w: 760, h: 96 }
+        enter: { at: "l3:'بيقف'", anim: pop }
+
+  - id: taxi
+    at: l4
+    transition: zoom
+    elements:
+      - use: title
+        id: taxi_title
+        props: { text: 'تاكسي؟ **اتفق على السعر**', size: 92, accent: '{{accent}}' }
+        place: { x: 60, y: 190, w: 960, h: 330 }
+        enter: { at: "l4:'التاكسيات'", anim: reveal }
+      - use: icon
+        id: card
+        props: { name: card, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 580, w: 160, h: 160 }
+        enter: { at: "l4:'العداد'", anim: pop }
+
+  - id: tips
+    at: l5
+    transition: push
+    elements:
+      - use: chip
+        id: tickets
+        props: { text: 'التذاكر من المكن', icon: card, color: '{{accent}}', size: 36 }
+        place: { x: 160, y: 140, w: 760, h: 104 }
+        enter: { at: "l5:'التذاكر'", anim: pop }
+      - use: title
+        id: check
+        props: { text: 'راجع **المواعيد** قبل السفر', size: 92, accent: '{{accent}}' }
+        place: { x: 60, y: 290, w: 960, h: 330 }
+        enter: { at: "l6:'المواعيد'", anim: reveal }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'قريبًا'
+          prompt: 'اكتب في الكومنتات'
+          next: 'دليل المدينة الجاي'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'لدليل'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

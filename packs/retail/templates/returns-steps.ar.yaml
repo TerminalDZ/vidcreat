@@ -1,0 +1,136 @@
+# Retail · returns in 3 steps, Arabic (template; slots are filled by `reelforge new --pack retail`).
+meta:
+  id: '{{id}}'
+  series: 'خدمات المتجر'
+  title: 'الاسترجاع في 3 خطوات'
+  episode: 1
+  preset: tiktok
+  theme: retail
+  lang: ar-EG
+  publish:
+    cover: 'الاسترجاع في 3 خطوات'
+    caption: 'إزاي ترجّع منتج لـ {{org}}: ابدأ أونلاين، غلّفه بالتيكت، وسلّمه. عندك {{days}} يوم من الاستلام، وفي منتجات ما بترجعش، فراجع السياسة.'
+    hashtags: ['#استرجاع', '#تسوق', '#متاجر', '#خدمة_العملاء']
+    pinned: 'اكتب {{keyword}} لو محتاج مساعدة في الاسترجاع.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'غيرت رأيك؟ ترجيع منتج لـ {{org}} تلات خطوات بس.'
+  - text: 'قدامك {{days}} يوم من الاستلام عشان تبدأ الاسترجاع.'
+  - text: 'الأول، ابدأ الاسترجاع من الـ app أو من الموقع.'
+  - text: 'بعدها غلّف المنتج بالتيكت بتاعه، واطبع الـ label.'
+  - text: 'وبعدين سلّمه في أي فرع أو نقطة استلام.'
+  - text: 'فلوسك بترجع على نفس وسيلة الدفع الأصلية.'
+  - text: 'في منتجات ما بترجعش، فراجع السياسة. واكتب {{keyword}} لو محتاج مساعدة.'
+
+chapters:
+  - { at: l1, label: '01 · المدة' }
+  - { at: l3, label: '02 · تلات خطوات' }
+  - { at: l6, label: '03 · فلوسك' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: org
+        props: { text: '{{org}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'غيرت'", anim: wipe }
+      - use: title
+        id: hook_title
+        props: { text: 'الاسترجاع في **3 خطوات**', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 240, w: 960, h: 340 }
+        enter: { at: "l1:'ترجيع'", anim: reveal }
+      - use: icon
+        id: hook_icon
+        props: { name: refresh, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'تلات'", anim: pop }
+
+  - id: window
+    at: l2
+    transition: zoom
+    elements:
+      - use: counter
+        id: days
+        props:
+          from: 0
+          keyframes: [{ at: "l2:'قدامك'", value: {{days}}, dur: 1 }]
+          suffix: ' يوم'
+          label: 'من الاستلام'
+          color: '{{accent}}'
+        place: { x: 140, y: 200, w: 800, h: 320 }
+        enter: { at: "l2:'قدامك'", anim: pop }
+
+  - id: steps
+    at: l3
+    transition: push
+    elements:
+      - use: steps
+        id: return_steps
+        props:
+          color: '{{accent}}'
+          fontSize: 52
+          items:
+            - { title: 'ابدأ أونلاين', text: 'من الـ app أو الموقع', at: "l3:'ابدأ'" }
+            - { title: 'غلّفه', text: 'بالتيكت والـ label', at: "l4:'غلّف'" }
+            - { title: 'سلّمه', text: 'أي فرع أو نقطة استلام', at: "l5:'سلّمه'" }
+        place: { x: 160, y: 40, w: 760, h: 600 }
+        enter: { at: "l3:'الأول'", anim: fade }
+      - use: icon
+        id: icon_app
+        props: { name: phone, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 700, w: 160, h: 160 }
+        enter: { at: "l3:'app'", anim: pop }
+        exit: { at: l4, anim: fade }
+      - use: icon
+        id: icon_pack
+        props: { name: check, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 700, w: 160, h: 160 }
+        enter: { at: "l4:'label'", anim: pop }
+        exit: { at: l5, anim: fade }
+      - use: icon
+        id: icon_drop
+        props: { name: globe, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 700, w: 160, h: 160 }
+        enter: { at: "l5:'استلام'", anim: pop }
+
+  - id: refund
+    at: l6
+    transition: zoom
+    elements:
+      - use: title
+        id: refund_title
+        props: { text: 'على **نفس وسيلة الدفع**', size: 96, accent: '{{accent}}' }
+        place: { x: 60, y: 180, w: 960, h: 320 }
+        enter: { at: "l6:'فلوسك'", anim: reveal }
+      - use: icon
+        id: card
+        props: { name: card, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 560, w: 160, h: 160 }
+        enter: { at: "l6:'الأصلية'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: chip
+        id: policy
+        props: { text: 'راجع سياسة الاسترجاع', icon: warn, color: dim, size: 30 }
+        place: { x: 160, y: 60, w: 760, h: 90 }
+        enter: { at: "l7:'السياسة'", anim: pop }
+      - use: cta
+        id: next
+        props:
+          label: 'محتاج مساعدة؟'
+          prompt: 'اكتب في الكومنتات'
+          next: '{{next}}'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'مساعدة'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'واكتب'", anim: rise }

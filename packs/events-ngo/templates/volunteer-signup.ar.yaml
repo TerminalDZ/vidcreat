@@ -1,0 +1,139 @@
+# Events & NGOs · volunteer sign-up, Arabic (template; slots are filled by `reelforge new --pack events-ngo`).
+meta:
+  id: '{{id}}'
+  series: 'تطوع'
+  title: 'كام ساعة من وقتك'
+  episode: 1
+  preset: tiktok
+  theme: editorial
+  lang: ar-EG
+  publish:
+    cover: 'كام ساعة في الشهر'
+    caption: 'اتطوع مع {{org}}: حوالي {{hours}} ساعات في الشهر، في {{role1}} أو {{role2}} أو {{role3}}. بنعلمك الأول، وتقدر توقف في أي وقت.'
+    hashtags: ['#تطوع', '#مجتمع', '#عمل_خيري']
+    pinned: 'اكتب {{keyword}} ونبعتلك لينك التسجيل.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'عايز تساعد في مدينتك؟ التطوع مع {{org}} بياخد كام ساعة بس.'
+  - text: 'أغلب المتطوعين بيدوا حوالي {{hours}} ساعات في الشهر.'
+  - text: 'تقدر تختار {{role1}}، أو {{role2}}، أو {{role3}}.'
+  - text: 'سجّل أونلاين، وبعدها احضر جلسة ترحيب قصيرة.'
+  - text: 'بنعلمك الأول، فمش محتاج أي خبرة.'
+  - text: 'وقتك هو اللي بيخلي شغلنا ممكن، وتقدر توقف في أي وقت.'
+  - text: 'اكتب {{keyword}} ونبعتلك لينك التسجيل.'
+
+chapters:
+  - { at: l1, label: '01 · وقتك' }
+  - { at: l3, label: '02 · الأدوار' }
+  - { at: l4, label: '03 · التسجيل' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: org
+        props: { text: '{{org}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'تساعد'", anim: wipe }
+      - use: title
+        id: hook_title
+        props: { text: '**كام ساعة** من وقتك', size: 108, accent: '{{accent}}' }
+        place: { x: 60, y: 240, w: 960, h: 330 }
+        enter: { at: "l1:'التطوع'", anim: reveal }
+      - use: icon
+        id: users
+        props: { name: users, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'ساعة'", anim: pop }
+
+  - id: hours
+    at: l2
+    transition: zoom
+    elements:
+      - use: counter
+        id: per_month
+        props:
+          from: 0
+          keyframes: [{ at: "l2:'حوالي'", value: {{hours}}, dur: 1 }]
+          suffix: ' h'
+          label: 'في الشهر تقريبًا'
+          color: '{{accent}}'
+        place: { x: 140, y: 200, w: 800, h: 320 }
+        enter: { at: "l2:'المتطوعين'", anim: pop }
+
+  - id: roles
+    at: l3
+    transition: push
+    elements:
+      - use: chip
+        id: r1
+        props: { text: '{{role1}}', icon: user, color: '{{accent}}', size: 40 }
+        place: { x: 160, y: 120, w: 760, h: 120 }
+        enter: { at: "l3:'تختار'", anim: pop }
+      - use: chip
+        id: r2
+        props: { text: '{{role2}}', icon: user, color: '{{accent}}', size: 40 }
+        place: { x: 160, y: 300, w: 760, h: 120 }
+        enter: { at: "l3:'تختار'+0.9", anim: pop }
+      - use: chip
+        id: r3
+        props: { text: '{{role3}}', icon: user, color: '{{accent}}', size: 40 }
+        place: { x: 160, y: 480, w: 760, h: 120 }
+        enter: { at: "l3:'تختار'+1.8", anim: pop }
+
+  - id: signup
+    at: l4
+    transition: push
+    elements:
+      - use: steps
+        id: join_steps
+        props:
+          color: '{{accent}}'
+          fontSize: 52
+          items:
+            - { title: 'سجّل أونلاين', text: 'في دقيقتين', at: "l4:'سجّل'" }
+            - { title: 'جلسة ترحيب', text: 'تتعرف على الفريق', at: "l4:'ترحيب'" }
+            - { title: 'تدريب', text: 'قبل أول مشاركة', at: "l5:'بنعلمك'" }
+        place: { x: 160, y: 40, w: 760, h: 560 }
+        enter: { at: "l4:'سجّل'", anim: fade }
+      - use: chip
+        id: noexp
+        props: { text: 'مش محتاج خبرة', icon: check, color: '{{accent}}', size: 34 }
+        place: { x: 160, y: 660, w: 760, h: 100 }
+        enter: { at: "l5:'خبرة'", anim: spring }
+
+  - id: matters
+    at: l6
+    transition: zoom
+    elements:
+      - use: title
+        id: matters_title
+        props: { text: 'وقتك **بيفرق**', size: 112, accent: '{{accent}}' }
+        place: { x: 60, y: 190, w: 960, h: 300 }
+        enter: { at: "l6:'وقتك'", anim: reveal }
+      - use: chip
+        id: stop
+        props: { text: 'توقف في أي وقت', icon: unlock, color: dim, size: 34 }
+        place: { x: 240, y: 580, w: 600, h: 100 }
+        enter: { at: "l6:'توقف'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'انضم لنا'
+          prompt: 'اكتب في الكومنتات'
+          next: 'اتطوع مع {{org}}'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'ونبعتلك'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

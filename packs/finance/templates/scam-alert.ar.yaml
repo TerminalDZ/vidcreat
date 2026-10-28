@@ -1,0 +1,133 @@
+# Finance · scam alert, Arabic (template; slots are filled by `reelforge new --pack finance`).
+meta:
+  id: '{{id}}'
+  series: 'خليك في أمان'
+  title: 'اكشف رسالة البنك المزيفة'
+  episode: 1
+  preset: tiktok
+  theme: ledger
+  lang: ar-EG
+  publish:
+    cover: 'رسالة حقيقية ولا نصب؟'
+    caption: 'تلات علامات لرسالة بنك مزيفة، وتعمل إيه بدلها. {{org}} عمره ما هيطلب منك الـ password أو كود الـ OTP. معلومات عامة.'
+    hashtags: ['#احتيال', '#نصب_إلكتروني', '#أمان', '#بنوك']
+    pinned: 'اكتب {{keyword}} وشارك الفيديو مع حد محتاج يشوفه.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'جالك message إن حسابك اتقفل. ده حقيقي، ولا نصب؟'
+  - text: 'النصابين بيعملوا نفسهم {{org}}، والرسالة شكلها رسمي جدًا.'
+  - text: 'خد بالك من تلات علامات: الاستعجال، ولينك غريب، وطلب أكواد.'
+  - text: 'البنك بتاعك عمره ما هيطلب الـ password أو كود الـ OTP.'
+  - text: 'فما تدوسش على اللينك. كلم الرقم اللي على ضهر الكارت بتاعك.'
+  - text: 'ولو شاركت أي حاجة خلاص، كلم البنك فورًا.'
+  - text: 'معلومات عامة. اكتب {{keyword}} وشارك الفيديو مع أهلك.'
+
+chapters:
+  - { at: l1, label: '01 · الرسالة' }
+  - { at: l3, label: '02 · العلامات' }
+  - { at: l5, label: '03 · تعمل إيه' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{danger}}'
+    elements:
+      - use: phone
+        id: phone
+        props:
+          title: 'الرسائل'
+          button: 'افتح اللينك'
+          notifications:
+            - { title: '{{org}}', text: '{{lure}}', at: "l1:'حسابك'", color: '{{danger}}', icon: warn }
+        place: { x: 480, y: 60, w: 440, h: 860 }
+        enter: { at: "l1:'message'", anim: rise }
+      - use: stamp
+        id: scam
+        props: { text: 'نصب؟', color: '{{danger}}', size: 110 }
+        place: { x: 60, y: 120, w: 400, h: 220 }
+        enter: { at: "l1:'نصب'", anim: stamp }
+      - use: chip
+        id: fake
+        props: { text: 'مرسل مزيف', icon: x, color: '{{danger}}', size: 34 }
+        place: { x: 60, y: 420, w: 380, h: 96 }
+        enter: { at: "l2:'النصابين'", anim: pop }
+
+  - id: signs
+    at: l3
+    transition: push
+    elements:
+      - use: label
+        id: signs_label
+        props: { text: 'تلات علامات تحذير', dot: true, align: center }
+        place: { x: 140, y: 130, w: 800, h: 60 }
+        enter: { at: "l3:'خد'", anim: wipe }
+      - use: checklist
+        id: signs_list
+        props:
+          color: '{{danger}}'
+          fontSize: 56
+          items:
+            - { text: 'الاستعجال', at: "l3:'الاستعجال'", ok: false }
+            - { text: 'لينك غريب', at: "l3:'ولينك'", ok: false }
+            - { text: 'طلب أكواد', at: "l3:'أكواد'", ok: false }
+        place: { x: 140, y: 230, w: 780, h: 420 }
+        enter: { at: "l3:'علامات'", anim: rise }
+
+  - id: never
+    at: l4
+    transition: zoom
+    elements:
+      - use: title
+        id: never_title
+        props: { text: 'البنك **عمره ما** هيطلب', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 150, w: 960, h: 320 }
+        enter: { at: "l4:'عمره'", anim: reveal }
+      - use: chip
+        id: password
+        props: { text: 'كلمة المرور', icon: lock, color: '{{danger}}', size: 36, strike: "l4:'OTP'+0.4" }
+        place: { x: 500, y: 540, w: 420, h: 100 }
+        enter: { at: "l4:'password'", anim: pop }
+      - use: chip
+        id: otp
+        props: { text: 'كود OTP', icon: key, color: '{{danger}}', size: 36, strike: "l4:'OTP'+0.6" }
+        place: { x: 80, y: 540, w: 380, h: 100 }
+        enter: { at: "l4:'OTP'", anim: pop }
+
+  - id: act
+    at: l5
+    glow: '{{accent}}'
+    transition: push
+    elements:
+      - use: chip
+        id: noclick
+        props: { text: 'ما تدوسش على اللينك', icon: x, color: '{{danger}}', size: 38 }
+        place: { x: 190, y: 120, w: 700, h: 104 }
+        enter: { at: "l5:'تدوسش'", anim: pop }
+      - use: title
+        id: call
+        props: { text: 'كلم **الرقم اللي على الكارت**', size: 88, accent: '{{accent}}' }
+        place: { x: 60, y: 260, w: 960, h: 330 }
+        enter: { at: "l5:'كلم'", anim: reveal }
+      - use: chip
+        id: shared
+        props: { text: 'شاركت حاجة؟ كلم البنك فورًا', icon: phone, color: '{{accent}}', size: 30 }
+        place: { x: 60, y: 660, w: 860, h: 100 }
+        enter: { at: "l6:'شاركت'", anim: spring }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'شاركه'
+          prompt: 'اكتب في الكومنتات'
+          next: 'خلّي أهلك في أمان'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'وشارك'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

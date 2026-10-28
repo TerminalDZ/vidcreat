@@ -1,0 +1,51 @@
+# Government pack: plain, neutral public-service guides for a fictional city. No legal advice.
+id: government
+name: { en: Government & public services, ar: الخدمات الحكومية }
+description:
+  en: Step-by-step guides to renewals, appointments and program deadlines. Neutral, plain and accessible.
+  ar: أدلة خطوة بخطوة للتجديد والمواعيد ومواعيد البرامج. محايدة وواضحة وسهلة الوصول.
+theme: civic
+playbook: skills/reelforge-industry-playbooks/references/government.md
+blueprints: [hook, process-steps, timeline, comparison, stat-reveal, cta]
+templates:
+  - id: renew-document
+    title: { en: Renew a document online, ar: تجديد مستند أونلاين }
+    description:
+      en: Renew a document online in three steps, with the processing time and where to check the rules.
+      ar: جدّد مستندًا أونلاين في ثلاث خطوات، مع مدة المعالجة وأين تراجع القواعد.
+    slots:
+      city: { label: City or agency, max: 24, default: { en: City of Westbrook, ar: مدينة ويستبروك } }
+      doc: { label: Document, max: 20, default: { en: residence card, ar: بطاقة الإقامة } }
+      days: { label: Typical working days, type: number, min: 1, max: 120, default: 10 }
+      keyword: { label: Comment keyword, max: 10, default: { en: BOOK, ar: موعد } }
+      accent: { label: Accent color, type: color, default: lime }
+    files: { en: templates/renew-document.en.yaml, ar: templates/renew-document.ar.yaml }
+  - id: appointment-checklist
+    title: { en: What to bring, ar: ماذا تحضر معك }
+    description:
+      en: A checklist of what to bring to an in-person appointment and when to arrive.
+      ar: قائمة بما تحضره إلى موعد حضوري ومتى تصل.
+    slots:
+      city: { label: City or agency, max: 24, default: { en: City of Westbrook, ar: مدينة ويستبروك } }
+      item1: { label: Item 1, max: 22, default: { en: your ID card, ar: بطاقة الهوية } }
+      item2: { label: Item 2, max: 22, default: { en: proof of address, ar: إثبات العنوان } }
+      item3: { label: Item 3, max: 22, default: { en: a recent photo, ar: صورة شخصية حديثة } }
+      minutes: { label: Minutes early, type: number, min: 1, max: 120, default: 15 }
+      keyword: { label: Comment keyword, max: 10, default: { en: LIST, ar: قائمة } }
+      accent: { label: Accent color, type: color, default: cyan }
+    files: { en: templates/appointment-checklist.en.yaml, ar: templates/appointment-checklist.ar.yaml }
+  - id: program-deadlines
+    title: { en: Program deadlines, ar: مواعيد برنامج }
+    description:
+      en: Three key dates of a public program on a timeline, with eligibility pointed to the official page.
+      ar: ثلاثة تواريخ مهمة لبرنامج عام على خط زمني، مع الإحالة للصفحة الرسمية لشروط الأهلية.
+    slots:
+      city: { label: City or agency, max: 24, default: { en: City of Westbrook, ar: مدينة ويستبروك } }
+      program: { label: Program name, max: 24, default: { en: Home Energy Grant, ar: منحة طاقة المنازل } }
+      open: { label: Opening date, max: 10, default: { en: 1 March, ar: 1 مارس } }
+      close: { label: Closing date, max: 10, default: { en: 30 April, ar: 30 أبريل } }
+      result: { label: Decisions in, max: 10, default: { en: June, ar: يونيو } }
+      keyword: { label: Comment keyword, max: 10, default: { en: REMIND, ar: تذكير } }
+      accent: { label: Accent color, type: color, default: amber }
+    files: { en: templates/program-deadlines.en.yaml, ar: templates/program-deadlines.ar.yaml }
+examples: [examples/westbrook-renewal-en, examples/westbrook-renewal-ar]

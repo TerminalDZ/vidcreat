@@ -1,0 +1,164 @@
+# Healthcare · department intro (template; slots are filled by `reelforge new --pack healthcare`).
+meta:
+  id: '{{id}}'
+  series: 'MEET THE TEAM'
+  title: '{{dept}}'
+  episode: 1
+  preset: tiktok
+  theme: clinical
+  lang: en-US
+  publish:
+    cover: '{{dept}}: where, when, how'
+    caption: 'Where to find {{dept}} at {{org}}, when it is open and how to book a visit. For emergencies, call your local emergency number.'
+    hashtags: ['#hospital', '#healthcare', '#patientguide']
+    pinned: 'Comment {{keyword}} and we will share the booking steps.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'Looking for {{dept}} at {{org}}? Here is how to find us.'
+  - text: 'The department is on {{floor}}, right next to the main lifts.'
+  - text: 'We are open from {{opens}} to {{closes}}, {{days}}.'
+  - text: 'A team of {{staff}} doctors, nurses and technicians works here every day.'
+  - text: 'To book a visit, first ask your family doctor for a referral.'
+  - text: 'Then call the booking line, or use the patient app to pick a time.'
+  - text: 'In an emergency, do not wait: call your local emergency number.'
+  - text: 'Comment {{keyword}} and we will share the booking steps.'
+
+chapters:
+  - { at: l1, label: '01 · FIND US' }
+  - { at: l4, label: '02 · THE TEAM' }
+  - { at: l5, label: '03 · BOOKING' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: org
+        props: { text: '{{org}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'Looking'", anim: wipe }
+      - use: title
+        id: dept
+        props: { text: '**{{dept}}**', size: 116, accent: '{{accent}}' }
+        place: { x: 60, y: 250, w: 960, h: 330 }
+        enter: { at: 'l1+0.6', anim: reveal }
+      - use: icon
+        id: hook_icon
+        props: { name: users, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'find'", anim: pop }
+
+  - id: where
+    at: l2
+    transition: push
+    elements:
+      - use: node
+        id: floor
+        props: { title: '{{floor}}', sub: '{{dept}}', icon: globe, color: '{{accent}}' }
+        place: { x: 190, y: 220, w: 700, h: 220 }
+        enter: { at: "l2:'department'", anim: pop }
+        exit: { at: l3, anim: fade }
+      - use: chip
+        id: lifts
+        props: { text: 'Next to the main lifts', icon: check, color: '{{accent}}', size: 38 }
+        place: { x: 190, y: 520, w: 700, h: 104 }
+        enter: { at: "l2:'lifts'", anim: spring }
+        exit: { at: l3, anim: fade }
+
+      - use: label
+        id: hours_label
+        props: { text: 'Opening hours', dot: true, align: center }
+        place: { x: 140, y: 150, w: 800, h: 60 }
+        enter: { at: "l3:'open'", anim: wipe }
+      - use: timeline
+        id: hours_line
+        props:
+          start: '{{opens}}'
+          end: '{{closes}}'
+          color: '{{accent}}'
+          markers:
+            - { pos: 0.08, label: 'Open', at: "l3:'open'+0.4" }
+            - { pos: 0.92, label: 'Close', at: "l3:'open'+1.2" }
+        place: { x: 60, y: 250, w: 960, h: 260 }
+        enter: { at: "l3:'open'+0.2", anim: wipe }
+      - use: chip
+        id: days
+        props: { text: '{{days}}', icon: clock, color: '{{accent}}', size: 38 }
+        place: { x: 190, y: 600, w: 700, h: 104 }
+        enter: { at: "l3:'open'+1.8", anim: pop }
+
+  - id: team
+    at: l4
+    transition: push
+    elements:
+      - use: counter
+        id: staff
+        props:
+          from: 0
+          keyframes: [{ at: "l4:'team'", value: {{staff}}, dur: 1.2 }]
+          label: 'PEOPLE ON THE TEAM'
+          color: '{{accent}}'
+        place: { x: 140, y: 160, w: 800, h: 320 }
+        enter: { at: "l4:'team'", anim: pop }
+      - use: chip
+        id: roles
+        props: { text: 'Doctors · nurses · technicians', icon: users, color: '{{accent}}', size: 34 }
+        place: { x: 140, y: 580, w: 780, h: 100 }
+        enter: { at: "l4:'nurses'", anim: spring }
+
+  - id: book
+    at: l5
+    transition: push
+    camera: drift
+    elements:
+      - use: steps
+        id: book_steps
+        props:
+          color: '{{accent}}'
+          fontSize: 54
+          items:
+            - { title: 'Referral', text: 'From your family doctor', icon: user, at: "l5:'referral'" }
+            - { title: 'Call or app', text: 'The booking line', icon: phone, at: "l6:'call'" }
+            - { title: 'Pick a time', text: 'That works for you', icon: clock, at: "l6:'time'" }
+        place: { x: 160, y: 40, w: 760, h: 600 }
+        enter: { at: "l5:'book'", anim: fade }
+      - use: chip
+        id: app
+        props: { text: 'Patient app', icon: phone, color: '{{accent}}', size: 34 }
+        place: { x: 270, y: 700, w: 540, h: 96 }
+        enter: { at: "l6:'app'", anim: pop }
+
+  - id: emergency
+    at: l7
+    glow: red
+    transition: cut
+    elements:
+      - use: title
+        id: emergency_title
+        props: { text: 'Emergency? **Do not wait**', size: 108, accent: red }
+        place: { x: 60, y: 200, w: 960, h: 300 }
+        enter: { at: "l7:'emergency'", anim: reveal }
+      - use: chip
+        id: call
+        props: { text: 'Call your local emergency number', icon: warn, color: red, size: 32 }
+        place: { x: 60, y: 580, w: 860, h: 96 }
+        enter: { at: "l7:'call'", anim: pop }
+
+  - id: outro
+    at: l8
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'COMING UP'
+          next: 'How to book a visit'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l8:'share'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l8:'Comment'", anim: rise }

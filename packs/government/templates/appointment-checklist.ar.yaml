@@ -1,0 +1,127 @@
+# Government · what to bring, Arabic (template; slots are filled by `reelforge new --pack government`).
+meta:
+  id: '{{id}}'
+  series: 'الخدمات العامة'
+  title: 'ماذا تحضر معك'
+  episode: 1
+  preset: tiktok
+  theme: civic
+  lang: ar-EG
+  publish:
+    cover: 'موعدك: ماذا تحضر معك'
+    caption: 'ماذا تحضر لموعدك مع {{city}}: التأكيد، و{{item1}}، و{{item2}}، وأحيانًا {{item3}}. المتطلبات قد تتغير: راجع الموقع الرسمي.'
+    hashtags: ['#خدمات_حكومية', '#قائمة', '#دليل']
+    pinned: 'اكتب {{keyword}} واحفظ القائمة لزيارتك.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'عندك موعد في {{city}}؟ إليك ما يجب أن تحضره معك.'
+  - text: 'أولًا، تأكيد الموعد، مطبوعًا أو على هاتفك.'
+  - text: 'وستحتاج أيضًا إلى {{item1}}، و{{item2}}.'
+  - text: 'بعض الخدمات تطلب كذلك {{item3}}، فاقرأ خطابك جيدًا.'
+  - text: 'احضر قبل الموعد بحوالي {{minutes}} دقيقة لتمر بالأمن وتجد المكتب.'
+  - text: 'المتطلبات قد تتغير، فراجع الموقع الرسمي لحالتك.'
+  - text: 'اكتب {{keyword}} واحفظ هذه القائمة لزيارتك.'
+
+chapters:
+  - { at: l1, label: '01 · زيارتك' }
+  - { at: l2, label: '02 · القائمة' }
+  - { at: l5, label: '03 · يوم الموعد' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    elements:
+      - use: label
+        id: city
+        props: { text: '{{city}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'عندك'", anim: wipe }
+      - use: title
+        id: hook_title
+        props: { text: 'ماذا **تحضر معك**', size: 108, accent: '{{accent}}' }
+        place: { x: 60, y: 240, w: 960, h: 320 }
+        enter: { at: "l1:'موعد'", anim: reveal }
+      - use: icon
+        id: hook_icon
+        props: { name: check, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'تحضره'", anim: pop }
+
+  - id: list
+    at: l2
+    transition: push
+    elements:
+      - use: chip
+        id: confirmation
+        props: { text: 'تأكيد الموعد', icon: mail, color: '{{accent}}', size: 38 }
+        place: { x: 60, y: 60, w: 860, h: 120 }
+        enter: { at: "l2:'تأكيد'", anim: slide-l }
+      - use: chip
+        id: item1
+        props: { text: '{{item1}}', icon: check, color: '{{accent}}', size: 38 }
+        place: { x: 60, y: 230, w: 860, h: 120 }
+        enter: { at: "l3:'وستحتاج'", anim: slide-l }
+      - use: chip
+        id: item2
+        props: { text: '{{item2}}', icon: check, color: '{{accent}}', size: 38 }
+        place: { x: 60, y: 400, w: 860, h: 120 }
+        enter: { at: "l3:'وستحتاج'+1.2", anim: slide-l }
+      - use: chip
+        id: item3
+        props: { text: '{{item3}}', icon: warn, color: amber, size: 34 }
+        place: { x: 60, y: 570, w: 860, h: 120 }
+        enter: { at: "l4:'الخدمات'", anim: slide-l }
+
+  - id: arrive
+    at: l5
+    transition: zoom
+    elements:
+      - use: counter
+        id: minutes
+        props:
+          from: 0
+          keyframes: [{ at: "l5:'احضر'", value: {{minutes}}, dur: 1 }]
+          suffix: ' دقيقة'
+          label: 'احضر مبكرًا'
+          color: '{{accent}}'
+        place: { x: 60, y: 160, w: 960, h: 320 }
+        enter: { at: "l5:'احضر'", anim: pop }
+      - use: chip
+        id: security
+        props: { text: 'الأمن، ثم المكتب الصحيح', icon: shield, color: '{{accent}}', size: 34 }
+        place: { x: 160, y: 580, w: 760, h: 100 }
+        enter: { at: "l5:'بالأمن'", anim: pop }
+
+  - id: rules
+    at: l6
+    transition: push
+    elements:
+      - use: title
+        id: official
+        props: { text: 'راجع **الموقع الرسمي**', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 190, w: 960, h: 320 }
+        enter: { at: "l6:'المتطلبات'", anim: reveal }
+      - use: icon
+        id: globe
+        props: { name: globe, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 580, w: 160, h: 160 }
+        enter: { at: "l6:'الرسمي'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'احفظ القائمة'
+          prompt: 'اكتب في التعليقات'
+          next: 'زيارتك خطوة بخطوة'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'واحفظ'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

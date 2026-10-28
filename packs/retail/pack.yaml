@@ -1,0 +1,49 @@
+# Retail pack: click-and-collect, returns and loyalty explainers for a fictional store.
+id: retail
+name: { en: Retail, ar: التجزئة }
+description:
+  en: Explain store services in short, upbeat steps. Prices and conditions exactly as you provide them.
+  ar: اشرح خدمات المتجر بخطوات قصيرة ومبهجة. الأسعار والشروط كما تقدمها أنت بالضبط.
+theme: retail
+playbook: skills/reelforge-industry-playbooks/references/retail.md
+blueprints: [hook, process-steps, stat-reveal, bar-stats, comparison, cta]
+templates:
+  - id: click-and-collect
+    title: { en: Click and collect, ar: اطلب واستلم }
+    description:
+      en: How online orders are picked up in store, on a phone mock with a "ready" notification.
+      ar: كيف تستلم طلبك الأونلاين من الفرع، على شاشة موبايل مع إشعار "جاهز".
+    slots:
+      org: { label: Store name, max: 22, default: { en: Bluebell Market, ar: بلوبيل ماركت } }
+      store: { label: Pickup store, max: 22, default: { en: Main Street store, ar: فرع الشارع الرئيسي } }
+      hours: { label: Typical hours until ready, type: number, min: 1, max: 72, default: 2 }
+      keyword: { label: Comment keyword, max: 10, default: { en: RETURNS, ar: استرجاع } }
+      accent: { label: Accent color, type: color, default: lime }
+    files: { en: templates/click-and-collect.en.yaml, ar: templates/click-and-collect.ar.yaml }
+  - id: returns-steps
+    title: { en: Returns in 3 steps, ar: الاسترجاع في 3 خطوات }
+    description:
+      en: The return window and three return steps, with a note that some items cannot be returned.
+      ar: مدة الاسترجاع وثلاث خطوات، مع ملاحظة أن بعض المنتجات لا تُسترجع.
+    slots:
+      org: { label: Store name, max: 22, default: { en: Northside Outfitters, ar: نورث سايد أوتفيترز } }
+      days: { label: Days to start a return, type: number, min: 1, max: 365, default: 30 }
+      keyword: { label: Comment keyword, max: 10, default: { en: HELP, ar: مساعدة } }
+      accent: { label: Accent color, type: color, default: cyan }
+      next: { label: Next episode topic, max: 30, default: { en: Exchanges made easy, ar: الاستبدال بسهولة } }
+    files: { en: templates/returns-steps.en.yaml, ar: templates/returns-steps.ar.yaml }
+  - id: loyalty-program
+    title: { en: Loyalty program, ar: برنامج الولاء }
+    description:
+      en: How members earn points and unlock a reward; free to join, leave any time.
+      ar: كيف يجمع الأعضاء النقاط ويحصلون على مكافأة؛ الاشتراك مجاني ويمكن الخروج في أي وقت.
+    slots:
+      org: { label: Store name, max: 22, default: { en: Corner & Co., ar: كورنر آند كو } }
+      program: { label: Program name, max: 20, default: { en: Corner Rewards, ar: مكافآت كورنر } }
+      points: { label: Points per unit spent, type: number, min: 1, max: 100, default: 1 }
+      reward: { label: Points needed for the reward, type: number, min: 1, max: 100000, default: 500 }
+      perk: { label: The reward, max: 22, default: { en: a free coffee, ar: قهوة مجانية } }
+      keyword: { label: Comment keyword, max: 10, default: { en: JOIN, ar: اشترك } }
+      accent: { label: Accent color, type: color, default: lime }
+    files: { en: templates/loyalty-program.en.yaml, ar: templates/loyalty-program.ar.yaml }
+examples: [examples/bluebell-pickup-en, examples/bluebell-pickup-ar]

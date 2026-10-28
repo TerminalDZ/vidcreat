@@ -1,0 +1,127 @@
+# Education · study plan, Arabic (template; slots are filled by `reelforge new --pack education`).
+meta:
+  id: '{{id}}'
+  series: 'ذاكر بذكاء'
+  title: 'خطة مذاكرة هادئة'
+  episode: 1
+  preset: tiktok
+  theme: campus
+  lang: ar-EG
+  publish:
+    cover: 'فاضل {{days}} أيام؟ جرّب الخطة دي'
+    caption: 'خطة مذاكرة هادئة لآخر {{days}} أيام قبل {{exam}}: المواضيع الصعبة الأول، وجلسات قصيرة، ومراجعة على فترات.'
+    hashtags: ['#مذاكرة', '#امتحانات', '#نصائح_مذاكرة', '#studytok']
+    pinned: 'اكتب {{keyword}} وهنبعتلك checklist تطبعها.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'فاضل {{days}} أيام على {{exam}}؟ دي خطة هادئة تقدر تمشي عليها.'
+  - text: 'الأول، اكتب كل المواضيع وعلّم على الأصعب بالنسبة لك.'
+  - text: 'ذاكر المواضيع الصعبة الصبح، وانت ذهنك لسه صافي.'
+  - text: 'خلي المذاكرة حوالي {{hours}} ساعات في اليوم، مع breaks قصيرة.'
+  - text: 'راجع كل موضوع بعد يوم، وبعدين بعد تلات أيام، وبعدين بعد سبعة.'
+  - text: 'وفي الليلة اللي قبل الامتحان، ارتاح بدل ما تذاكر كل حاجة مرة واحدة.'
+  - text: 'احفظ الخطة، واكتب {{keyword}} وهنبعتلك checklist تطبعها.'
+
+chapters:
+  - { at: l1, label: '01 · الخطة' }
+  - { at: l2, label: '02 · كل يوم' }
+  - { at: l5, label: '03 · المراجعة' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: counter
+        id: days
+        props:
+          from: 0
+          keyframes: [{ at: "l1:'فاضل'+0.2", value: {{days}}, dur: 1 }]
+          suffix: ' أيام'
+          label: 'على الامتحان'
+          color: '{{accent}}'
+        place: { x: 140, y: 100, w: 800, h: 320 }
+        enter: { at: "l1:'فاضل'", anim: pop }
+      - use: title
+        id: plan
+        props: { text: 'خطة مذاكرة **هادئة**', size: 96, accent: '{{accent}}' }
+        place: { x: 60, y: 460, w: 860, h: 260 }
+        enter: { at: "l1:'هادئة'", anim: reveal }
+
+  - id: daily
+    at: l2
+    transition: push
+    elements:
+      - use: node
+        id: list
+        props: { title: 'اكتب كل المواضيع', sub: 'وعلّم على الأصعب', icon: check, color: '{{accent}}' }
+        place: { x: 60, y: 60, w: 860, h: 190 }
+        enter: { at: "l2:'اكتب'", anim: slide-l }
+      - use: node
+        id: morning
+        props: { title: 'الصعب الأول', sub: 'الصبح', icon: bolt, color: '{{accent}}' }
+        place: { x: 60, y: 290, w: 860, h: 190 }
+        enter: { at: "l3:'الصعبة'", anim: slide-l }
+      - use: node
+        id: hours
+        props: { title: '{{hours}} ساعات في اليوم', sub: 'مع استراحات قصيرة', icon: hourglass, color: '{{accent}}' }
+        place: { x: 60, y: 520, w: 860, h: 190 }
+        enter: { at: "l4:'المذاكرة'", anim: slide-l }
+
+  - id: review
+    at: l5
+    transition: zoom
+    elements:
+      - use: label
+        id: review_label
+        props: { text: 'مراجعة على فترات', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l5:'راجع'", anim: wipe }
+      - use: timeline
+        id: spaced
+        props:
+          color: '{{accent}}'
+          start: 'المذاكرة'
+          end: 'الامتحان'
+          markers:
+            - { pos: 0.15, label: 'يوم 1', at: "l5:'يوم'" }
+            - { pos: 0.45, label: 'يوم 3', at: "l5:'تلات'" }
+            - { pos: 0.9, label: 'يوم 7', at: "l5:'سبعة'" }
+        place: { x: 60, y: 280, w: 960, h: 280 }
+        enter: { at: "l5:'راجع'+0.2", anim: wipe }
+
+  - id: rest
+    at: l6
+    glow: violet
+    transition: push
+    camera: drift
+    elements:
+      - use: chip
+        id: night
+        props: { text: 'الليلة اللي قبل الامتحان', icon: clock, color: violet, size: 36 }
+        place: { x: 160, y: 160, w: 760, h: 104 }
+        enter: { at: "l6:'الليلة'", anim: pop }
+      - use: title
+        id: rest_title
+        props: { text: '**ارتاح** قبل الامتحان', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 320, w: 960, h: 280 }
+        enter: { at: "l6:'ارتاح'", anim: reveal }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'احفظ الخطة'
+          prompt: 'اكتب في الكومنتات'
+          next: 'قائمة مراجعة تطبعها'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'واكتب'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'احفظ'", anim: rise }

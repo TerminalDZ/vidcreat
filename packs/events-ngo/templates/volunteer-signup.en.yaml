@@ -1,0 +1,138 @@
+# Events & NGOs · volunteer sign-up (template; slots are filled by `reelforge new --pack events-ngo`).
+meta:
+  id: '{{id}}'
+  series: 'VOLUNTEER'
+  title: 'Give a few hours'
+  episode: 1
+  preset: tiktok
+  theme: editorial
+  lang: en-US
+  publish:
+    cover: 'Give a few hours a month'
+    caption: 'Volunteer with {{org}}: about {{hours}} hours a month, as {{role1}}, {{role2}} or {{role3}}. We train you first, and you can stop at any time.'
+    hashtags: ['#volunteer', '#community', '#nonprofit', '#givingback']
+    pinned: 'Comment {{keyword}} and we will send you the sign-up link.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'Want to help in your city? Volunteering with {{org}} takes just a few hours.'
+  - text: 'Most volunteers give about {{hours}} hours a month.'
+  - text: 'You can choose {{role1}}, {{role2}} or {{role3}}.'
+  - text: 'Sign up online, then join a short welcome session.'
+  - text: 'We train you first, so no experience is needed.'
+  - text: 'Your time makes our work possible, and you can stop at any time.'
+  - text: 'Comment {{keyword}} and we will send you the sign-up link.'
+
+chapters:
+  - { at: l1, label: '01 · YOUR TIME' }
+  - { at: l3, label: '02 · ROLES' }
+  - { at: l4, label: '03 · SIGN UP' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: org
+        props: { text: '{{org}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'help'", anim: wipe }
+      - use: title
+        id: hook_title
+        props: { text: 'Give a **few hours**', size: 112, accent: '{{accent}}' }
+        place: { x: 60, y: 250, w: 960, h: 300 }
+        enter: { at: "l1:'Volunteering'", anim: reveal }
+      - use: icon
+        id: users
+        props: { name: users, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'hours'", anim: pop }
+
+  - id: hours
+    at: l2
+    transition: zoom
+    elements:
+      - use: counter
+        id: per_month
+        props:
+          from: 0
+          keyframes: [{ at: "l2:'about'", value: {{hours}}, dur: 1 }]
+          suffix: ' h'
+          label: 'A MONTH, ON AVERAGE'
+          color: '{{accent}}'
+        place: { x: 140, y: 200, w: 800, h: 320 }
+        enter: { at: "l2:'volunteers'", anim: pop }
+
+  - id: roles
+    at: l3
+    transition: push
+    elements:
+      - use: chip
+        id: r1
+        props: { text: '{{role1}}', icon: user, color: '{{accent}}', size: 40 }
+        place: { x: 160, y: 120, w: 760, h: 120 }
+        enter: { at: "l3:'choose'", anim: pop }
+      - use: chip
+        id: r2
+        props: { text: '{{role2}}', icon: user, color: '{{accent}}', size: 40 }
+        place: { x: 160, y: 300, w: 760, h: 120 }
+        enter: { at: "l3:'choose'+0.9", anim: pop }
+      - use: chip
+        id: r3
+        props: { text: '{{role3}}', icon: user, color: '{{accent}}', size: 40 }
+        place: { x: 160, y: 480, w: 760, h: 120 }
+        enter: { at: "l3:'choose'+1.8", anim: pop }
+
+  - id: signup
+    at: l4
+    transition: push
+    elements:
+      - use: steps
+        id: join_steps
+        props:
+          color: '{{accent}}'
+          fontSize: 52
+          items:
+            - { title: 'Sign up online', text: 'Two minutes', at: "l4:'Sign'" }
+            - { title: 'Welcome session', text: 'Meet the team', at: "l4:'welcome'" }
+            - { title: 'Training', text: 'Before your first shift', at: "l5:'train'" }
+        place: { x: 160, y: 40, w: 760, h: 560 }
+        enter: { at: "l4:'Sign'", anim: fade }
+      - use: chip
+        id: noexp
+        props: { text: 'No experience needed', icon: check, color: '{{accent}}', size: 34 }
+        place: { x: 160, y: 660, w: 760, h: 100 }
+        enter: { at: "l5:'experience'", anim: spring }
+
+  - id: matters
+    at: l6
+    transition: zoom
+    elements:
+      - use: title
+        id: matters_title
+        props: { text: 'Your time **matters**', size: 112, accent: '{{accent}}' }
+        place: { x: 60, y: 200, w: 960, h: 300 }
+        enter: { at: "l6:'time'", anim: reveal }
+      - use: chip
+        id: stop
+        props: { text: 'Stop at any time', icon: unlock, color: dim, size: 34 }
+        place: { x: 240, y: 580, w: 600, h: 100 }
+        enter: { at: "l6:'stop'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'JOIN US'
+          next: 'Volunteer with {{org}}'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'send'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'Comment'", anim: rise }

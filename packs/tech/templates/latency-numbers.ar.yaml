@@ -1,0 +1,107 @@
+# Tech · latency numbers, Arabic (template; slots are filled by `reelforge new --pack tech`).
+meta:
+  id: '{{id}}'
+  series: 'SYSTEM DESIGN'
+  title: 'Latency percentiles'
+  episode: 1
+  preset: tiktok
+  theme: default
+  lang: ar-EG
+  publish:
+    cover: 'المتوسط بيكدب'
+    caption: 'الـ p50 والـ p95 والـ p99 لـ {{service}}: ليه المتوسط بيخبي أبطأ users عندك. أرقام توضيحية من الـ dashboards بتاعتنا.'
+    hashtags: ['#systemdesign', '#performance', '#backend', '#برمجة']
+    pinned: 'اكتب {{keyword}} وهنشرح إزاي تقلل الـ tail latency.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'الـ {{service}} بتاعك سريع؟ المتوسط ممكن يكدب عليك.'
+  - text: 'نص الـ requests بتخلص في {{p50}} millisecond أو أقل.'
+  - text: 'بس واحد من كل عشرين بياخد {{p95}} millisecond أو أكتر.'
+  - text: 'وأبطأ واحد في المية بيستنى {{p99}} millisecond.'
+  - text: 'الهدف بتاعنا {{target}} millisecond لكل request تقريبًا.'
+  - text: 'فراقب الـ p99، مش المتوسط، على الـ dashboards.'
+  - text: 'اكتب {{keyword}} وهنشرح إزاي تقلل الـ tail latency.'
+
+chapters:
+  - { at: l1, label: '01 · الخدعة' }
+  - { at: l2, label: '02 · الـ percentiles' }
+  - { at: l5, label: '03 · الهدف' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: node
+        id: service
+        props: { title: '{{service}}', sub: 'المتوسط يبان كويس', icon: server, color: violet, status: ok }
+        place: { x: 270, y: 80, w: 540, h: 170 }
+        enter: { at: "l1:'بتاعك'", anim: pop }
+      - use: title
+        id: hook_title
+        props: { text: 'المتوسط **بيكدب**', size: 116, accent: '{{accent}}' }
+        place: { x: 60, y: 320, w: 960, h: 280 }
+        enter: { at: "l1:'المتوسط'", anim: reveal }
+      - use: icon
+        id: bolt
+        props: { name: bolt, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'يكدب'", anim: pop }
+
+  - id: bars
+    at: l2
+    transition: push
+    elements:
+      - use: bar-chart
+        id: chart
+        props:
+          title: 'Latency (ms)'
+          color: cyan
+          accent: '{{accent}}'
+          suffix: ' ms'
+          focus: { index: 2, at: "l4:'وأبطأ'" }
+          bars:
+            - { label: 'p50', value: {{p50}} }
+            - { label: 'p95', value: {{p95}} }
+            - { label: 'p99', value: {{p99}} }
+        place: { x: 60, y: 20, w: 960, h: 520 }
+        enter: { at: "l2:'نص'", anim: fade }
+      - use: chip
+        id: p95
+        props: { text: 'p95: واحد من كل 20', icon: users, color: amber, size: 32 }
+        place: { x: 160, y: 590, w: 760, h: 96 }
+        enter: { at: "l3:'عشرين'", anim: pop }
+      - use: chip
+        id: p99
+        props: { text: 'p99: أبطأ 1%', icon: hourglass, color: red, size: 32 }
+        place: { x: 160, y: 710, w: 760, h: 96 }
+        enter: { at: "l4:'وأبطأ'", anim: pop }
+
+  - id: target
+    at: l5
+    transition: zoom
+    elements:
+      - use: stat-card
+        id: target_card
+        props: { label: 'الهدف', value: {{target}}, suffix: ' ms', icon: check, accent: '{{accent}}' }
+        place: { x: 270, y: 80, w: 540, h: 300 }
+        enter: { at: "l5:'الهدف'", anim: rise }
+      - use: title
+        id: watch
+        props: { text: 'راقب الـ **p99**', size: 108, accent: '{{accent}}' }
+        place: { x: 60, y: 410, w: 860, h: 250 }
+        enter: { at: "l6:'فراقب'", anim: reveal }
+
+  - id: outro
+    at: l7
+    glow: '{{accent}}'
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props: { next: 'Tail latency', keyword: '{{keyword}}', prompt: 'اكتب في الكومنتات', color: '{{accent}}', at: "l7:'وهنشرح'" }
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

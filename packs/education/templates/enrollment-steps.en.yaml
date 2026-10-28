@@ -1,0 +1,122 @@
+# Education · enrollment steps (template; slots are filled by `reelforge new --pack education`).
+meta:
+  id: '{{id}}'
+  series: 'ADMISSIONS'
+  title: 'How to enroll'
+  episode: 1
+  preset: tiktok
+  theme: campus
+  lang: en-US
+  publish:
+    cover: 'Enroll in 4 steps'
+    caption: 'How to enroll in {{program}} at {{org}}: account, form, submit before {{deadline}}, then wait for the email. Questions about your case? Contact the admissions office.'
+    hashtags: ['#admissions', '#education', '#college', '#enrollment']
+    pinned: 'Comment {{keyword}} and we will share the full checklist.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'Want to join {{program}} at {{org}}? Enrollment takes four steps.'
+  - text: 'First, create your account on the school website.'
+  - text: 'Then fill in the form, and upload your ID and your latest report card.'
+  - text: 'Submit everything before {{deadline}}, because late forms wait for the next round.'
+  - text: 'You will get an answer by email within about {{days}} days.'
+  - text: 'Questions about your own case? Contact the admissions office directly.'
+  - text: 'Comment {{keyword}} and we will share the full checklist.'
+
+chapters:
+  - { at: l1, label: '01 · THE PROGRAM' }
+  - { at: l2, label: '02 · FOUR STEPS' }
+  - { at: l6, label: '03 · QUESTIONS' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: org
+        props: { text: '{{org}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'Want'", anim: wipe }
+      - use: title
+        id: program
+        props: { text: '**{{program}}**', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 250, w: 960, h: 300 }
+        enter: { at: "l1:'join'", anim: reveal }
+      - use: chip
+        id: four
+        props: { text: 'Enroll in 4 steps', icon: check, color: '{{accent}}', size: 38 }
+        place: { x: 240, y: 620, w: 600, h: 104 }
+        enter: { at: "l1:'four'", anim: spring }
+
+  - id: steps
+    at: l2
+    transition: push
+    elements:
+      - use: steps
+        id: enroll_steps
+        props:
+          color: '{{accent}}'
+          fontSize: 48
+          items:
+            - { title: 'Account', text: 'On the school website', at: "l2:'account'" }
+            - { title: 'Form', text: 'ID and latest report card', at: "l3:'form'" }
+            - { title: 'Submit', text: 'Before {{deadline}}', at: "l4:'Submit'" }
+            - { title: 'Answer', text: 'By email in about {{days}} days', at: "l5:'answer'" }
+        place: { x: 160, y: 20, w: 760, h: 660 }
+        enter: { at: "l2:'First'", anim: fade }
+      - use: icon
+        id: icon_account
+        props: { name: user, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 720, w: 160, h: 160 }
+        enter: { at: "l2:'website'", anim: pop }
+        exit: { at: l3, anim: fade }
+      - use: icon
+        id: icon_form
+        props: { name: card, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 720, w: 160, h: 160 }
+        enter: { at: "l3:'upload'", anim: pop }
+        exit: { at: l4, anim: fade }
+      - use: icon
+        id: icon_deadline
+        props: { name: clock, color: amber, ring: true, pulse: true }
+        place: { x: 460, y: 720, w: 160, h: 160 }
+        enter: { at: "l4:'late'", anim: pop }
+        exit: { at: l5, anim: fade }
+      - use: icon
+        id: icon_mail
+        props: { name: mail, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 720, w: 160, h: 160 }
+        enter: { at: "l5:'email'", anim: spring }
+
+  - id: contact
+    at: l6
+    transition: zoom
+    elements:
+      - use: title
+        id: ask
+        props: { text: 'Ask **admissions**', size: 116, accent: '{{accent}}' }
+        place: { x: 60, y: 200, w: 960, h: 300 }
+        enter: { at: "l6:'Questions'", anim: reveal }
+      - use: icon
+        id: ask_icon
+        props: { name: mail, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 580, w: 160, h: 160 }
+        enter: { at: "l6:'admissions'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'FULL CHECKLIST'
+          next: 'Everything you need to enroll'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'share'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'Comment'", anim: rise }

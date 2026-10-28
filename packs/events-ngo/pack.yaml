@@ -1,0 +1,58 @@
+# Events and non-profits pack: impact, agendas and volunteering for a fictional organization.
+id: events-ngo
+name: { en: Events & non-profits, ar: الفعاليات والجمعيات }
+description:
+  en: Honest, human videos about where donations go, an event day and how to volunteer.
+  ar: فيديوهات صادقة وإنسانية عن أين تذهب التبرعات، ويوم الفعالية، وكيف تتطوع.
+theme: editorial
+playbook: skills/reelforge-industry-playbooks/references/events-ngo.md
+blueprints: [hook, stat-reveal, timeline, process-steps, quote, cta]
+templates:
+  - id: donation-impact
+    title: { en: Where donations go, ar: أين تذهب التبرعات }
+    description:
+      en: Your own yearly shares on a donut chart, explained line by line. No pressure to give.
+      ar: نسبكم السنوية على رسم دائري، مشروحة سطرًا بسطر. بدون ضغط للتبرع.
+    slots:
+      org:
+        { label: Organization, max: 24, default: { en: Open Hands Foundation, ar: مؤسسة الأيادي المفتوحة } }
+      cause: { label: Main program, max: 24, default: { en: meals for families, ar: وجبات للأسر } }
+      meals: { label: Share for the main program (%), type: number, min: 1, max: 100, default: 70 }
+      transport: { label: Share for transport and storage (%), type: number, min: 1, max: 100, default: 20 }
+      training: { label: Share for volunteers (%), type: number, min: 1, max: 100, default: 10 }
+      keyword: { label: Comment keyword, max: 10, default: { en: HELP, ar: مساعدة } }
+      accent: { label: Accent color, type: color, default: lime }
+    files: { en: templates/donation-impact.en.yaml, ar: templates/donation-impact.ar.yaml }
+  - id: event-agenda
+    title: { en: Event agenda, ar: برنامج الفعالية }
+    description:
+      en: The event day in three moments on a timeline, with access information.
+      ar: يوم الفعالية في ثلاث محطات على خط زمني، مع معلومات الوصول.
+    slots:
+      event:
+        { label: Event name, max: 24, default: { en: Greenfield Arts Festival, ar: مهرجان جرينفيلد للفنون } }
+      date: { label: Date, max: 20, default: { en: Saturday 14 June, ar: السبت 14 يونيو } }
+      t1: { label: Time 1, max: 6, default: { en: '10:00', ar: '10:00' } }
+      a1: { label: Moment 1, max: 20, default: { en: the opening, ar: الافتتاح } }
+      t2: { label: Time 2, max: 6, default: { en: '13:00', ar: '13:00' } }
+      a2: { label: Moment 2, max: 20, default: { en: open workshops, ar: ورش مفتوحة } }
+      t3: { label: Time 3, max: 6, default: { en: '19:00', ar: '19:00' } }
+      a3: { label: Moment 3, max: 20, default: { en: a live concert, ar: حفلة موسيقية } }
+      keyword: { label: Comment keyword, max: 10, default: { en: PROGRAM, ar: البرنامج } }
+      accent: { label: Accent color, type: color, default: amber }
+    files: { en: templates/event-agenda.en.yaml, ar: templates/event-agenda.ar.yaml }
+  - id: volunteer-signup
+    title: { en: Volunteer sign-up, ar: التطوع }
+    description:
+      en: How much time volunteering takes, the roles and the sign-up steps.
+      ar: كم يأخذ التطوع من وقتك، والأدوار المتاحة، وخطوات التسجيل.
+    slots:
+      org: { label: Organization, max: 24, default: { en: Riverside Charity Run, ar: سباق ريفرسايد الخيري } }
+      hours: { label: Hours per month, type: number, min: 1, max: 200, default: 4 }
+      role1: { label: Role 1, max: 18, default: { en: welcome desk, ar: الاستقبال } }
+      role2: { label: Role 2, max: 18, default: { en: water stations, ar: محطات المياه } }
+      role3: { label: Role 3, max: 18, default: { en: photography, ar: التصوير } }
+      keyword: { label: Comment keyword, max: 10, default: { en: JOIN, ar: انضم } }
+      accent: { label: Accent color, type: color, default: lime }
+    files: { en: templates/volunteer-signup.en.yaml, ar: templates/volunteer-signup.ar.yaml }
+examples: [examples/open-hands-en, examples/open-hands-ar]

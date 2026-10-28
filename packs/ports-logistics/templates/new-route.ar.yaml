@@ -1,0 +1,140 @@
+# Ports · new route, Arabic (template; slots are filled by `reelforge new --pack ports-logistics`).
+meta:
+  id: '{{id}}'
+  series: 'خدمة جديدة'
+  title: '{{org}} إلى {{dest}}'
+  episode: 1
+  preset: tiktok
+  theme: harbor
+  lang: ar-EG
+  publish:
+    cover: 'خط مباشر جديد: {{dest}}'
+    caption: 'خدمة مباشرة جديدة من {{org}} إلى {{dest}} يشغلها {{carrier}}. المواعيد ممكن تتغير، وقواعد الـ customs بتختلف من بلد لبلد، فاسأل مخلص جمركي مرخص.'
+    hashtags: ['#شحن', '#لوجستيات', '#خط_جديد', '#shipping']
+    pinned: 'اكتب {{keyword}} ونبعتلك الجدول الكامل.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'خط جديد: {{org}} بقى متوصل مباشرة بـ {{dest}}.'
+  - text: 'الخدمة يشغلها {{carrier}}، بعدد {{calls}} رحلات كل أسبوع.'
+  - text: 'مدة الـ transit حوالي {{days}} أيام، من رصيف لرصيف.'
+  - text: 'يعني transshipment أقل، وفرص أقل للتأخير.'
+  - text: 'أول رحلة مخططة يوم {{starts}}، والمواعيد لسه ممكن تتغير.'
+  - text: 'قواعد الـ customs بتختلف من بلد لبلد، فاسأل مخلص جمركي مرخص.'
+  - text: 'اكتب {{keyword}} في الكومنتات ونبعتلك الجدول الكامل.'
+
+chapters:
+  - { at: l1, label: '01 · الخط' }
+  - { at: l2, label: '02 · الخدمة' }
+  - { at: l5, label: '03 · أول رحلة' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    elements:
+      - use: label
+        id: kicker
+        props: { text: 'خط جديد', dot: true, color: '{{accent}}', align: right }
+        place: { x: 380, y: 60, w: 640, h: 60 }
+        enter: { at: "l1:'خط'", anim: wipe }
+      - use: node
+        id: origin
+        props: { title: '{{org}}', sub: 'نقطة الانطلاق', icon: globe, color: cyan }
+        place: { x: 480, y: 160, w: 540, h: 170 }
+        enter: { at: "l1:'جديد'", anim: pop }
+      - use: node
+        id: dest
+        props: { title: '{{dest}}', sub: 'الوجهة', icon: globe, color: '{{accent}}' }
+        place: { x: 60, y: 420, w: 540, h: 170 }
+        enter: { at: "l1:'متوصل'", anim: pop }
+      - use: arrow
+        id: lane
+        props:
+          from: origin.bottom
+          to: dest.right
+          route: elbow
+          color: '{{accent}}'
+          packet: { at: "l1:'مباشرة'", dur: 1.6, color: '{{accent}}' }
+        enter: { at: "l1:'متوصل'+0.2", anim: draw }
+
+  - id: service
+    at: l2
+    transition: push
+    elements:
+      - use: label
+        id: carrier
+        props: { text: '{{carrier}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l2:'الخدمة'", anim: wipe }
+      - use: stat-card
+        id: calls
+        props: { label: 'رحلات في الأسبوع', value: {{calls}}, icon: refresh, accent: '{{accent}}' }
+        place: { x: 270, y: 280, w: 540, h: 300 }
+        enter: { at: "l2:'رحلات'", anim: rise }
+
+  - id: transit
+    at: l3
+    transition: zoom
+    elements:
+      - use: counter
+        id: days
+        props:
+          from: 0
+          keyframes: [{ at: "l3:'حوالي'", value: {{days}}, dur: 1 }]
+          suffix: ' أيام'
+          label: 'مدة الرحلة · من رصيف لرصيف'
+          color: '{{accent}}'
+        place: { x: 140, y: 120, w: 800, h: 320 }
+        enter: { at: "l3:'transit'", anim: pop }
+      - use: before-after
+        id: direct
+        props:
+          before: { label: 'قبل', text: 'عبر ميناء وسيط' }
+          after: { label: 'الآن', text: 'مباشر' }
+          at: "l4:'أقل'"
+          fontSize: 40
+        place: { x: 60, y: 500, w: 860, h: 300 }
+        enter: { at: "l4:'يعني'", anim: rise }
+
+  - id: start
+    at: l5
+    transition: push
+    elements:
+      - use: label
+        id: first
+        props: { text: 'أول رحلة', dot: true, align: center }
+        place: { x: 140, y: 100, w: 800, h: 60 }
+        enter: { at: "l5:'أول'", anim: wipe }
+      - use: title
+        id: date
+        props: { text: '**{{starts}}**', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 170, w: 960, h: 260 }
+        enter: { at: "l5:'مخططة'", anim: reveal }
+      - use: chip
+        id: change
+        props: { text: 'المواعيد ممكن تتغير', icon: refresh, color: dim, size: 34 }
+        place: { x: 160, y: 470, w: 760, h: 100 }
+        enter: { at: "l5:'والمواعيد'", anim: pop }
+      - use: chip
+        id: broker
+        props: { text: 'الجمارك: اسأل مخلص مرخص', icon: shield, color: dim, size: 34 }
+        place: { x: 60, y: 630, w: 860, h: 100 }
+        enter: { at: "l6:'customs'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'الجدول الكامل'
+          prompt: 'اكتب في الكومنتات'
+          next: '{{org}} إلى {{dest}}'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'ونبعتلك'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

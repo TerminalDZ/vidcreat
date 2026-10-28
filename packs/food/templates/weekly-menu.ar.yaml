@@ -1,0 +1,124 @@
+# Food · weekly specials, Arabic (template; slots are filled by `reelforge new --pack food`).
+meta:
+  id: '{{id}}'
+  series: 'الأسبوع ده'
+  title: 'أطباق الأسبوع'
+  episode: 1
+  preset: tiktok
+  theme: bistro
+  lang: ar-EG
+  publish:
+    cover: '3 أطباق مميزة الأسبوع ده'
+    caption: 'الأسبوع ده في {{org}}: {{dish1}} يوم {{day1}}، و{{dish2}} يوم {{day2}}، و{{dish3}} يوم {{day3}}. لحد ما الكمية تخلص، واسأل الفريق عن مسببات الحساسية.'
+    hashtags: ['#أطباق_الأسبوع', '#أكل', '#مطاعم', '#منيو']
+    pinned: 'اكتب {{keyword}} ويوصلك المنيو كل أسبوع.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'إيه اللي بيتطبخ في {{org}} الأسبوع ده؟ عندنا تلات أطباق مميزة.'
+  - text: 'نبدأ يوم {{day1}}، وبنقدم {{dish1}}.'
+  - text: 'في نص الأسبوع، يوم {{day2}}، جرّب {{dish2}}.'
+  - text: 'ويوم {{day3}}، الشيف بيطبخ {{dish3}}.'
+  - text: 'الأطباق المميزة موجودة لحد ما الكمية تخلص، فتعالى بدري.'
+  - text: 'واسأل الفريق عن مسببات الحساسية والمكونات.'
+  - text: 'اكتب {{keyword}} ويوصلك المنيو كل أسبوع.'
+
+chapters:
+  - { at: l1, label: '01 · الأسبوع ده' }
+  - { at: l2, label: '02 · الأطباق' }
+  - { at: l5, label: '03 · خلي بالك' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: org
+        props: { text: '{{org}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'إيه'", anim: wipe }
+      - use: title
+        id: hook_title
+        props: { text: 'أطباق **الأسبوع**', size: 108, accent: '{{accent}}' }
+        place: { x: 60, y: 240, w: 960, h: 320 }
+        enter: { at: "l1:'بيتطبخ'", anim: reveal }
+      - use: icon
+        id: fire
+        props: { name: fire, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'تلات'", anim: pop }
+
+  - id: specials
+    at: l2
+    transition: push
+    elements:
+      - use: timeline
+        id: week
+        props:
+          color: '{{accent}}'
+          markers:
+            - { pos: 0.12, label: '{{day1}}', at: "l2:'نبدأ'" }
+            - { pos: 0.5, label: '{{day2}}', at: "l3:'نص'" }
+            - { pos: 0.88, label: '{{day3}}', at: "l4:'الشيف'" }
+          cursor:
+            - { at: "l2:'نبدأ'", pos: 0.12, dur: 0.6 }
+            - { at: "l3:'نص'", pos: 0.5, dur: 0.8 }
+            - { at: "l4:'الشيف'", pos: 0.88, dur: 0.8 }
+        place: { x: 60, y: 120, w: 960, h: 260 }
+        enter: { at: "l2:'نبدأ'", anim: wipe }
+      - use: chip
+        id: dish1
+        props: { text: '{{dish1}}', icon: fire, color: '{{accent}}', size: 42, variant: solid }
+        place: { x: 160, y: 480, w: 760, h: 120 }
+        enter: { at: "l2:'وبنقدم'", anim: pop }
+        exit: { at: l3, anim: fade }
+      - use: chip
+        id: dish2
+        props: { text: '{{dish2}}', icon: fire, color: '{{accent}}', size: 42, variant: solid }
+        place: { x: 160, y: 480, w: 760, h: 120 }
+        enter: { at: "l3:'جرّب'", anim: pop }
+        exit: { at: l4, anim: fade }
+      - use: chip
+        id: dish3
+        props: { text: '{{dish3}}', icon: fire, color: '{{accent}}', size: 42, variant: solid }
+        place: { x: 160, y: 480, w: 760, h: 120 }
+        enter: { at: "l4:'بيطبخ'", anim: pop }
+
+  - id: notes
+    at: l5
+    transition: zoom
+    elements:
+      - use: title
+        id: last
+        props: { text: 'لحد ما **الكمية تخلص**', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 170, w: 960, h: 300 }
+        enter: { at: "l5:'الأطباق'", anim: reveal }
+      - use: chip
+        id: early
+        props: { text: 'تعالى بدري', icon: clock, color: '{{accent}}', size: 38 }
+        place: { x: 290, y: 500, w: 500, h: 100 }
+        enter: { at: "l5:'بدري'", anim: spring }
+      - use: chip
+        id: allergens
+        props: { text: 'اسأل عن مسببات الحساسية', icon: warn, color: dim, size: 32 }
+        place: { x: 120, y: 660, w: 800, h: 100 }
+        enter: { at: "l6:'الحساسية'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'كل أسبوع'
+          prompt: 'اكتب في الكومنتات'
+          next: 'منيو الأسبوع الجاي'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'ويوصلك'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

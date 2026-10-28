@@ -1,0 +1,60 @@
+# Real estate pack: property tours and buyer guides for a fictional agency. No price promises or advice.
+id: real-estate
+name: { en: Real estate, ar: العقارات }
+description:
+  en: Property tours, neighborhood guides and buyer steps for an agency or developer.
+  ar: جولات في العقارات وأدلة للأحياء وخطوات الشراء لوكالة أو مطور عقاري.
+theme: estate
+playbook: skills/reelforge-industry-playbooks/references/real-estate.md
+blueprints: [hook, process-steps, stat-reveal, comparison, before-after, timeline, cta]
+templates:
+  - id: property-tour
+    title: { en: Property tour, ar: جولة في عقار }
+    description:
+      en: A quick tour of one home with its key numbers, a standout detail, the area and a viewing call.
+      ar: جولة سريعة في منزل بأرقامه الأساسية وأبرز تفاصيله والمنطقة ودعوة للمعاينة.
+    slots:
+      org: { label: Agency name, max: 24, default: { en: Cedar Homes, ar: سيدار هومز } }
+      place: { label: Property name, max: 22, default: { en: Maple Court, ar: ميبل كورت } }
+      area: { label: Neighborhood, max: 22, default: { en: Oakridge, ar: حي أوكريدج } }
+      rooms: { label: Bedrooms, type: number, min: 0, max: 20, default: 3 }
+      size: { label: Living space (m²), type: number, min: 10, max: 2000, default: 120 }
+      feature: { label: Standout detail, max: 26, default: { en: sunny balcony, ar: الشرفة المشمسة } }
+      price: { label: Price (as you want it shown), max: 22, default: { en: on request, ar: عند الطلب } }
+      keyword: { label: Comment keyword, max: 10, default: { en: TOUR, ar: معاينة } }
+      accent: { label: Accent color, type: color, default: amber }
+    files: { en: templates/property-tour.en.yaml, ar: templates/property-tour.ar.yaml }
+  - id: neighborhood-guide
+    title: { en: Neighborhood guide, ar: دليل الحي }
+    description:
+      en: What daily life looks like in one area, with three places on a simple route and the commute time.
+      ar: كيف تبدو الحياة اليومية في منطقة واحدة، مع ثلاثة أماكن على مسار بسيط ووقت الوصول للمركز.
+    slots:
+      org: { label: Agency name, max: 24, default: { en: Cedar Homes, ar: سيدار هومز } }
+      area: { label: Neighborhood, max: 22, default: { en: Oakridge, ar: حي أوكريدج } }
+      cafe: { label: A café or market, max: 18, default: { en: Juniper Café, ar: مقهى جونيبر } }
+      school: { label: A school, max: 18, default: { en: Elm Street School, ar: مدرسة شارع الدردار } }
+      park: { label: A park, max: 18, default: { en: Riverside Park, ar: حديقة النهر } }
+      minutes: { label: Minutes to the center, type: number, min: 1, max: 180, default: 15 }
+      keyword: { label: Comment keyword, max: 10, default: { en: HOMES, ar: بيوت } }
+      accent: { label: Accent color, type: color, default: lime }
+    files: { en: templates/neighborhood-guide.en.yaml, ar: templates/neighborhood-guide.ar.yaml }
+  - id: buying-steps
+    title: { en: Buying steps, ar: خطوات الشراء }
+    description:
+      en: The five steps of buying a first home, with a typical time from offer to keys.
+      ar: الخطوات الخمس لشراء أول منزل، مع المدة المعتادة من العرض حتى استلام المفاتيح.
+    slots:
+      org: { label: Agency name, max: 24, default: { en: Cedar Homes, ar: سيدار هومز } }
+      city: { label: City, max: 20, default: { en: Harbor City, ar: مدينة الميناء } }
+      weeks: { label: Typical weeks from offer to keys, type: number, min: 1, max: 104, default: 8 }
+      keyword: { label: Comment keyword, max: 10, default: { en: KEYS, ar: مفاتيح } }
+      next:
+        {
+          label: Next episode topic,
+          max: 30,
+          default: { en: The full buying checklist, ar: قائمة الشراء الكاملة },
+        }
+      accent: { label: Accent color, type: color, default: amber }
+    files: { en: templates/buying-steps.en.yaml, ar: templates/buying-steps.ar.yaml }
+examples: [examples/maple-court-en, examples/maple-court-ar]

@@ -1,0 +1,112 @@
+# Manufacturing · downtime causes, Arabic (template; slots are filled by `reelforge new --pack manufacturing`).
+meta:
+  id: '{{id}}'
+  series: 'أداء الخط'
+  title: 'وقت الخط بيروح فين'
+  episode: 1
+  preset: tiktok
+  theme: industrial
+  lang: ar-EG
+  publish:
+    cover: 'وقت الخط بيروح فين؟'
+    caption: 'أكبر أسباب التوقف في {{plant}} خلال شهر: {{c1}}، و{{c2}}، و{{c3}}. أرقام توضيحية من بياناتنا.'
+    hashtags: ['#تصنيع', '#lean', '#oee', '#تحسين_مستمر']
+    pinned: 'اكتب {{keyword}} للجزء التاني عن التوقفات الصغيرة.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'خط الإنتاج بيضيّع أغلب وقته فين؟'
+  - text: 'في {{plant}}، قسنا وقت التوقف لمدة شهر كامل.'
+  - text: 'أكبر سبب كان {{c1}}، وبعده {{c2}}، وبعده {{c3}}.'
+  - text: 'دي أرقام توضيحية من بياناتنا، بالساعات الضايعة.'
+  - text: 'والحل لأكبر سبب: {{fix}}.'
+  - text: 'تغييرات صغيرة زي دي بتفرق جدًا على مدار السنة.'
+  - text: 'اكتب {{keyword}} للجزء التاني عن التوقفات الصغيرة.'
+
+chapters:
+  - { at: l1, label: '01 · السؤال' }
+  - { at: l3, label: '02 · الأسباب' }
+  - { at: l5, label: '03 · الحل' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: title
+        id: hook_title
+        props: { text: 'الوقت **بيروح فين**؟', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 150, w: 960, h: 340 }
+        enter: { at: "l1:'الإنتاج'", anim: reveal }
+      - use: icon
+        id: clock
+        props: { name: hourglass, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 520, w: 160, h: 160 }
+        enter: { at: "l1:'وقته'", anim: pop }
+      - use: chip
+        id: month
+        props: { text: 'بيانات شهر كامل', icon: db, color: dim, size: 30 }
+        place: { x: 60, y: 740, w: 860, h: 96 }
+        enter: { at: "l2:'قسنا'", anim: fade }
+
+  - id: causes
+    at: l3
+    transition: push
+    elements:
+      - use: ranking
+        id: rank
+        props:
+          order: top-down
+          color: cyan
+          accent: '{{accent}}'
+          suffix: ' h'
+          items:
+            - { label: '{{c1}}', value: {{v1}} }
+            - { label: '{{c2}}', value: {{v2}} }
+            - { label: '{{c3}}', value: {{v3}} }
+        place: { x: 60, y: 60, w: 960, h: 480 }
+        enter: { at: "l3:'أكبر'", anim: fade }
+      - use: label
+        id: example
+        props: { text: 'أرقام توضيحية · ساعات ضايعة', dot: true, align: center }
+        place: { x: 60, y: 620, w: 860, h: 60 }
+        enter: { at: "l4:'توضيحية'", anim: wipe }
+
+  - id: fix
+    at: l5
+    glow: lime
+    transition: zoom
+    elements:
+      - use: label
+        id: fix_label
+        props: { text: 'الحل', dot: true, align: center }
+        place: { x: 140, y: 120, w: 800, h: 60 }
+        enter: { at: "l5:'والحل'", anim: wipe }
+      - use: title
+        id: fix_title
+        props: { text: '**{{fix}}**', size: 80, accent: '{{accent}}' }
+        place: { x: 60, y: 200, w: 960, h: 340 }
+        enter: { at: "l5:'سبب'", anim: reveal }
+      - use: chip
+        id: adds
+        props: { text: 'التغييرات الصغيرة بتفرق', icon: refresh, color: lime, size: 36 }
+        place: { x: 160, y: 600, w: 760, h: 104 }
+        enter: { at: "l6:'تغييرات'", anim: spring }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'الجزء التاني'
+          prompt: 'اكتب في الكومنتات'
+          next: 'التوقفات الصغيرة'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'للجزء'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

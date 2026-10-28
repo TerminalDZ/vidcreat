@@ -1,0 +1,134 @@
+# Government · renew a document online (template; slots are filled by `reelforge new --pack government`).
+meta:
+  id: '{{id}}'
+  series: 'PUBLIC SERVICES'
+  title: 'Renew online'
+  episode: 1
+  preset: tiktok
+  theme: civic
+  lang: en-US
+  publish:
+    cover: 'Renew your {{doc}} online'
+    caption: 'How to renew your {{doc}} online with {{city}} in three steps. Rules and fees can differ for your case: check the official website.'
+    hashtags: ['#publicservices', '#howto', '#citygov']
+    pinned: 'Comment {{keyword}} for our guide on booking an appointment.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'Renewing your {{doc}}? You can do it online in three steps.'
+  - text: 'First, sign in to the {{city}} portal with your account.'
+  - text: 'Then upload a recent photo and a scan of your current card.'
+  - text: 'Pay the fee online, and keep your receipt number.'
+  - text: 'Processing usually takes about {{days}} working days, and you can track it online.'
+  - text: 'Rules and fees can differ for your case, so check the official website.'
+  - text: 'Comment {{keyword}} for our guide on booking an appointment.'
+
+chapters:
+  - { at: l1, label: '01 · ONLINE' }
+  - { at: l2, label: '02 · THREE STEPS' }
+  - { at: l5, label: '03 · AFTER' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    elements:
+      - use: label
+        id: city
+        props: { text: '{{city}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'Renewing'", anim: wipe }
+      - use: title
+        id: hook_title
+        props: { text: 'Renew your **{{doc}}**', size: 88, accent: '{{accent}}' }
+        place: { x: 60, y: 240, w: 960, h: 340 }
+        enter: { at: 'l1+0.6', anim: reveal }
+      - use: chip
+        id: three
+        props: { text: 'Online, in 3 steps', icon: globe, color: '{{accent}}', size: 38 }
+        place: { x: 190, y: 640, w: 700, h: 104 }
+        enter: { at: "l1:'online'", anim: pop }
+
+  - id: steps
+    at: l2
+    transition: push
+    elements:
+      - use: steps
+        id: renew_steps
+        props:
+          color: '{{accent}}'
+          fontSize: 52
+          items:
+            - { title: 'Sign in', text: 'The city portal', at: "l2:'sign'" }
+            - { title: 'Upload', text: 'Photo and current card', at: "l3:'upload'" }
+            - { title: 'Pay the fee', text: 'Keep the receipt number', at: "l4:'Pay'" }
+        place: { x: 160, y: 40, w: 760, h: 600 }
+        enter: { at: "l2:'First'", anim: fade }
+      - use: icon
+        id: icon_sign
+        props: { name: user, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 700, w: 160, h: 160 }
+        enter: { at: "l2:'account'", anim: pop }
+        exit: { at: l3, anim: fade }
+      - use: icon
+        id: icon_upload
+        props: { name: cloud, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 700, w: 160, h: 160 }
+        enter: { at: "l3:'photo'", anim: pop }
+        exit: { at: l4, anim: fade }
+      - use: icon
+        id: icon_pay
+        props: { name: card, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 700, w: 160, h: 160 }
+        enter: { at: "l4:'receipt'", anim: pop }
+
+  - id: processing
+    at: l5
+    transition: zoom
+    elements:
+      - use: counter
+        id: days
+        props:
+          from: 0
+          keyframes: [{ at: "l5:'about'", value: {{days}}, dur: 1 }]
+          suffix: ' days'
+          label: 'TYPICAL PROCESSING · WORKING DAYS'
+          color: '{{accent}}'
+        place: { x: 140, y: 160, w: 800, h: 320 }
+        enter: { at: "l5:'Processing'", anim: pop }
+      - use: chip
+        id: track
+        props: { text: 'Track it online', icon: refresh, color: '{{accent}}', size: 38 }
+        place: { x: 240, y: 580, w: 600, h: 104 }
+        enter: { at: "l5:'track'", anim: pop }
+
+  - id: rules
+    at: l6
+    transition: push
+    elements:
+      - use: title
+        id: official
+        props: { text: 'Check the **official website**', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 200, w: 960, h: 300 }
+        enter: { at: "l6:'Rules'", anim: reveal }
+      - use: icon
+        id: globe
+        props: { name: globe, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 580, w: 160, h: 160 }
+        enter: { at: "l6:'official'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'COMING UP'
+          next: 'Booking an appointment'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'guide'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'Comment'", anim: rise }

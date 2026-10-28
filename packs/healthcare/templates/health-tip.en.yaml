@@ -1,0 +1,120 @@
+# Healthcare · health awareness tip (template; slots are filled by `reelforge new --pack healthcare`).
+meta:
+  id: '{{id}}'
+  series: 'HEALTH TIPS'
+  title: '{{topic}}'
+  episode: {{num}}
+  preset: tiktok
+  theme: clinical
+  lang: en-US
+  publish:
+    cover: '{{topic}}: 3 easy reminders'
+    caption: 'Three easy reminders about {{topic}} from the team at {{org}}. General awareness, not medical advice: talk to your doctor about your own health.'
+    hashtags: ['#healthtips', '#wellbeing', '#healthcare']
+    pinned: 'Save this tip, and talk to your doctor about what is right for you.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'One small habit can make a real difference. Today: {{topic}}.'
+  - text: 'This is general awareness from the team at {{org}}, not a diagnosis.'
+  - text: 'Here is the first easy reminder: {{tip1}}.'
+  - text: 'The second one is just as simple: {{tip2}}.'
+  - text: 'And the third, which is easy to forget: {{tip3}}.'
+  - text: 'Everyone is different, so what works for you may be different too.'
+  - text: 'Questions about your own health? Talk to your doctor or care team.'
+  - text: 'Save this tip, and follow us for the next one.'
+
+chapters:
+  - { at: l1, label: '01 · THE HABIT' }
+  - { at: l3, label: '02 · REMINDERS' }
+  - { at: l6, label: '03 · YOUR HEALTH' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: kicker
+        props: { text: 'Health tip #{{num}}', dot: true, align: center }
+        place: { x: 140, y: 130, w: 800, h: 60 }
+        enter: { at: "l1:'One'", anim: wipe }
+      - use: icon
+        id: hook_icon
+        props: { name: check, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 220, w: 160, h: 160 }
+        enter: { at: "l1:'habit'", anim: pop }
+      - use: title
+        id: topic
+        props: { text: '**{{topic}}**', size: 90, accent: '{{accent}}' }
+        place: { x: 60, y: 400, w: 960, h: 220 }
+        enter: { at: "l1:'Today'", anim: reveal }
+      - use: chip
+        id: aware
+        props: { text: 'General awareness, not a diagnosis', icon: shield, color: dim, size: 30 }
+        place: { x: 60, y: 740, w: 860, h: 96 }
+        enter: { at: "l2:'general'", anim: fade }
+
+  - id: tips
+    at: l3
+    transition: push
+    elements:
+      - use: node
+        id: tip1
+        props: { title: '{{tip1}}', sub: 'Reminder 1', icon: check, color: '{{accent}}', status: ok }
+        place: { x: 60, y: 60, w: 860, h: 200 }
+        enter: { at: "l3:'first'", anim: slide-r }
+      - use: node
+        id: tip2
+        props: { title: '{{tip2}}', sub: 'Reminder 2', icon: check, color: '{{accent}}', status: ok }
+        place: { x: 60, y: 300, w: 860, h: 200 }
+        enter: { at: "l4:'second'", anim: slide-r }
+      - use: node
+        id: tip3
+        props: { title: '{{tip3}}', sub: 'Reminder 3', icon: check, color: '{{accent}}', status: ok }
+        place: { x: 60, y: 540, w: 860, h: 200 }
+        enter: { at: "l5:'third'", anim: slide-r }
+
+  - id: different
+    at: l6
+    transition: zoom
+    camera: drift
+    elements:
+      - use: title
+        id: different_title
+        props: { text: 'Everyone is **different**', size: 112, accent: '{{accent}}' }
+        place: { x: 60, y: 220, w: 960, h: 300 }
+        enter: { at: "l6:'Everyone'", anim: reveal }
+      - use: icon
+        id: users
+        props: { name: users, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 600, w: 160, h: 160 }
+        enter: { at: "l6:'works'", anim: pop }
+
+  - id: ask
+    at: l7
+    glow: lime
+    transition: push
+    elements:
+      - use: title
+        id: ask_title
+        props: { text: 'Talk to your **doctor**', size: 116, accent: '{{accent}}' }
+        place: { x: 60, y: 220, w: 960, h: 300 }
+        enter: { at: "l7:'Questions'", anim: reveal }
+      - use: chip
+        id: disclaimer
+        props: { text: 'General information, not medical advice', icon: shield, color: dim, size: 30 }
+        place: { x: 60, y: 580, w: 860, h: 96 }
+        enter: { at: "l7:'Talk'", anim: pop }
+
+  - id: outro
+    at: l8
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props: { label: 'SAVE THIS TIP', next: 'Next health tip soon', color: '{{accent}}' }
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l8:'Save'", anim: rise }

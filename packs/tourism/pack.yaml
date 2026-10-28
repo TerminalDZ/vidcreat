@@ -1,0 +1,59 @@
+# Tourism pack: itineraries, getting around and seasons for a fictional destination.
+id: tourism
+name: { en: Tourism & travel, ar: السياحة والسفر }
+description:
+  en: Short travel guides with practical tips. Times, prices and rules only as you provide them.
+  ar: أدلة سفر قصيرة بنصائح عملية. المواعيد والأسعار والقواعد كما تقدمها أنت فقط.
+theme: voyage
+playbook: skills/reelforge-industry-playbooks/references/tourism.md
+blueprints: [hook, timeline, comparison, bar-stats, process-steps, cta]
+templates:
+  - id: itinerary-3-days
+    title: { en: 3-day itinerary, ar: برنامج 3 أيام }
+    description:
+      en: A simple three-day plan on a timeline, with two practical tips.
+      ar: خطة بسيطة لثلاثة أيام على خط زمني، مع نصيحتين عمليتين.
+    slots:
+      org: { label: Your brand, max: 22, default: { en: Voyager Tours, ar: فوياجر تورز } }
+      place: { label: Destination, max: 18, default: { en: Azur Bay, ar: خليج أزور } }
+      day1: { label: Day 1, max: 24, default: { en: the old harbor, ar: الميناء القديم } }
+      day2: { label: Day 2, max: 24, default: { en: a boat trip, ar: رحلة بالمركب } }
+      day3: { label: Day 3, max: 24, default: { en: the hill fort, ar: قلعة التل } }
+      keyword: { label: Comment keyword, max: 10, default: { en: FOOD, ar: أكل } }
+      accent: { label: Accent color, type: color, default: amber }
+    files: { en: templates/itinerary-3-days.en.yaml, ar: templates/itinerary-3-days.ar.yaml }
+  - id: airport-to-town
+    title: { en: Airport to town, ar: من المطار للمدينة }
+    description:
+      en: Train, bus or taxi from the airport, compared side by side, with a ticket tip.
+      ar: القطار أو الأتوبيس أو التاكسي من المطار، مقارنة جنبًا إلى جنب، مع نصيحة للتذاكر.
+    slots:
+      airport: { label: Airport, max: 16, default: { en: Azur Airport, ar: مطار أزور } }
+      town: { label: Destination in town, max: 16, default: { en: the old town, ar: البلد القديمة } }
+      train_min: { label: Train minutes, type: number, min: 1, max: 300, default: 25 }
+      bus_min: { label: Bus minutes, type: number, min: 1, max: 300, default: 40 }
+      keyword: { label: Comment keyword, max: 10, default: { en: GUIDE, ar: دليل } }
+      accent: { label: Accent color, type: color, default: cyan }
+    files: { en: templates/airport-to-town.en.yaml, ar: templates/airport-to-town.ar.yaml }
+  - id: best-time-to-visit
+    title: { en: Best time to visit, ar: أفضل وقت للزيارة }
+    description:
+      en: Your numbers per season on a bar chart, and the sweet spot for most visitors.
+      ar: أرقامك لكل موسم على رسم أعمدة، وأنسب وقت لمعظم الزوار.
+    slots:
+      place: { label: Destination, max: 18, default: { en: Azur Bay, ar: خليج أزور } }
+      metric:
+        {
+          label: What the numbers show,
+          max: 26,
+          default: { en: Average °C (example), ar: متوسط الحرارة (مثال) },
+        }
+      spring: { label: Spring value, type: number, min: -50, max: 9999, default: 22 }
+      summer: { label: Summer value, type: number, min: -50, max: 9999, default: 31 }
+      autumn: { label: Autumn value, type: number, min: -50, max: 9999, default: 24 }
+      winter: { label: Winter value, type: number, min: -50, max: 9999, default: 15 }
+      best: { label: Best period, max: 18, default: { en: April to June, ar: أبريل إلى يونيو } }
+      keyword: { label: Comment keyword, max: 10, default: { en: PACK, ar: شنطة } }
+      accent: { label: Accent color, type: color, default: amber }
+    files: { en: templates/best-time-to-visit.en.yaml, ar: templates/best-time-to-visit.ar.yaml }
+examples: [examples/azur-bay-en, examples/azur-bay-ar]

@@ -1,0 +1,123 @@
+# Events & NGOs · event agenda (template; slots are filled by `reelforge new --pack events-ngo`).
+meta:
+  id: '{{id}}'
+  series: 'EVENT GUIDE'
+  title: '{{event}}'
+  episode: 1
+  preset: tiktok
+  theme: editorial
+  lang: en-US
+  publish:
+    cover: '{{event}}: the day'
+    caption: '{{event}} on {{date}}: {{a1}} at {{t1}}, {{a2}} at {{t2}} and {{a3}} at {{t3}}. Step-free venue with a quiet room.'
+    hashtags: ['#events', '#festival', '#community', '#agenda']
+    pinned: 'Comment {{keyword}} and we will send you the full program.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'Coming to {{event}}? Here is the whole day in thirty seconds.'
+  - text: 'It all happens on {{date}}, and the doors open early.'
+  - text: 'The morning starts at {{t1}} with {{a1}}.'
+  - text: 'After lunch, at {{t2}}, it is time for {{a2}}.'
+  - text: 'And at {{t3}}, the evening ends with {{a3}}.'
+  - text: 'The venue is step-free, and there is a quiet room if you need a break.'
+  - text: 'Comment {{keyword}} and we will send you the full program.'
+
+chapters:
+  - { at: l1, label: '01 · THE EVENT' }
+  - { at: l3, label: '02 · THE DAY' }
+  - { at: l6, label: '03 · ACCESS' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: kicker
+        props: { text: 'Event guide', dot: true, align: center }
+        place: { x: 140, y: 140, w: 800, h: 60 }
+        enter: { at: "l1:'Coming'", anim: wipe }
+      - use: title
+        id: event
+        props: { text: '**{{event}}**', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 220, w: 960, h: 320 }
+        enter: { at: 'l1+0.6', anim: reveal }
+      - use: chip
+        id: date
+        props: { text: '{{date}}', icon: clock, color: '{{accent}}', size: 38, variant: solid }
+        place: { x: 190, y: 620, w: 700, h: 104 }
+        enter: { at: "l2:'happens'", anim: spring }
+
+  - id: day
+    at: l3
+    transition: push
+    elements:
+      - use: timeline
+        id: agenda
+        props:
+          color: '{{accent}}'
+          markers:
+            - { pos: 0.15, label: '{{t1}}', at: "l3:'morning'" }
+            - { pos: 0.5, label: '{{t2}}', at: "l4:'lunch'" }
+            - { pos: 0.85, label: '{{t3}}', at: "l5:'evening'" }
+          cursor:
+            - { at: "l3:'morning'", pos: 0.15, dur: 0.6 }
+            - { at: "l4:'lunch'", pos: 0.5, dur: 0.8 }
+            - { at: "l5:'evening'", pos: 0.85, dur: 0.8 }
+        place: { x: 60, y: 120, w: 960, h: 260 }
+        enter: { at: "l3:'morning'", anim: wipe }
+      - use: chip
+        id: m1
+        props: { text: '{{a1}}', icon: bell, color: '{{accent}}', size: 42, variant: solid }
+        place: { x: 160, y: 470, w: 760, h: 120 }
+        enter: { at: "l3:'starts'", anim: pop }
+        exit: { at: l4, anim: fade }
+      - use: chip
+        id: m2
+        props: { text: '{{a2}}', icon: users, color: '{{accent}}', size: 42, variant: solid }
+        place: { x: 160, y: 470, w: 760, h: 120 }
+        enter: { at: "l4:'time'", anim: pop }
+        exit: { at: l5, anim: fade }
+      - use: chip
+        id: m3
+        props: { text: '{{a3}}', icon: bolt, color: '{{accent}}', size: 42, variant: solid }
+        place: { x: 160, y: 470, w: 760, h: 120 }
+        enter: { at: "l5:'ends'", anim: pop }
+
+  - id: access
+    at: l6
+    transition: zoom
+    elements:
+      - use: chip
+        id: stepfree
+        props: { text: 'Step-free', icon: check, color: '{{accent}}', size: 36 }
+        place: { x: 60, y: 140, w: 440, h: 104 }
+        enter: { at: "l6:'venue'", anim: pop }
+      - use: chip
+        id: quiet
+        props: { text: 'Quiet room', icon: bubble, color: '{{accent}}', size: 36 }
+        place: { x: 540, y: 140, w: 440, h: 104 }
+        enter: { at: "l6:'quiet'", anim: pop }
+      - use: title
+        id: welcome
+        props: { text: 'Everyone is **welcome**', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 300, w: 960, h: 300 }
+        enter: { at: "l6:'break'", anim: reveal }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'FULL PROGRAM'
+          next: '{{event}}'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'send'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'Comment'", anim: rise }

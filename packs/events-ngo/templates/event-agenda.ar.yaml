@@ -1,0 +1,124 @@
+# Events & NGOs · event agenda, Arabic (template; slots are filled by `reelforge new --pack events-ngo`).
+meta:
+  id: '{{id}}'
+  series: 'دليل الفعالية'
+  title: '{{event}}'
+  episode: 1
+  preset: tiktok
+  theme: editorial
+  lang: ar-EG
+  publish:
+    cover: '{{event}}: اليوم كله'
+    caption: '{{event}} يوم {{date}}: {{a1}} الساعة {{t1}}، و{{a2}} الساعة {{t2}}، و{{a3}} الساعة {{t3}}. المكان بدون سلالم وفيه غرفة هادية.'
+    hashtags: ['#فعاليات', '#مهرجان', '#مجتمع', '#برنامج']
+    pinned: 'اكتب {{keyword}} ونبعتلك البرنامج الكامل.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'جاي {{event}}؟ دي اليوم كله في تلاتين ثانية.'
+  - text: 'كل ده يوم {{date}}، والأبواب بتفتح بدري.'
+  - text: 'الصبح بيبدأ الساعة {{t1}} مع {{a1}}.'
+  - text: 'بعد الغدا، الساعة {{t2}}، وقت {{a2}}.'
+  - text: 'والساعة {{t3}}، الليلة بتخلص مع {{a3}}.'
+  - text: 'المكان من غير سلالم، وفيه غرفة هادية لو محتاج بريك.'
+  - text: 'اكتب {{keyword}} ونبعتلك البرنامج الكامل.'
+
+chapters:
+  - { at: l1, label: '01 · الفعالية' }
+  - { at: l3, label: '02 · اليوم' }
+  - { at: l6, label: '03 · الوصول' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: kicker
+        props: { text: 'دليل الفعالية', dot: true, align: center }
+        place: { x: 140, y: 140, w: 800, h: 60 }
+        enter: { at: "l1:'جاي'", anim: wipe }
+      - use: title
+        id: event
+        props: { text: '**{{event}}**', size: 96, accent: '{{accent}}' }
+        place: { x: 60, y: 210, w: 960, h: 340 }
+        enter: { at: 'l1+0.6', anim: reveal }
+      - use: chip
+        id: date
+        props: { text: '{{date}}', icon: clock, color: '{{accent}}', size: 38, variant: solid }
+        place: { x: 190, y: 620, w: 700, h: 104 }
+        enter: { at: "l2:'يوم'", anim: spring }
+
+  - id: day
+    at: l3
+    transition: push
+    elements:
+      - use: timeline
+        id: agenda
+        props:
+          color: '{{accent}}'
+          markers:
+            - { pos: 0.15, label: '{{t1}}', at: "l3:'الصبح'" }
+            - { pos: 0.5, label: '{{t2}}', at: "l4:'الغدا'" }
+            - { pos: 0.85, label: '{{t3}}', at: "l5:'الليلة'" }
+          cursor:
+            - { at: "l3:'الصبح'", pos: 0.15, dur: 0.6 }
+            - { at: "l4:'الغدا'", pos: 0.5, dur: 0.8 }
+            - { at: "l5:'الليلة'", pos: 0.85, dur: 0.8 }
+        place: { x: 60, y: 120, w: 960, h: 260 }
+        enter: { at: "l3:'الصبح'", anim: wipe }
+      - use: chip
+        id: m1
+        props: { text: '{{a1}}', icon: bell, color: '{{accent}}', size: 42, variant: solid }
+        place: { x: 160, y: 470, w: 760, h: 120 }
+        enter: { at: "l3:'بيبدأ'", anim: pop }
+        exit: { at: l4, anim: fade }
+      - use: chip
+        id: m2
+        props: { text: '{{a2}}', icon: users, color: '{{accent}}', size: 42, variant: solid }
+        place: { x: 160, y: 470, w: 760, h: 120 }
+        enter: { at: "l4:'وقت'", anim: pop }
+        exit: { at: l5, anim: fade }
+      - use: chip
+        id: m3
+        props: { text: '{{a3}}', icon: bolt, color: '{{accent}}', size: 42, variant: solid }
+        place: { x: 160, y: 470, w: 760, h: 120 }
+        enter: { at: "l5:'بتخلص'", anim: pop }
+
+  - id: access
+    at: l6
+    transition: zoom
+    elements:
+      - use: chip
+        id: stepfree
+        props: { text: 'من غير سلالم', icon: check, color: '{{accent}}', size: 36 }
+        place: { x: 540, y: 140, w: 440, h: 104 }
+        enter: { at: "l6:'المكان'", anim: pop }
+      - use: chip
+        id: quiet
+        props: { text: 'غرفة هادية', icon: bubble, color: '{{accent}}', size: 36 }
+        place: { x: 60, y: 140, w: 440, h: 104 }
+        enter: { at: "l6:'هادية'", anim: pop }
+      - use: title
+        id: welcome
+        props: { text: 'الكل **مُرحّب بيه**', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 290, w: 960, h: 320 }
+        enter: { at: "l6:'بريك'", anim: reveal }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'البرنامج الكامل'
+          prompt: 'اكتب في الكومنتات'
+          next: '{{event}}'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'ونبعتلك'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

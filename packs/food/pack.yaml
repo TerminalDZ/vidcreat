@@ -1,0 +1,60 @@
+# Food and hospitality pack: dishes, kitchen flow and weekly specials for a fictional restaurant.
+id: food
+name: { en: Food & hospitality, ar: المطاعم والضيافة }
+description:
+  en: Show how a dish is made, how an order reaches the table and this week's specials. No health claims.
+  ar: اعرض طريقة تحضير طبق، وكيف يصل الطلب للطاولة، وأطباق الأسبوع. بدون ادعاءات صحية.
+theme: bistro
+playbook: skills/reelforge-industry-playbooks/references/food.md
+blueprints: [hook, process-steps, timeline, before-after, comparison, cta]
+templates:
+  - id: dish-in-steps
+    title: { en: A dish in 4 steps, ar: طبق في 4 خطوات }
+    description:
+      en: How one dish is made in four short steps, with the total time and an allergen reminder.
+      ar: طريقة تحضير طبق في أربع خطوات قصيرة، مع الوقت الكلي وتذكير بمسببات الحساسية.
+    slots:
+      org: { label: Restaurant name, max: 24, default: { en: Maple Street Bistro, ar: بيسترو شارع القيقب } }
+      dish: { label: Dish, max: 20, default: { en: Shakshuka, ar: الشكشوكة } }
+      step1: { label: Step 1, max: 24, default: { en: Soften onion and pepper, ar: نشوّح البصل والفلفل } }
+      step2: { label: Step 2, max: 24, default: { en: Add tomatoes and spices, ar: نضيف الطماطم والتوابل } }
+      step3: { label: Step 3, max: 24, default: { en: Simmer until thick, ar: نسيبها تتسبك } }
+      step4: { label: Step 4, max: 24, default: { en: Crack in the eggs, ar: نكسر البيض فوقها } }
+      minutes: { label: Total minutes, type: number, min: 1, max: 240, default: 25 }
+      keyword: { label: Comment keyword, max: 10, default: { en: TABLE, ar: ترابيزة } }
+      accent: { label: Accent color, type: color, default: amber }
+    files: { en: templates/dish-in-steps.en.yaml, ar: templates/dish-in-steps.ar.yaml }
+  - id: order-to-table
+    title: { en: Order to table, ar: من الطلب للطاولة }
+    description:
+      en: Behind the kitchen door, from the ticket to the plate on your table.
+      ar: وراء باب المطبخ، من الطلب حتى الطبق على طاولتك.
+    slots:
+      org: { label: Restaurant name, max: 24, default: { en: The Copper Pot, ar: ذا كوبر بوت } }
+      minutes: { label: Typical minutes from order to table, type: number, min: 1, max: 120, default: 12 }
+      next:
+        {
+          label: Next episode topic,
+          max: 30,
+          default: { en: How we prep before opening, ar: إزاي بنجهز قبل الفتح },
+        }
+      keyword: { label: Comment keyword, max: 10, default: { en: KITCHEN, ar: مطبخ } }
+      accent: { label: Accent color, type: color, default: amber }
+    files: { en: templates/order-to-table.en.yaml, ar: templates/order-to-table.ar.yaml }
+  - id: weekly-menu
+    title: { en: This week's specials, ar: أطباق الأسبوع }
+    description:
+      en: Three specials on three days, with a "while they last" note and an allergen reminder.
+      ar: ثلاثة أطباق مميزة في ثلاثة أيام، مع ملاحظة "حتى نفاد الكمية" وتذكير بمسببات الحساسية.
+    slots:
+      org: { label: Restaurant name, max: 24, default: { en: Saffron Table, ar: سفرة الزعفران } }
+      day1: { label: Day 1, max: 10, default: { en: Monday, ar: الاثنين } }
+      dish1: { label: Special 1, max: 22, default: { en: Lemon herb chicken, ar: فراخ بالليمون والأعشاب } }
+      day2: { label: Day 2, max: 10, default: { en: Wednesday, ar: الأربعاء } }
+      dish2: { label: Special 2, max: 22, default: { en: Lentil soup, ar: شوربة عدس } }
+      day3: { label: Day 3, max: 10, default: { en: Friday, ar: الجمعة } }
+      dish3: { label: Special 3, max: 22, default: { en: Grilled fish, ar: سمك مشوي } }
+      keyword: { label: Comment keyword, max: 10, default: { en: MENU, ar: منيو } }
+      accent: { label: Accent color, type: color, default: amber }
+    files: { en: templates/weekly-menu.en.yaml, ar: templates/weekly-menu.ar.yaml }
+examples: [examples/shakshuka-en, examples/shakshuka-ar]

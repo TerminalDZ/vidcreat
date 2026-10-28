@@ -1,0 +1,60 @@
+# Manufacturing pack: process, safety and downtime explainers for a fictional plant.
+id: manufacturing
+name: { en: Manufacturing, ar: التصنيع }
+description:
+  en: How a part is made, a safety rule and where line time goes. Follow your site's official procedures.
+  ar: كيف تُصنع قطعة، وقاعدة سلامة، وأين يضيع وقت الخط. اتبع إجراءات موقعك الرسمية.
+theme: industrial
+playbook: skills/reelforge-industry-playbooks/references/manufacturing.md
+blueprints: [hook, process-steps, problem-solution, stat-reveal, bar-stats, before-after, cta]
+templates:
+  - id: part-journey
+    title: { en: How a part is made, ar: رحلة تصنيع قطعة }
+    description:
+      en: One part from raw material to box in five stages, with the cycle time.
+      ar: قطعة واحدة من المادة الخام حتى التغليف في خمس مراحل، مع زمن الدورة.
+    slots:
+      plant: { label: Plant name, max: 22, default: { en: Ridgeway Plant, ar: مصنع ريدجواي } }
+      part: { label: Part, max: 20, default: { en: steel bracket, ar: الدعامة المعدنية } }
+      material: { label: Raw material, max: 20, default: { en: a steel sheet, ar: لوح صاج } }
+      minutes: { label: Minutes per part, type: number, min: 1, max: 600, default: 6 }
+      keyword: { label: Comment keyword, max: 10, default: { en: QC, ar: QC } }
+      accent: { label: Accent color, type: color, default: amber }
+    files: { en: templates/part-journey.en.yaml, ar: templates/part-journey.ar.yaml }
+  - id: safety-mistake
+    title: { en: Safety mistake, ar: خطأ سلامة شائع }
+    description:
+      en: The common mistake, why it is dangerous and the rule from your own procedure.
+      ar: الخطأ الشائع، ولماذا هو خطير، والقاعدة من إجراءاتكم الرسمية.
+    slots:
+      plant: { label: Plant name, max: 22, default: { en: Ridgeway Plant, ar: مصنع ريدجواي } }
+      rule:
+        {
+          label: The rule (from your procedure),
+          max: 28,
+          default: { en: Lock out before you reach in, ar: اقفلها قبل ما تمد إيدك },
+        }
+      ppe:
+        { label: Protective equipment, max: 22, default: { en: gloves and glasses, ar: الجوانتي والنضارة } }
+      keyword: { label: Comment keyword, max: 10, default: { en: SAFE, ar: سلامة } }
+      accent: { label: Accent color, type: color, default: amber }
+    files: { en: templates/safety-mistake.en.yaml, ar: templates/safety-mistake.ar.yaml }
+  - id: downtime-causes
+    title: { en: Downtime causes, ar: أسباب التوقف }
+    description:
+      en: Your top three downtime causes ranked with your numbers, and the fix for the biggest one.
+      ar: أكبر ثلاثة أسباب للتوقف مرتبة بأرقامك، والحل لأكبرها.
+    slots:
+      plant: { label: Plant name, max: 22, default: { en: Ridgeway Plant, ar: مصنع ريدجواي } }
+      c1: { label: Cause 1, max: 18, default: { en: changeovers, ar: تغيير الإعدادات } }
+      v1: { label: Cause 1 hours, type: number, min: 0, max: 9999, default: 42 }
+      c2: { label: Cause 2, max: 18, default: { en: small stops, ar: التوقفات الصغيرة } }
+      v2: { label: Cause 2 hours, type: number, min: 0, max: 9999, default: 27 }
+      c3: { label: Cause 3, max: 18, default: { en: waiting for parts, ar: انتظار الخامات } }
+      v3: { label: Cause 3 hours, type: number, min: 0, max: 9999, default: 15 }
+      fix:
+        { label: The fix, max: 28, default: { en: tools ready before the stop, ar: العدة جاهزة قبل التوقف } }
+      keyword: { label: Comment keyword, max: 10, default: { en: STOPS, ar: STOPS } }
+      accent: { label: Accent color, type: color, default: amber }
+    files: { en: templates/downtime-causes.en.yaml, ar: templates/downtime-causes.ar.yaml }
+examples: [examples/bracket-line-en, examples/bracket-line-ar]

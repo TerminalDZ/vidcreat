@@ -1,0 +1,122 @@
+# Tourism · airport to town (template; slots are filled by `reelforge new --pack tourism`).
+meta:
+  id: '{{id}}'
+  series: 'GETTING AROUND'
+  title: 'Airport to town'
+  episode: 1
+  preset: tiktok
+  theme: voyage
+  lang: en-US
+  publish:
+    cover: 'Train, bus or taxi?'
+    caption: 'From {{airport}} to {{town}}: train about {{train_min}} min, bus about {{bus_min}} min, or a taxi. Schedules change: check times before you travel.'
+    hashtags: ['#travel', '#traveltips', '#airport', '#gettingaround']
+    pinned: 'Comment {{keyword}} for our next city guide.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'Just landed at {{airport}}? Here is how to reach {{town}}.'
+  - text: 'The train is the fastest, about {{train_min}} minutes to the center.'
+  - text: 'The bus takes about {{bus_min}} minutes, but it stops near most hotels.'
+  - text: 'Taxis wait outside arrivals, so agree on the price or ask for the meter.'
+  - text: 'Buy your tickets at the machines before you board.'
+  - text: 'Schedules change, so check the times before you travel.'
+  - text: 'Comment {{keyword}} for our next city guide.'
+
+chapters:
+  - { at: l1, label: '01 · ARRIVAL' }
+  - { at: l2, label: '02 · YOUR OPTIONS' }
+  - { at: l5, label: '03 · TIPS' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    elements:
+      - use: node
+        id: airport
+        props: { title: '{{airport}}', sub: 'Arrivals', icon: globe, color: cyan }
+        place: { x: 60, y: 140, w: 540, h: 170 }
+        enter: { at: "l1:'landed'", anim: pop }
+      - use: node
+        id: town
+        props: { title: '{{town}}', sub: 'Your stay', icon: key, color: '{{accent}}' }
+        place: { x: 480, y: 420, w: 540, h: 170 }
+        enter: { at: "l1:'reach'", anim: pop }
+      - use: arrow
+        id: way
+        props:
+          from: airport.bottom
+          to: town.left
+          route: elbow
+          color: '{{accent}}'
+          packet: { at: "l1:'reach'+0.3", dur: 1.4, color: '{{accent}}' }
+        enter: { at: "l1:'reach'+0.1", anim: draw }
+
+  - id: options
+    at: l2
+    transition: push
+    elements:
+      - use: comparison
+        id: compare
+        props:
+          a: { title: 'Train', color: '{{accent}}', icon: bolt }
+          b: { title: 'Bus', color: cyan, icon: users }
+          rows:
+            - { label: 'Minutes', a: '{{train_min}}', b: '{{bus_min}}', at: "l2:'center'" }
+            - { label: 'Fastest', a: true, b: false, at: "l2:'fastest'" }
+            - { label: 'Near hotels', a: false, b: true, at: "l3:'hotels'" }
+          fontSize: 34
+        place: { x: 60, y: 40, w: 960, h: 520 }
+        enter: { at: "l2:'train'", anim: rise }
+      - use: chip
+        id: bus
+        props: { text: 'Bus stops near most hotels', icon: users, color: cyan, size: 32 }
+        place: { x: 160, y: 640, w: 760, h: 96 }
+        enter: { at: "l3:'stops'", anim: pop }
+
+  - id: taxi
+    at: l4
+    transition: zoom
+    elements:
+      - use: title
+        id: taxi_title
+        props: { text: 'Taxi? **Agree on the price**', size: 96, accent: '{{accent}}' }
+        place: { x: 60, y: 200, w: 960, h: 300 }
+        enter: { at: "l4:'Taxis'", anim: reveal }
+      - use: icon
+        id: card
+        props: { name: card, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 580, w: 160, h: 160 }
+        enter: { at: "l4:'meter'", anim: pop }
+
+  - id: tips
+    at: l5
+    transition: push
+    elements:
+      - use: chip
+        id: tickets
+        props: { text: 'Tickets from the machines', icon: card, color: '{{accent}}', size: 36 }
+        place: { x: 160, y: 140, w: 760, h: 104 }
+        enter: { at: "l5:'tickets'", anim: pop }
+      - use: title
+        id: check
+        props: { text: 'Check **times** before you go', size: 96, accent: '{{accent}}' }
+        place: { x: 60, y: 300, w: 960, h: 300 }
+        enter: { at: "l6:'Schedules'", anim: reveal }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'COMING UP'
+          next: 'Our next city guide'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'guide'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'Comment'", anim: rise }

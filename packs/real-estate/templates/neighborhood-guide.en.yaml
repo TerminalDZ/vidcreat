@@ -1,0 +1,136 @@
+# Real estate · neighborhood guide (template; slots are filled by `reelforge new --pack real-estate`).
+meta:
+  id: '{{id}}'
+  series: 'NEIGHBORHOOD GUIDE'
+  title: '{{area}}'
+  episode: 1
+  preset: tiktok
+  theme: estate
+  lang: en-US
+  publish:
+    cover: 'Living in {{area}}'
+    caption: 'What daily life looks like in {{area}}: coffee, school, the park and the commute. Visit at different times of day before you decide.'
+    hashtags: ['#realestate', '#neighborhood', '#citylife', '#moving']
+    pinned: 'Comment {{keyword}} for homes for sale in {{area}}.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'What is it really like to live in {{area}}? Here is a quick guide.'
+  - text: 'Mornings start at {{cafe}}, a short walk from the main square.'
+  - text: 'The nearest school, {{school}}, sits right next to the bus line.'
+  - text: 'Weekends belong to {{park}}, with walking paths along the water.'
+  - text: 'The city center is about {{minutes}} minutes away by tram.'
+  - text: 'Every area has pros and cons, so visit at different times of day.'
+  - text: 'Comment {{keyword}} and {{org}} will share homes for sale nearby.'
+
+chapters:
+  - { at: l1, label: '01 · THE AREA' }
+  - { at: l2, label: '02 · A DAY HERE' }
+  - { at: l6, label: '03 · BEFORE YOU MOVE' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: org
+        props: { text: 'Neighborhood guide', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'really'", anim: wipe }
+      - use: title
+        id: area
+        props: { text: '**{{area}}**', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 250, w: 960, h: 300 }
+        enter: { at: 'l1+1.2', anim: reveal }
+      - use: icon
+        id: hook_icon
+        props: { name: globe, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'guide'", anim: pop }
+
+  - id: day
+    at: l2
+    transition: push
+    elements:
+      - use: node
+        id: cafe
+        props: { title: '{{cafe}}', sub: 'Morning coffee', icon: bubble, color: '{{accent}}' }
+        place: { x: 60, y: 60, w: 540, h: 170 }
+        enter: { at: "l2:'Mornings'", anim: pop }
+      - use: node
+        id: school
+        props: { title: '{{school}}', sub: 'Next to the bus line', icon: users, color: '{{accent}}' }
+        place: { x: 480, y: 300, w: 540, h: 170 }
+        enter: { at: "l3:'nearest'", anim: pop }
+      - use: node
+        id: park
+        props: { title: '{{park}}', sub: 'Paths by the water', icon: globe, color: '{{accent}}' }
+        place: { x: 60, y: 560, w: 540, h: 170 }
+        enter: { at: "l4:'Weekends'", anim: pop }
+      - use: arrow
+        id: walk1
+        props: { from: cafe.right, to: school.top, route: elbow, color: '{{accent}}', dashed: true }
+        enter: { at: "l3:'school'", anim: draw }
+      - use: arrow
+        id: walk2
+        props: { from: school.bottom, to: park.right, route: elbow, color: '{{accent}}', dashed: true }
+        enter: { at: "l4:'paths'", anim: draw }
+
+  - id: commute
+    at: l5
+    transition: zoom
+    elements:
+      - use: counter
+        id: minutes
+        props:
+          from: 0
+          keyframes: [{ at: "l5:'about'", value: {{minutes}}, dur: 1 }]
+          suffix: ' min'
+          label: 'TO THE CITY CENTER'
+          color: '{{accent}}'
+        place: { x: 140, y: 160, w: 800, h: 320 }
+        enter: { at: "l5:'center'", anim: pop }
+      - use: chip
+        id: tram
+        props: { text: 'By tram', icon: clock, color: '{{accent}}', size: 40 }
+        place: { x: 290, y: 580, w: 500, h: 104 }
+        enter: { at: "l5:'tram'", anim: spring }
+
+  - id: visit
+    at: l6
+    glow: amber
+    transition: push
+    elements:
+      - use: title
+        id: visit_title
+        props: { text: 'Visit at **different times**', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 180, w: 960, h: 300 }
+        enter: { at: "l6:'Every'", anim: reveal }
+      - use: chip
+        id: morning
+        props: { text: 'Morning', icon: clock, color: '{{accent}}', size: 36 }
+        place: { x: 80, y: 560, w: 380, h: 96 }
+        enter: { at: "l6:'visit'", anim: pop }
+      - use: chip
+        id: evening
+        props: { text: 'Evening', icon: clock, color: '{{accent}}', size: 36 }
+        place: { x: 520, y: 560, w: 380, h: 96 }
+        enter: { at: "l6:'day'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'HOMES NEARBY'
+          next: 'Homes for sale in {{area}}'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'homes'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'Comment'", anim: rise }

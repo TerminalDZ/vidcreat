@@ -1,0 +1,111 @@
+# Manufacturing · downtime causes (template; slots are filled by `reelforge new --pack manufacturing`).
+meta:
+  id: '{{id}}'
+  series: 'LINE PERFORMANCE'
+  title: 'Where line time goes'
+  episode: 1
+  preset: tiktok
+  theme: industrial
+  lang: en-US
+  publish:
+    cover: 'Where does line time go?'
+    caption: 'Our top downtime causes at {{plant}} for one month: {{c1}}, {{c2}} and {{c3}}. Example numbers from our own data.'
+    hashtags: ['#manufacturing', '#lean', '#oee', '#continuousimprovement']
+    pinned: 'Comment {{keyword}} for part two, on small stops.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'Where does a production line lose most of its time?'
+  - text: 'At {{plant}}, we measured our downtime for one full month.'
+  - text: 'The biggest cause was {{c1}}, then {{c2}}, then {{c3}}.'
+  - text: 'These are our own example numbers, in hours lost.'
+  - text: 'Our fix for the biggest one: {{fix}}.'
+  - text: 'Small changes like this add up over a whole year.'
+  - text: 'Comment {{keyword}} for part two, on small stops.'
+
+chapters:
+  - { at: l1, label: '01 · THE QUESTION' }
+  - { at: l3, label: '02 · THE CAUSES' }
+  - { at: l5, label: '03 · THE FIX' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: title
+        id: hook_title
+        props: { text: 'Where does the **time** go?', size: 108, accent: '{{accent}}' }
+        place: { x: 60, y: 160, w: 960, h: 320 }
+        enter: { at: "l1:'production'", anim: reveal }
+      - use: icon
+        id: clock
+        props: { name: hourglass, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 520, w: 160, h: 160 }
+        enter: { at: "l1:'time'", anim: pop }
+      - use: chip
+        id: month
+        props: { text: 'One month of data', icon: db, color: dim, size: 30 }
+        place: { x: 60, y: 740, w: 860, h: 96 }
+        enter: { at: "l2:'measured'", anim: fade }
+
+  - id: causes
+    at: l3
+    transition: push
+    elements:
+      - use: ranking
+        id: rank
+        props:
+          order: top-down
+          color: cyan
+          accent: '{{accent}}'
+          suffix: ' h'
+          items:
+            - { label: '{{c1}}', value: {{v1}} }
+            - { label: '{{c2}}', value: {{v2}} }
+            - { label: '{{c3}}', value: {{v3}} }
+        place: { x: 60, y: 60, w: 960, h: 480 }
+        enter: { at: "l3:'biggest'", anim: fade }
+      - use: label
+        id: example
+        props: { text: 'Example numbers · hours lost', dot: true, align: center }
+        place: { x: 60, y: 620, w: 860, h: 60 }
+        enter: { at: "l4:'example'", anim: wipe }
+
+  - id: fix
+    at: l5
+    glow: lime
+    transition: zoom
+    elements:
+      - use: label
+        id: fix_label
+        props: { text: 'Our fix', dot: true, align: center }
+        place: { x: 140, y: 120, w: 800, h: 60 }
+        enter: { at: "l5:'fix'", anim: wipe }
+      - use: title
+        id: fix_title
+        props: { text: '**{{fix}}**', size: 84, accent: '{{accent}}' }
+        place: { x: 60, y: 200, w: 960, h: 320 }
+        enter: { at: "l5:'biggest'", anim: reveal }
+      - use: chip
+        id: adds
+        props: { text: 'Small changes add up', icon: refresh, color: lime, size: 36 }
+        place: { x: 190, y: 600, w: 700, h: 104 }
+        enter: { at: "l6:'Small'", anim: spring }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'PART TWO'
+          next: 'Small stops'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'part'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'Comment'", anim: rise }

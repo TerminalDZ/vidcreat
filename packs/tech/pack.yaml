@@ -1,0 +1,61 @@
+# Tech pack: system design explainers in the style of the "System Design" season (default theme).
+id: tech
+name: { en: Tech & software, ar: التقنية والبرمجيات }
+description:
+  en: System design concepts, latency numbers and a request's path through the stack. Generic technologies only.
+  ar: مفاهيم الـ system design، وأرقام الـ latency، ومسار الـ request داخل النظام. تقنيات عامة فقط.
+theme: default
+playbook: skills/reelforge-industry-playbooks/references/tech.md
+blueprints: [hook, problem-solution, process-steps, stat-reveal, bar-stats, comparison, cta]
+templates:
+  - id: system-concept
+    title: { en: System design concept, ar: مفهوم system design }
+    description:
+      en: A flooded API, the component that fixes it, the limit, the 429 and the classic trap.
+      ar: API عليه ضغط، والـ component اللي بيحل المشكلة، والـ limit، والـ 429، والفخ المشهور.
+    slots:
+      concept: { label: Concept, max: 20, default: { en: Rate Limiting, ar: Rate Limiting } }
+      component: { label: Component, max: 18, default: { en: Rate limiter, ar: Rate limiter } }
+      limit: { label: Limit per client, type: number, min: 1, max: 100000, default: 100 }
+      unit: { label: Unit, max: 10, default: { en: req/s, ar: req/s } }
+      next:
+        {
+          label: Next episode topic,
+          max: 30,
+          default: { en: Caching and stampedes, ar: الـ Caching والـ Stampede },
+        }
+      keyword: { label: Comment keyword, max: 10, default: { en: CACHE, ar: cache } }
+      accent: { label: Accent color, type: color, default: lime }
+    files: { en: templates/system-concept.en.yaml, ar: templates/system-concept.ar.yaml }
+  - id: latency-numbers
+    title: { en: Latency numbers, ar: أرقام الـ latency }
+    description:
+      en: Why the average lies, with your p50, p95 and p99 on a bar chart and a target.
+      ar: ليه المتوسط بيكدب، بأرقام p50 وp95 وp99 بتاعتك على رسم أعمدة مع الهدف.
+    slots:
+      service: { label: Service name, max: 16, default: { en: Checkout API, ar: Checkout API } }
+      p50: { label: p50 (ms), type: number, min: 1, max: 99999, default: 80 }
+      p95: { label: p95 (ms), type: number, min: 1, max: 99999, default: 210 }
+      p99: { label: p99 (ms), type: number, min: 1, max: 99999, default: 480 }
+      target: { label: Target (ms), type: number, min: 1, max: 99999, default: 300 }
+      keyword: { label: Comment keyword, max: 10, default: { en: TAIL, ar: tail } }
+      accent: { label: Accent color, type: color, default: lime }
+    files: { en: templates/latency-numbers.en.yaml, ar: templates/latency-numbers.ar.yaml }
+  - id: request-path
+    title: { en: A request's path, ar: رحلة الـ request }
+    description:
+      en: From tap to answer through DNS, CDN, load balancer, API and database.
+      ar: من الضغطة للرد مرورًا بالـ DNS والـ CDN والـ load balancer والـ API والـ database.
+    slots:
+      app: { label: App name, max: 18, default: { en: Bytehaven, ar: Bytehaven } }
+      ms: { label: Total milliseconds, type: number, min: 1, max: 9999, default: 120 }
+      next:
+        {
+          label: Next episode topic,
+          max: 30,
+          default: { en: How a CDN caches, ar: إزاي الـ CDN بيعمل cache },
+        }
+      keyword: { label: Comment keyword, max: 10, default: { en: CDN, ar: CDN } }
+      accent: { label: Accent color, type: color, default: lime }
+    files: { en: templates/request-path.en.yaml, ar: templates/request-path.ar.yaml }
+examples: [examples/rate-limiting-en, examples/rate-limiting-ar]

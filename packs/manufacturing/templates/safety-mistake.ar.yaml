@@ -1,0 +1,136 @@
+# Manufacturing · safety mistake, Arabic (template; slots are filled by `reelforge new --pack manufacturing`).
+meta:
+  id: '{{id}}'
+  series: 'السلامة أولًا'
+  title: 'غلطة الثانية الواحدة'
+  episode: 1
+  preset: tiktok
+  theme: industrial
+  lang: ar-EG
+  publish:
+    cover: 'غلطة الثانية الواحدة'
+    caption: 'إنك تمد إيدك في ماكينة واقفة بياخد ثانية واحدة. القاعدة في {{plant}}: {{rule}}. اتبع دايمًا إجراءات السلامة الرسمية في موقعك.'
+    hashtags: ['#السلامة_أولا', '#تصنيع', '#سلامة_مهنية']
+    pinned: 'اتبع دايمًا الإجراءات الرسمية في موقعك. اكتب {{keyword}} للجزء التاني.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'أشهر غلطة على خط الإنتاج بتاخد ثانية واحدة بس.'
+  - text: 'الماكينة بتعلّق، وحد بيمد إيده عشان يسلكها.'
+  - text: 'ولو الماكينة اشتغلت تاني، الثانية دي ممكن تعمل إصابة خطيرة.'
+  - text: 'في {{plant}}، القاعدة بسيطة: {{rule}}.'
+  - text: 'وقّف الماكينة، واقفلها، واتأكد إنها مش هتشتغل.'
+  - text: 'والبس {{ppe}}، زي ما إجراءات السلامة بتقول بالظبط.'
+  - text: 'اتبع دايمًا الإجراءات الرسمية في موقعك. اكتب {{keyword}} للجزء التاني.'
+
+chapters:
+  - { at: l1, label: '01 · الغلطة' }
+  - { at: l4, label: '02 · القاعدة' }
+  - { at: l7, label: '03 · الجاي' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: red
+    elements:
+      - use: title
+        id: hook_title
+        props: { text: 'أشهر **غلطة** على الخط', size: 100, accent: red }
+        place: { x: 60, y: 190, w: 960, h: 340 }
+        enter: { at: "l1:'غلطة'", anim: reveal }
+      - use: icon
+        id: warn
+        props: { name: warn, color: red, ring: true, pulse: true }
+        place: { x: 460, y: 600, w: 160, h: 160 }
+        enter: { at: "l1:'ثانية'", anim: pop }
+
+  - id: jam
+    at: l2
+    transition: cut
+    elements:
+      - use: node
+        id: machine
+        props: { title: 'الماكينة', sub: 'شغالة', icon: cpu, color: cyan }
+        place: { x: 190, y: 120, w: 700, h: 200 }
+        enter: { at: "l2:'الماكينة'", anim: pop }
+        states:
+          - { at: "l2:'بتعلّق'", set: { status: warn, sub: 'معلّقة' } }
+          - { at: "l3:'اشتغلت'", set: { status: err, sub: 'اشتغلت تاني' } }
+      - use: chip
+        id: reach
+        props: { text: 'مد الإيد جوه', icon: x, color: red, size: 40 }
+        place: { x: 240, y: 400, w: 600, h: 110 }
+        enter: { at: "l2:'بيمد'", anim: pop }
+      - use: stamp
+        id: danger
+        props: { text: 'خطر', color: red, size: 100 }
+        place: { x: 200, y: 560, w: 680, h: 240 }
+        enter: { at: "l3:'خطيرة'", anim: stamp }
+
+  - id: rule
+    at: l4
+    glow: '{{accent}}'
+    transition: push
+    elements:
+      - use: label
+        id: rule_label
+        props: { text: 'القاعدة في {{plant}}', dot: true, align: center }
+        place: { x: 100, y: 100, w: 880, h: 60 }
+        enter: { at: "l4:'القاعدة'", anim: wipe }
+      - use: title
+        id: rule_title
+        props: { text: '**{{rule}}**', size: 80, accent: '{{accent}}' }
+        place: { x: 60, y: 180, w: 960, h: 360 }
+        enter: { at: "l4:'بسيطة'", anim: reveal }
+      - use: chip
+        id: stop
+        props: { text: 'وقّف', icon: x, color: '{{accent}}', size: 36 }
+        place: { x: 660, y: 620, w: 260, h: 100 }
+        enter: { at: "l5:'وقّف'", anim: pop }
+      - use: chip
+        id: lock
+        props: { text: 'اقفل', icon: lock, color: '{{accent}}', size: 36 }
+        place: { x: 360, y: 620, w: 260, h: 100 }
+        enter: { at: "l5:'واقفلها'", anim: pop }
+      - use: chip
+        id: test
+        props: { text: 'اتأكد', icon: check, color: '{{accent}}', size: 36 }
+        place: { x: 60, y: 620, w: 260, h: 100 }
+        enter: { at: "l5:'واتأكد'", anim: pop }
+
+  - id: ppe
+    at: l6
+    transition: zoom
+    elements:
+      - use: icon
+        id: shield
+        props: { name: shield, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 140, w: 160, h: 160 }
+        enter: { at: "l6:'والبس'", anim: pop }
+      - use: title
+        id: ppe_title
+        props: { text: 'البس **{{ppe}}**', size: 92, accent: '{{accent}}' }
+        place: { x: 60, y: 300, w: 960, h: 320 }
+        enter: { at: "l6:'والبس'+0.3", anim: reveal }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: label
+        id: official
+        props: { text: 'اتبع الإجراءات الرسمية في موقعك', dot: true, align: center }
+        place: { x: 60, y: 80, w: 960, h: 60 }
+        enter: { at: "l7:'اتبع'", anim: wipe }
+      - use: cta
+        id: next
+        props:
+          label: 'الجزء التاني'
+          prompt: 'اكتب في الكومنتات'
+          next: 'الـ Lockout خطوة بخطوة'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'للجزء'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

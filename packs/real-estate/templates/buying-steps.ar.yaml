@@ -1,0 +1,129 @@
+# Real estate · buying steps, Arabic (template; slots are filled by `reelforge new --pack real-estate`).
+meta:
+  id: '{{id}}'
+  series: 'دليل المشتري'
+  title: 'شراء أول منزل'
+  episode: 1
+  preset: tiktok
+  theme: estate
+  lang: ar-EG
+  publish:
+    cover: 'أول منزل في 5 خطوات'
+    caption: 'الخطوات الخمس لشراء أول منزل في {{city}}، يشرحها فريق {{org}}. معلومات عامة وليست نصيحة مالية أو قانونية: تحدث مع جهة تمويل أو وسيط أو كاتب عدل مرخص.'
+    hashtags: ['#عقارات', '#أول_منزل', '#شراء_منزل']
+    pinned: 'اكتب {{keyword}} للجزء الثاني: {{next}}.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'تشتري أول منزل لك في {{city}}؟ الموضوع كله خمس خطوات.'
+  - text: 'أولًا، اعرف ما تقدر عليه مع جهة تمويل مرخصة.'
+  - text: 'بعدها زر البيوت وقارن بينها بنفس قائمة المراجعة.'
+  - text: 'قدّم عرضك، واحجز فحصًا مستقلًا للمنزل.'
+  - text: 'وأخيرًا، وقّع عند كاتب العدل واستلم المفاتيح.'
+  - text: 'من العرض حتى المفاتيح تمر عادةً حوالي {{weeks}} أسابيع، لكن كل حالة مختلفة.'
+  - text: 'اكتب {{keyword}} وتابع {{org}} للجزء الثاني: {{next}}.'
+
+chapters:
+  - { at: l1, label: '01 · الخطة' }
+  - { at: l2, label: '02 · خمس خطوات' }
+  - { at: l6, label: '03 · المدة' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: org
+        props: { text: '{{org}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'تشتري'", anim: wipe }
+      - use: title
+        id: hook_title
+        props: { text: 'أول منزل في **5 خطوات**', size: 108, accent: '{{accent}}' }
+        place: { x: 60, y: 250, w: 960, h: 320 }
+        enter: { at: "l1:'منزل'", anim: reveal }
+      - use: icon
+        id: hook_icon
+        props: { name: key, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'خمس'", anim: pop }
+
+  - id: steps
+    at: l2
+    transition: push
+    elements:
+      - use: steps
+        id: buy_steps
+        props:
+          color: '{{accent}}'
+          fontSize: 46
+          items:
+            - { title: 'الميزانية', text: 'مع جهة تمويل مرخصة', at: "l2:'تقدر'" }
+            - { title: 'الزيارة والمقارنة', text: 'قائمة واحدة للجميع', at: "l3:'زر'" }
+            - { title: 'العرض', text: 'مكتوبًا', at: "l4:'عرضك'" }
+            - { title: 'الفحص', text: 'فحص مستقل', at: "l4:'فحصًا'" }
+            - { title: 'التوقيع', text: 'واستلام المفاتيح', at: "l5:'وقّع'" }
+        place: { x: 160, y: 20, w: 760, h: 660 }
+        enter: { at: "l2:'أولًا'", anim: fade }
+      - use: icon
+        id: icon_budget
+        props: { name: card, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 720, w: 160, h: 160 }
+        enter: { at: "l2:'تمويل'", anim: pop }
+        exit: { at: l3, anim: fade }
+      - use: icon
+        id: icon_visit
+        props: { name: check, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 720, w: 160, h: 160 }
+        enter: { at: "l3:'وقارن'", anim: pop }
+        exit: { at: l4, anim: fade }
+      - use: icon
+        id: icon_offer
+        props: { name: shield, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 720, w: 160, h: 160 }
+        enter: { at: "l4:'واحجز'", anim: pop }
+        exit: { at: l5, anim: fade }
+      - use: icon
+        id: icon_keys
+        props: { name: key, color: '{{accent}}', ring: true, pulse: true }
+        place: { x: 460, y: 720, w: 160, h: 160 }
+        enter: { at: "l5:'المفاتيح'", anim: spring }
+
+  - id: time
+    at: l6
+    transition: zoom
+    elements:
+      - use: counter
+        id: weeks
+        props:
+          from: 0
+          keyframes: [{ at: "l6:'حوالي'", value: {{weeks}}, dur: 1 }]
+          suffix: ' أسابيع'
+          label: 'من العرض حتى المفاتيح'
+          color: '{{accent}}'
+        place: { x: 140, y: 160, w: 800, h: 320 }
+        enter: { at: "l6:'العرض'", anim: pop }
+      - use: chip
+        id: differs
+        props: { text: 'كل حالة مختلفة', icon: warn, color: dim, size: 36 }
+        place: { x: 190, y: 580, w: 700, h: 100 }
+        enter: { at: "l6:'حالة'", anim: spring }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'الجزء الثاني'
+          prompt: 'اكتب في التعليقات'
+          next: '{{next}}'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'وتابع'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

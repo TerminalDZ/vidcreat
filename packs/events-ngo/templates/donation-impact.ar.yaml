@@ -1,0 +1,114 @@
+# Events & NGOs · where donations go, Arabic (template; slots are filled by `reelforge new --pack events-ngo`).
+meta:
+  id: '{{id}}'
+  series: 'أثرنا'
+  title: 'أين تذهب التبرعات'
+  episode: 1
+  preset: tiktok
+  theme: editorial
+  lang: ar-EG
+  publish:
+    cover: 'تبرعك بيروح فين؟'
+    caption: 'كل تبرع لـ {{org}} بيروح فين، من تقريرنا السنوي: {{cause}}، والنقل والتخزين، وتدريب المتطوعين.'
+    hashtags: ['#عمل_خيري', '#تطوع', '#شفافية', '#مجتمع']
+    pinned: 'اكتب {{keyword}} عشان تنضم لحملة الأكل الجاية.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'كل تبرع لـ {{org}} بيروح فين؟ دي الصورة كاملة.'
+  - text: 'النسب دي جاية مباشرة من تقريرنا السنوي.'
+  - text: 'الجزء الأكبر، {{meals}} في المية، بيروح لـ {{cause}}.'
+  - text: 'وبعدها {{transport}} في المية للنقل والتخزين.'
+  - text: 'و{{training}} في المية لتدريب المتطوعين وسلامتهم.'
+  - text: 'كل تبرع بيفرق، ووقتك كمان بيفرق.'
+  - text: 'اكتب {{keyword}} عشان تنضم لحملة الأكل الجاية.'
+
+chapters:
+  - { at: l1, label: '01 · السؤال' }
+  - { at: l3, label: '02 · النسب' }
+  - { at: l6, label: '03 · انضم لنا' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: org
+        props: { text: '{{org}}', dot: true, align: center }
+        place: { x: 140, y: 140, w: 800, h: 60 }
+        enter: { at: "l1:'كل'", anim: wipe }
+      - use: title
+        id: hook_title
+        props: { text: '**تبرعك** بيروح فين؟', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 210, w: 960, h: 340 }
+        enter: { at: "l1:'تبرع'", anim: reveal }
+      - use: chip
+        id: report
+        props: { text: 'من تقريرنا السنوي', icon: db, color: dim, size: 34 }
+        place: { x: 190, y: 620, w: 700, h: 100 }
+        enter: { at: "l2:'تقريرنا'", anim: fade }
+
+  - id: shares
+    at: l3
+    transition: push
+    elements:
+      - use: donut-chart
+        id: donut
+        props:
+          color: '{{accent}}'
+          label: 'كل تبرع'
+          segments:
+            - { label: 'البرامج', value: {{meals}}, color: '{{accent}}' }
+            - { label: 'النقل', value: {{transport}}, color: cyan }
+            - { label: 'المتطوعين', value: {{training}}, color: amber }
+        place: { x: 60, y: 20, w: 960, h: 520 }
+        enter: { at: "l3:'الأكبر'", anim: fade }
+      - use: chip
+        id: cause
+        props: { text: '{{cause}}', icon: users, color: '{{accent}}', size: 32 }
+        place: { x: 160, y: 580, w: 760, h: 96 }
+        enter: { at: "l3:'بيروح'", anim: pop }
+      - use: chip
+        id: transport
+        props: { text: 'النقل والتخزين', icon: queue, color: cyan, size: 32 }
+        place: { x: 160, y: 700, w: 760, h: 96 }
+        enter: { at: "l4:'والتخزين'", anim: pop }
+      - use: chip
+        id: training
+        props: { text: 'متطوعين مدربين وفي أمان', icon: shield, color: amber, size: 32 }
+        place: { x: 160, y: 820, w: 760, h: 96 }
+        enter: { at: "l5:'المتطوعين'", anim: pop }
+
+  - id: helps
+    at: l6
+    transition: zoom
+    elements:
+      - use: title
+        id: helps_title
+        props: { text: 'كل تبرع **بيفرق**', size: 112, accent: '{{accent}}' }
+        place: { x: 60, y: 190, w: 960, h: 300 }
+        enter: { at: "l6:'تبرع'", anim: reveal }
+      - use: chip
+        id: time
+        props: { text: 'ووقتك كمان بيفرق', icon: clock, color: '{{accent}}', size: 38 }
+        place: { x: 190, y: 560, w: 700, h: 104 }
+        enter: { at: "l6:'ووقتك'", anim: spring }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'انضم لنا'
+          prompt: 'اكتب في الكومنتات'
+          next: 'حملة الأكل الجاية'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'تنضم'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

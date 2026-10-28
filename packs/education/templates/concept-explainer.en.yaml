@@ -1,0 +1,113 @@
+# Education · concept explainer (template; slots are filled by `reelforge new --pack education`).
+meta:
+  id: '{{id}}'
+  series: '{{subject}} IN A MINUTE'
+  title: '{{concept}}'
+  episode: 1
+  preset: tiktok
+  theme: campus
+  lang: en-US
+  publish:
+    cover: '{{concept}} in a minute'
+    caption: '{{concept}} in three parts, from {{subject}} class at {{org}}. Save it for revision.'
+    hashtags: ['#studytok', '#learnontiktok', '#education', '#revision']
+    pinned: 'Comment {{keyword}} for the next topic.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'Can you explain {{concept}} in under a minute? Let us try.'
+  - text: 'In {{subject}} class at {{org}}, we break it into three simple parts.'
+  - text: 'Part one, the starting point, is {{part1}}.'
+  - text: 'Part two, the thing that keeps it going, is {{part2}}.'
+  - text: 'Part three, the piece most people forget, is {{part3}}.'
+  - text: 'Put them all together, and the result is {{result}}.'
+  - text: 'Save this for revision, and comment {{keyword}} for the next topic.'
+
+chapters:
+  - { at: l1, label: '01 · THE QUESTION' }
+  - { at: l3, label: '02 · THREE PARTS' }
+  - { at: l6, label: '03 · THE RESULT' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: subject
+        props: { text: '{{subject}}', dot: true, align: center }
+        place: { x: 140, y: 140, w: 800, h: 60 }
+        enter: { at: "l1:'Can'", anim: wipe }
+      - use: title
+        id: concept
+        props: { text: '**{{concept}}**', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 220, w: 960, h: 300 }
+        enter: { at: "l1:'explain'", anim: reveal }
+      - use: chip
+        id: minute
+        props: { text: 'In under a minute', icon: clock, color: '{{accent}}', size: 36 }
+        place: { x: 240, y: 560, w: 600, h: 96 }
+        enter: { at: "l1:'try'", anim: spring }
+      - use: chip
+        id: parts
+        props: { text: 'Three simple parts', icon: check, color: '{{accent}}', size: 36, variant: solid }
+        place: { x: 240, y: 700, w: 600, h: 96 }
+        enter: { at: "l2:'three'", anim: pop }
+
+  - id: parts
+    at: l3
+    transition: push
+    elements:
+      - use: node
+        id: part1
+        props: { title: '{{part1}}', sub: 'Part 1 · starting point', icon: bolt, color: '{{accent}}' }
+        place: { x: 60, y: 60, w: 860, h: 200 }
+        enter: { at: "l3:'one'", anim: slide-r }
+      - use: node
+        id: part2
+        props: { title: '{{part2}}', sub: 'Part 2 · keeps it going', icon: refresh, color: '{{accent}}' }
+        place: { x: 60, y: 300, w: 860, h: 200 }
+        enter: { at: "l4:'two'", anim: slide-r }
+      - use: node
+        id: part3
+        props: { title: '{{part3}}', sub: 'Part 3 · often forgotten', icon: warn, color: amber }
+        place: { x: 60, y: 540, w: 860, h: 200 }
+        enter: { at: "l5:'three'", anim: slide-r }
+
+  - id: result
+    at: l6
+    glow: lime
+    transition: zoom
+    elements:
+      - use: label
+        id: together
+        props: { text: 'Put together', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l6:'together'", anim: wipe }
+      - use: title
+        id: result_title
+        props: { text: '**{{result}}**', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 250, w: 960, h: 300 }
+        enter: { at: "l6:'result'", anim: reveal }
+      - use: icon
+        id: done
+        props: { name: check, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 620, w: 160, h: 160 }
+        enter: { at: "l6:'result'+0.6", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'SAVE FOR REVISION'
+          next: 'The next topic'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'comment'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'Save'", anim: rise }
