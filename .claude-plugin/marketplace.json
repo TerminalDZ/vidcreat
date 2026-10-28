@@ -1,0 +1,14 @@
+{
+  "name": "reelforge",
+  "owner": { "name": "Idriss Boukmouche", "url": "https://github.com/TerminalDZ" },
+  "description": "ReelForge plugin: skills and an MCP server for making vertical explainer videos from a voice recording and one episode.yaml.",
+  "plugins": [
+    {
+      "name": "reelforge",
+      "source": "./",
+      "description": "Task skills (script writing, scene design, timing, themes, industry playbooks, review and render) and the ReelForge MCP server.",
+      "category": "productivity",
+      "tags": ["video", "explainer", "mcp", "skills"]
+    }
+  ]
+}
