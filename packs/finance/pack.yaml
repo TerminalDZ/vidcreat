@@ -1,0 +1,57 @@
+# Finance pack: money basics and scam awareness for a fictional bank. Information only, never advice.
+id: finance
+name: { en: Finance, ar: المال والبنوك }
+description:
+  en: Budget basics, compound interest and scam alerts with example values. For information only, not financial advice.
+  ar: أساسيات الميزانية والفائدة المركبة والتحذير من الاحتيال بقيم توضيحية. للمعلومات فقط وليست نصيحة مالية.
+theme: ledger
+playbook: skills/reelforge-industry-playbooks/references/finance.md
+blueprints: [hook, stat-reveal, bar-stats, problem-solution, comparison, process-steps, cta]
+templates:
+  - id: budget-basics
+    title: { en: Budget basics, ar: أساسيات الميزانية }
+    description:
+      en: Split an example monthly income into needs, wants and savings on a donut chart.
+      ar: قسّم دخلًا شهريًا توضيحيًا إلى احتياجات ورغبات وادخار على رسم دائري.
+    slots:
+      org: { label: Bank name, max: 22, default: { en: Brightway Bank, ar: بنك برايتواي } }
+      income: { label: Example monthly income, type: number, min: 1, max: 999999, default: 2000 }
+      currency: { label: Currency code, max: 3, default: { en: EUR, ar: EGP } }
+      needs: { label: Needs (%), type: number, min: 1, max: 100, default: 50 }
+      wants: { label: Wants (%), type: number, min: 1, max: 100, default: 30 }
+      savings: { label: Savings (%), type: number, min: 1, max: 100, default: 20 }
+      keyword: { label: Comment keyword, max: 10, default: { en: BUDGET, ar: ميزانية } }
+      accent: { label: Accent color, type: color, default: lime }
+    files: { en: templates/budget-basics.en.yaml, ar: templates/budget-basics.ar.yaml }
+  - id: compound-interest
+    title: { en: Compound interest, ar: الفائدة المركبة }
+    description:
+      en: What compound interest is, with one clearly labeled example and a reminder about fees and risks.
+      ar: ما هي الفائدة المركبة، مع مثال واحد واضح وتذكير بالرسوم والمخاطر.
+    slots:
+      org: { label: Bank name, max: 22, default: { en: Brightway Bank, ar: بنك برايتواي } }
+      currency: { label: Currency code, max: 3, default: { en: EUR, ar: EGP } }
+      start: { label: Example starting amount, type: number, min: 1, max: 999999, default: 1000 }
+      rate: { label: Example yearly rate (%), type: number, min: 0, max: 30, default: 5 }
+      years: { label: Example years, type: number, min: 1, max: 60, default: 10 }
+      end: { label: Example amount after those years, type: number, min: 1, max: 999999, default: 1629 }
+      accent: { label: Accent color, type: color, default: lime }
+    files: { en: templates/compound-interest.en.yaml, ar: templates/compound-interest.ar.yaml }
+  - id: scam-alert
+    title: { en: Scam alert, ar: تحذير من الاحتيال }
+    description:
+      en: How a fake bank message looks, three warning signs and what to do instead.
+      ar: كيف تبدو رسالة بنك مزيفة، وثلاث علامات تحذير، وماذا تفعل بدلًا من ذلك.
+    slots:
+      org: { label: Bank name, max: 22, default: { en: Brightway Bank, ar: بنك برايتواي } }
+      lure:
+        {
+          label: What the fake message says,
+          max: 28,
+          default: { en: Your account is locked, ar: تم إيقاف حسابك },
+        }
+      keyword: { label: Comment keyword, max: 10, default: { en: SAFE, ar: أمان } }
+      accent: { label: Accent color, type: color, default: lime }
+      danger: { label: Warning color, type: color, default: red }
+    files: { en: templates/scam-alert.en.yaml, ar: templates/scam-alert.ar.yaml }
+examples: [examples/budget-split-en, examples/budget-split-ar]

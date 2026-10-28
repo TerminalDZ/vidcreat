@@ -1,0 +1,138 @@
+# Ports · terminal in numbers, Arabic (template; slots are filled by `reelforge new --pack ports-logistics`).
+meta:
+  id: '{{id}}'
+  series: 'حقائق المحطة'
+  title: '{{org}} بالأرقام'
+  episode: 1
+  preset: tiktok
+  theme: harbor
+  lang: ar-EG
+  publish:
+    cover: '{{org}} بالأرقام'
+    caption: 'الحجم والرافعات والأرصفة ومواعيد البوابات في {{org}}. الأرقام بتتغير كل سنة، فراجع آخر تقرير.'
+    hashtags: ['#لوجستيات', '#موانئ', '#شحن', '#terminal']
+    pinned: 'اكتب {{keyword}} وهنشرح إزاي بيتخطط الـ berth.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'إيه اللي بيخلي {{org}} شغال ليل ونهار؟ تعالى نشوفه بالأرقام.'
+  - text: 'السنة اللي فاتت، المحطة تعاملت مع {{teu}} container بوحدة الـ TEU.'
+  - text: 'وعلى الرصيف، {{cranes}} رافعة ship-to-shore بتحمّل وتفرّغ السفن.'
+  - text: 'السفن بترسى على {{berths}} أرصفة، ولكل رصيف جدول مواعيد خاص.'
+  - text: 'والبوابات مفتوحة {{hours}}، عشان الشاحنات تتفادى الزحمة.'
+  - text: 'الأرقام بتتغير كل سنة، فراجع آخر تقرير لينا للتحديثات.'
+  - text: 'اكتب {{keyword}} وهنشرح إزاي بيتخطط الـ berth.'
+
+chapters:
+  - { at: l1, label: '01 · المحطة' }
+  - { at: l2, label: '02 · الأرقام' }
+  - { at: l6, label: '03 · التحديثات' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: kicker
+        props: { text: 'حقائق المحطة', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'إيه'", anim: wipe }
+      - use: title
+        id: hook_title
+        props: { text: '**{{org}}** بالأرقام', size: 96, accent: '{{accent}}' }
+        place: { x: 60, y: 240, w: 960, h: 360 }
+        enter: { at: "l1:'ليل'", anim: reveal }
+      - use: icon
+        id: hook_icon
+        props: { name: globe, color: '{{accent}}', ring: true, pulse: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'بالأرقام'", anim: pop }
+
+  - id: volume
+    at: l2
+    transition: zoom
+    elements:
+      - use: label
+        id: year
+        props: { text: 'السنة اللي فاتت', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l2:'السنة'", anim: wipe }
+      - use: counter
+        id: teu
+        props:
+          from: 0
+          keyframes: [{ at: "l2:'تعاملت'", value: {{teu}}, dur: 1.4 }]
+          label: 'الحاويات (TEU)'
+          color: '{{accent}}'
+          size: 140
+        place: { x: 60, y: 260, w: 960, h: 320 }
+        enter: { at: "l2:'المحطة'", anim: pop }
+
+  - id: assets
+    at: l3
+    transition: push
+    elements:
+      - use: stat-card
+        id: cranes
+        props: { label: 'رافعات الرصيف', value: {{cranes}}, icon: queue, accent: '{{accent}}' }
+        place: { x: 570, y: 200, w: 430, h: 280 }
+        enter: { at: "l3:'الرصيف'", anim: rise }
+      - use: stat-card
+        id: berths
+        props: { label: 'الأرصفة', value: {{berths}}, icon: clock, accent: '{{accent}}' }
+        place: { x: 80, y: 200, w: 430, h: 280 }
+        enter: { at: "l4:'السفن'", anim: rise }
+      - use: chip
+        id: schedule
+        props: { text: 'لكل رصيف جدول مواعيد', icon: clock, color: '{{accent}}', size: 34 }
+        place: { x: 160, y: 580, w: 760, h: 100 }
+        enter: { at: "l4:'جدول'", anim: spring }
+
+  - id: gates
+    at: l5
+    transition: push
+    elements:
+      - use: title
+        id: gates_title
+        props: { text: 'البوابات مفتوحة **{{hours}}**', size: 96, accent: '{{accent}}' }
+        place: { x: 60, y: 180, w: 960, h: 340 }
+        enter: { at: "l5:'والبوابات'", anim: reveal }
+      - use: chip
+        id: rush
+        props: { text: 'الشاحنات تتفادى الزحمة', icon: check, color: '{{accent}}', size: 38 }
+        place: { x: 160, y: 580, w: 760, h: 104 }
+        enter: { at: "l5:'الشاحنات'", anim: spring }
+
+  - id: report
+    at: l6
+    transition: zoom
+    elements:
+      - use: title
+        id: report_title
+        props: { text: 'راجع **آخر تقرير**', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 200, w: 960, h: 300 }
+        enter: { at: "l6:'الأرقام'", anim: reveal }
+      - use: icon
+        id: refresh
+        props: { name: refresh, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 580, w: 160, h: 160 }
+        enter: { at: "l6:'تقرير'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'قريبًا'
+          prompt: 'اكتب في الكومنتات'
+          next: 'إزاي بيتخطط الـ berth'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'وهنشرح'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

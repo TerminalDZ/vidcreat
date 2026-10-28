@@ -1,0 +1,137 @@
+# Ports · terminal in numbers (template; slots are filled by `reelforge new --pack ports-logistics`).
+meta:
+  id: '{{id}}'
+  series: 'TERMINAL FACTS'
+  title: '{{org}} in numbers'
+  episode: 1
+  preset: tiktok
+  theme: harbor
+  lang: en-US
+  publish:
+    cover: '{{org}} in numbers'
+    caption: 'Volume, cranes, berths and gate hours at {{org}}. Numbers change every year: check the latest report.'
+    hashtags: ['#logistics', '#port', '#shipping', '#terminal']
+    pinned: 'Comment {{keyword}} and we will explain how a berth is planned.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'What keeps {{org}} moving, day and night? Here it is in numbers.'
+  - text: 'Last year, the terminal handled {{teu}} containers, counted in TEU.'
+  - text: 'Along the quay, {{cranes}} ship-to-shore cranes load and unload the vessels.'
+  - text: 'Ships tie up at {{berths}} berths, each one with its own schedule.'
+  - text: 'And the gates stay open {{hours}}, so trucks can avoid the rush.'
+  - text: 'Numbers change every year, so check our latest report for updates.'
+  - text: 'Comment {{keyword}} and we will explain how a berth is planned.'
+
+chapters:
+  - { at: l1, label: '01 · THE TERMINAL' }
+  - { at: l2, label: '02 · THE NUMBERS' }
+  - { at: l6, label: '03 · UPDATES' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: kicker
+        props: { text: 'Terminal facts', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'What'", anim: wipe }
+      - use: title
+        id: hook_title
+        props: { text: '**{{org}}** in numbers', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 250, w: 960, h: 330 }
+        enter: { at: "l1:'moving'", anim: reveal }
+      - use: icon
+        id: hook_icon
+        props: { name: globe, color: '{{accent}}', ring: true, pulse: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'numbers'", anim: pop }
+
+  - id: volume
+    at: l2
+    transition: zoom
+    elements:
+      - use: label
+        id: year
+        props: { text: 'Last year', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l2:'Last'", anim: wipe }
+      - use: counter
+        id: teu
+        props:
+          from: 0
+          keyframes: [{ at: "l2:'handled'", value: {{teu}}, dur: 1.4 }]
+          label: 'CONTAINERS (TEU)'
+          color: '{{accent}}'
+          size: 140
+        place: { x: 60, y: 260, w: 960, h: 320 }
+        enter: { at: "l2:'terminal'", anim: pop }
+
+  - id: assets
+    at: l3
+    transition: push
+    elements:
+      - use: stat-card
+        id: cranes
+        props: { label: 'Quay cranes', value: {{cranes}}, icon: queue, accent: '{{accent}}' }
+        place: { x: 80, y: 200, w: 430, h: 280 }
+        enter: { at: "l3:'quay'", anim: rise }
+      - use: stat-card
+        id: berths
+        props: { label: 'Berths', value: {{berths}}, icon: clock, accent: '{{accent}}' }
+        place: { x: 570, y: 200, w: 430, h: 280 }
+        enter: { at: "l4:'Ships'", anim: rise }
+      - use: chip
+        id: schedule
+        props: { text: 'Each berth has a schedule', icon: clock, color: '{{accent}}', size: 34 }
+        place: { x: 160, y: 580, w: 760, h: 100 }
+        enter: { at: "l4:'schedule'", anim: spring }
+
+  - id: gates
+    at: l5
+    transition: push
+    elements:
+      - use: title
+        id: gates_title
+        props: { text: 'Gates open **{{hours}}**', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 200, w: 960, h: 300 }
+        enter: { at: "l5:'gates'", anim: reveal }
+      - use: chip
+        id: rush
+        props: { text: 'Trucks avoid the rush', icon: check, color: '{{accent}}', size: 38 }
+        place: { x: 190, y: 580, w: 700, h: 104 }
+        enter: { at: "l5:'trucks'", anim: spring }
+
+  - id: report
+    at: l6
+    transition: zoom
+    elements:
+      - use: title
+        id: report_title
+        props: { text: 'Check the **latest report**', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 200, w: 960, h: 300 }
+        enter: { at: "l6:'Numbers'", anim: reveal }
+      - use: icon
+        id: refresh
+        props: { name: refresh, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 580, w: 160, h: 160 }
+        enter: { at: "l6:'report'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'COMING UP'
+          next: 'How a berth is planned'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'explain'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'Comment'", anim: rise }

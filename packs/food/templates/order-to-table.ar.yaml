@@ -1,0 +1,122 @@
+# Food · order to table, Arabic (template; slots are filled by `reelforge new --pack food`).
+meta:
+  id: '{{id}}'
+  series: 'ورا المطبخ'
+  title: 'من الطلب للترابيزة'
+  episode: 1
+  preset: tiktok
+  theme: bistro
+  lang: ar-EG
+  publish:
+    cover: 'طلبك في {{minutes}} دقيقة'
+    caption: 'إيه اللي بيحصل ورا باب المطبخ في {{org}}، من طلبك لحد ترابيزتك. عندك حساسية؟ قول للـ waiter قبل ما تطلب.'
+    hashtags: ['#ورا_الكواليس', '#مطبخ', '#مطاعم', '#أكل']
+    pinned: 'اكتب {{keyword}} للجزء التاني: {{next}}.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'إزاي طلبك بيوصل الترابيزة في {{org}} في حوالي {{minutes}} دقيقة؟'
+  - text: 'الطلب بيظهر على شاشة المطبخ في نفس اللحظة.'
+  - text: 'الـ grill والـ cold station بيبدأوا في نفس الوقت.'
+  - text: 'وعند الـ pass، الشيف بيراجع كل طبق قبل ما يخرج.'
+  - text: 'وبعدها الـ waiter بيوصله لك وهو لسه سخن.'
+  - text: 'عندك حساسية أو سؤال؟ قول للـ waiter قبل ما تطلب.'
+  - text: 'اكتب {{keyword}} للجزء التاني: {{next}}.'
+
+chapters:
+  - { at: l1, label: '01 · الوقت' }
+  - { at: l2, label: '02 · المطبخ' }
+  - { at: l6, label: '03 · ترابيزتك' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    elements:
+      - use: label
+        id: org
+        props: { text: '{{org}}', dot: true, align: center }
+        place: { x: 140, y: 160, w: 800, h: 60 }
+        enter: { at: "l1:'إزاي'", anim: wipe }
+      - use: counter
+        id: minutes
+        props:
+          from: 0
+          keyframes: [{ at: "l1:'الترابيزة'", value: {{minutes}}, dur: 1.2 }]
+          suffix: ' دقيقة'
+          label: 'من الطلب للترابيزة'
+          color: '{{accent}}'
+        place: { x: 140, y: 240, w: 800, h: 320 }
+        enter: { at: "l1:'طلبك'", anim: pop }
+      - use: icon
+        id: clock
+        props: { name: clock, color: '{{accent}}', ring: true, pulse: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'الترابيزة'+0.4", anim: pop }
+
+  - id: kitchen
+    at: l2
+    transition: push
+    elements:
+      - use: flow
+        id: line
+        props:
+          color: cyan
+          accent: '{{accent}}'
+          fontSize: 28
+          token: { at: "l2:'شاشة'", dur: 10, color: '{{accent}}' }
+          stages:
+            - { label: 'الطلب', icon: bell, at: "l2:'الطلب'" }
+            - { label: 'المحطات', icon: fire, at: "l3:'grill'" }
+            - { label: 'المراجعة', icon: check, at: "l4:'pass'" }
+            - { label: 'الترابيزة', icon: users, at: "l5:'waiter'" }
+        place: { x: 60, y: 80, w: 960, h: 300 }
+        enter: { at: "l2:'الطلب'", anim: fade }
+      - use: chip
+        id: stations
+        props: { text: 'الشوي والأطباق الباردة مع بعض', icon: fire, color: '{{accent}}', size: 32 }
+        place: { x: 160, y: 440, w: 760, h: 96 }
+        enter: { at: "l3:'cold'", anim: pop }
+      - use: chip
+        id: checked
+        props: { text: 'كل طبق بيتراجع', icon: check, color: '{{accent}}', size: 32 }
+        place: { x: 160, y: 570, w: 760, h: 96 }
+        enter: { at: "l4:'بيراجع'", anim: pop }
+      - use: chip
+        id: hot
+        props: { text: 'بيوصل وهو سخن', icon: users, color: '{{accent}}', size: 32 }
+        place: { x: 160, y: 700, w: 760, h: 96 }
+        enter: { at: "l5:'سخن'", anim: pop }
+
+  - id: allergies
+    at: l6
+    glow: amber
+    transition: zoom
+    elements:
+      - use: title
+        id: allergy_title
+        props: { text: 'قول لنا عن **الحساسية**', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 190, w: 960, h: 330 }
+        enter: { at: "l6:'حساسية'", anim: reveal }
+      - use: icon
+        id: warn
+        props: { name: warn, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 580, w: 160, h: 160 }
+        enter: { at: "l6:'قول'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'الجزء التاني'
+          prompt: 'اكتب في الكومنتات'
+          next: '{{next}}'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'للجزء'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

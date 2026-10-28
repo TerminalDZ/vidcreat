@@ -1,0 +1,123 @@
+# Education · enrollment steps, Arabic (template; slots are filled by `reelforge new --pack education`).
+meta:
+  id: '{{id}}'
+  series: 'القبول والتسجيل'
+  title: 'كيف تسجل'
+  episode: 1
+  preset: tiktok
+  theme: campus
+  lang: ar-EG
+  publish:
+    cover: 'سجّل في 4 خطوات'
+    caption: 'كيف تسجل في {{program}} في {{org}}: الحساب، ثم الاستمارة، ثم الإرسال قبل {{deadline}}، ثم انتظار البريد. عندك أسئلة عن حالتك؟ تواصل مع مكتب القبول.'
+    hashtags: ['#تعليم', '#تسجيل', '#قبول', '#جامعة']
+    pinned: 'اكتب {{keyword}} وسنشارك معك القائمة الكاملة.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'تريد الالتحاق بـ {{program}} في {{org}}؟ التسجيل أربع خطوات فقط.'
+  - text: 'أولًا، أنشئ حسابك على موقع المدرسة.'
+  - text: 'ثم املأ الاستمارة، وارفع الهوية وآخر شهادة دراسية.'
+  - text: 'أرسل كل شيء قبل {{deadline}}، لأن الطلبات المتأخرة تنتظر الدفعة التالية.'
+  - text: 'سيصلك الرد بالبريد الإلكتروني خلال {{days}} أيام تقريبًا.'
+  - text: 'عندك أسئلة عن حالتك؟ تواصل مع مكتب القبول مباشرة.'
+  - text: 'اكتب {{keyword}} في التعليقات وسنشارك معك القائمة الكاملة.'
+
+chapters:
+  - { at: l1, label: '01 · البرنامج' }
+  - { at: l2, label: '02 · أربع خطوات' }
+  - { at: l6, label: '03 · أسئلة' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: org
+        props: { text: '{{org}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'تريد'", anim: wipe }
+      - use: title
+        id: program
+        props: { text: '**{{program}}**', size: 96, accent: '{{accent}}' }
+        place: { x: 60, y: 240, w: 960, h: 340 }
+        enter: { at: "l1:'الالتحاق'", anim: reveal }
+      - use: chip
+        id: four
+        props: { text: 'التسجيل في 4 خطوات', icon: check, color: '{{accent}}', size: 38 }
+        place: { x: 240, y: 620, w: 600, h: 104 }
+        enter: { at: "l1:'أربع'", anim: spring }
+
+  - id: steps
+    at: l2
+    transition: push
+    elements:
+      - use: steps
+        id: enroll_steps
+        props:
+          color: '{{accent}}'
+          fontSize: 48
+          items:
+            - { title: 'الحساب', text: 'على موقع المدرسة', at: "l2:'حسابك'" }
+            - { title: 'الاستمارة', text: 'الهوية وآخر شهادة', at: "l3:'الاستمارة'" }
+            - { title: 'الإرسال', text: 'قبل {{deadline}}', at: "l4:'أرسل'" }
+            - { title: 'الرد', text: 'بالبريد خلال {{days}} أيام', at: "l5:'الرد'" }
+        place: { x: 160, y: 20, w: 760, h: 660 }
+        enter: { at: "l2:'أولًا'", anim: fade }
+      - use: icon
+        id: icon_account
+        props: { name: user, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 720, w: 160, h: 160 }
+        enter: { at: "l2:'موقع'", anim: pop }
+        exit: { at: l3, anim: fade }
+      - use: icon
+        id: icon_form
+        props: { name: card, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 720, w: 160, h: 160 }
+        enter: { at: "l3:'وارفع'", anim: pop }
+        exit: { at: l4, anim: fade }
+      - use: icon
+        id: icon_deadline
+        props: { name: clock, color: amber, ring: true, pulse: true }
+        place: { x: 460, y: 720, w: 160, h: 160 }
+        enter: { at: "l4:'المتأخرة'", anim: pop }
+        exit: { at: l5, anim: fade }
+      - use: icon
+        id: icon_mail
+        props: { name: mail, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 720, w: 160, h: 160 }
+        enter: { at: "l5:'بالبريد'", anim: spring }
+
+  - id: contact
+    at: l6
+    transition: zoom
+    elements:
+      - use: title
+        id: ask
+        props: { text: 'اسأل **مكتب القبول**', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 200, w: 960, h: 320 }
+        enter: { at: "l6:'أسئلة'", anim: reveal }
+      - use: icon
+        id: ask_icon
+        props: { name: mail, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 580, w: 160, h: 160 }
+        enter: { at: "l6:'القبول'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'القائمة الكاملة'
+          prompt: 'اكتب في التعليقات'
+          next: 'كل ما تحتاجه للتسجيل'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'وسنشارك'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

@@ -1,0 +1,121 @@
+# Food · order to table (template; slots are filled by `reelforge new --pack food`).
+meta:
+  id: '{{id}}'
+  series: 'BEHIND THE KITCHEN'
+  title: 'Order to table'
+  episode: 1
+  preset: tiktok
+  theme: bistro
+  lang: en-US
+  publish:
+    cover: 'Your order in {{minutes}} minutes'
+    caption: 'What happens behind the kitchen door at {{org}}, from your order to your table. Allergies? Tell your server before you order.'
+    hashtags: ['#behindthescenes', '#kitchen', '#restaurant', '#foodtok']
+    pinned: 'Comment {{keyword}} for part two: {{next}}.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'How does your order reach the table at {{org}} in about {{minutes}} minutes?'
+  - text: 'The ticket hits the kitchen screen the moment you order.'
+  - text: 'The grill and the cold station start at the same time.'
+  - text: 'At the pass, the chef checks every plate before it leaves.'
+  - text: 'Then a server brings it to you while it is still hot.'
+  - text: 'Allergies or questions? Tell your server before you order.'
+  - text: 'Comment {{keyword}} for part two: {{next}}.'
+
+chapters:
+  - { at: l1, label: '01 · THE CLOCK' }
+  - { at: l2, label: '02 · THE KITCHEN' }
+  - { at: l6, label: '03 · YOUR TABLE' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    elements:
+      - use: label
+        id: org
+        props: { text: '{{org}}', dot: true, align: center }
+        place: { x: 140, y: 160, w: 800, h: 60 }
+        enter: { at: "l1:'How'", anim: wipe }
+      - use: counter
+        id: minutes
+        props:
+          from: 0
+          keyframes: [{ at: "l1:'table'", value: {{minutes}}, dur: 1.2 }]
+          suffix: ' min'
+          label: 'ORDER TO TABLE'
+          color: '{{accent}}'
+        place: { x: 140, y: 240, w: 800, h: 320 }
+        enter: { at: "l1:'order'", anim: pop }
+      - use: icon
+        id: clock
+        props: { name: clock, color: '{{accent}}', ring: true, pulse: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'table'+0.4", anim: pop }
+
+  - id: kitchen
+    at: l2
+    transition: push
+    elements:
+      - use: flow
+        id: line
+        props:
+          color: cyan
+          accent: '{{accent}}'
+          fontSize: 28
+          token: { at: "l2:'screen'", dur: 10, color: '{{accent}}' }
+          stages:
+            - { label: 'Ticket', icon: bell, at: "l2:'ticket'" }
+            - { label: 'Stations', icon: fire, at: "l3:'grill'" }
+            - { label: 'Pass', icon: check, at: "l4:'pass'" }
+            - { label: 'Table', icon: users, at: "l5:'server'" }
+        place: { x: 60, y: 80, w: 960, h: 300 }
+        enter: { at: "l2:'ticket'", anim: fade }
+      - use: chip
+        id: stations
+        props: { text: 'Grill + cold station together', icon: fire, color: '{{accent}}', size: 32 }
+        place: { x: 160, y: 440, w: 760, h: 96 }
+        enter: { at: "l3:'cold'", anim: pop }
+      - use: chip
+        id: checked
+        props: { text: 'Every plate checked', icon: check, color: '{{accent}}', size: 32 }
+        place: { x: 160, y: 570, w: 760, h: 96 }
+        enter: { at: "l4:'checks'", anim: pop }
+      - use: chip
+        id: hot
+        props: { text: 'Served while hot', icon: users, color: '{{accent}}', size: 32 }
+        place: { x: 160, y: 700, w: 760, h: 96 }
+        enter: { at: "l5:'hot'", anim: pop }
+
+  - id: allergies
+    at: l6
+    glow: amber
+    transition: zoom
+    elements:
+      - use: title
+        id: allergy_title
+        props: { text: 'Tell us about **allergies**', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 200, w: 960, h: 300 }
+        enter: { at: "l6:'Allergies'", anim: reveal }
+      - use: icon
+        id: warn
+        props: { name: warn, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 580, w: 160, h: 160 }
+        enter: { at: "l6:'Tell'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'PART TWO'
+          next: '{{next}}'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'part'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'Comment'", anim: rise }

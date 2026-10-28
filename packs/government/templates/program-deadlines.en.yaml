@@ -1,0 +1,106 @@
+# Government · program deadlines (template; slots are filled by `reelforge new --pack government`).
+meta:
+  id: '{{id}}'
+  series: 'PUBLIC PROGRAMS'
+  title: '{{program}}'
+  episode: 1
+  preset: tiktok
+  theme: civic
+  lang: en-US
+  publish:
+    cover: '{{program}}: 3 dates'
+    caption: 'Key dates for the {{program}} from {{city}}: opens {{open}}, closes {{close}}, decisions in {{result}}. Eligibility rules are on the official page.'
+    hashtags: ['#publicservices', '#deadlines', '#citygov']
+    pinned: 'Comment {{keyword}} and we will remind you before the deadline.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'Applying for the {{program}}? Mark these three dates.'
+  - text: 'Applications open on {{open}}, on the {{city}} website.'
+  - text: 'The last day to apply is {{close}}, and late forms are not accepted.'
+  - text: 'Decisions are sent by email in {{result}}.'
+  - text: 'Prepare your documents early, so you are not rushed at the end.'
+  - text: 'Eligibility rules are on the official page, so check them for your case.'
+  - text: 'Comment {{keyword}} and we will remind you before the deadline.'
+
+chapters:
+  - { at: l1, label: '01 · THE PROGRAM' }
+  - { at: l2, label: '02 · THREE DATES' }
+  - { at: l5, label: '03 · GET READY' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    elements:
+      - use: label
+        id: city
+        props: { text: '{{city}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'Applying'", anim: wipe }
+      - use: title
+        id: program
+        props: { text: '**{{program}}**', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 250, w: 960, h: 320 }
+        enter: { at: 'l1+0.6', anim: reveal }
+      - use: chip
+        id: three
+        props: { text: '3 dates to know', icon: clock, color: '{{accent}}', size: 38 }
+        place: { x: 240, y: 640, w: 600, h: 104 }
+        enter: { at: "l1:'three'", anim: pop }
+
+  - id: dates
+    at: l2
+    transition: push
+    elements:
+      - use: timeline
+        id: dates_line
+        props:
+          color: '{{accent}}'
+          markers:
+            - { pos: 0.15, label: '{{open}}', sub: 'Opens', at: "l2:'open'" }
+            - { pos: 0.5, label: '{{close}}', sub: 'Last day', at: "l3:'last'", color: amber }
+            - { pos: 0.85, label: '{{result}}', sub: 'Decisions', at: "l4:'Decisions'" }
+        place: { x: 60, y: 120, w: 960, h: 280 }
+        enter: { at: "l2:'Applications'", anim: wipe }
+      - use: chip
+        id: late
+        props: { text: 'Late forms are not accepted', icon: warn, color: amber, size: 34 }
+        place: { x: 160, y: 480, w: 760, h: 100 }
+        enter: { at: "l3:'late'", anim: pop }
+      - use: chip
+        id: email
+        props: { text: 'Decision by email', icon: mail, color: '{{accent}}', size: 34 }
+        place: { x: 160, y: 620, w: 760, h: 100 }
+        enter: { at: "l4:'email'", anim: pop }
+
+  - id: ready
+    at: l5
+    transition: zoom
+    elements:
+      - use: title
+        id: early
+        props: { text: 'Prepare **early**', size: 116, accent: '{{accent}}' }
+        place: { x: 60, y: 160, w: 960, h: 280 }
+        enter: { at: "l5:'Prepare'", anim: reveal }
+      - use: chip
+        id: eligibility
+        props: { text: 'Eligibility: see the official page', icon: globe, color: '{{accent}}', size: 32 }
+        place: { x: 60, y: 560, w: 860, h: 100 }
+        enter: { at: "l6:'Eligibility'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'GET A REMINDER'
+          next: 'Before {{close}}'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'remind'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'Comment'", anim: rise }

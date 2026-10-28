@@ -1,0 +1,165 @@
+# Healthcare · department intro, Arabic (template; slots are filled by `reelforge new --pack healthcare`).
+meta:
+  id: '{{id}}'
+  series: 'تعرّف على الفريق'
+  title: '{{dept}}'
+  episode: 1
+  preset: tiktok
+  theme: clinical
+  lang: ar-EG
+  publish:
+    cover: '{{dept}}: المكان والمواعيد والحجز'
+    caption: 'أين تجد {{dept}} في {{org}}، ومتى يعمل، وكيف تحجز موعدًا. في الطوارئ اتصل برقم الطوارئ المحلي.'
+    hashtags: ['#مستشفى', '#صحة', '#دليل_المريض']
+    pinned: 'اكتب {{keyword}} وسنشارك معك خطوات الحجز.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'تبحث عن {{dept}} في {{org}}؟ إليك الطريق إلينا.'
+  - text: 'القسم موجود في {{floor}}، بجوار المصاعد الرئيسية مباشرة.'
+  - text: 'نعمل من الساعة {{opens}} حتى {{closes}}، {{days}}.'
+  - text: 'فريق من {{staff}} طبيبًا وممرضًا وفنيًا يعمل هنا كل يوم.'
+  - text: 'لحجز موعد، اطلب أولًا خطاب تحويل من طبيب الأسرة.'
+  - text: 'ثم اتصل بخط الحجز، أو استخدم تطبيق المرضى لاختيار الوقت.'
+  - text: 'في حالة الطوارئ لا تنتظر: اتصل برقم الطوارئ المحلي.'
+  - text: 'اكتب {{keyword}} في التعليقات وسنشارك معك خطوات الحجز.'
+
+chapters:
+  - { at: l1, label: '01 · المكان' }
+  - { at: l4, label: '02 · الفريق' }
+  - { at: l5, label: '03 · الحجز' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: org
+        props: { text: '{{org}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'تبحث'", anim: wipe }
+      - use: title
+        id: dept
+        props: { text: '**{{dept}}**', size: 116, accent: '{{accent}}' }
+        place: { x: 60, y: 250, w: 960, h: 330 }
+        enter: { at: 'l1+0.6', anim: reveal }
+      - use: icon
+        id: hook_icon
+        props: { name: users, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'الطريق'", anim: pop }
+
+  - id: where
+    at: l2
+    transition: push
+    elements:
+      - use: node
+        id: floor
+        props: { title: '{{floor}}', sub: '{{dept}}', icon: globe, color: '{{accent}}' }
+        place: { x: 190, y: 220, w: 700, h: 220 }
+        enter: { at: "l2:'القسم'", anim: pop }
+        exit: { at: l3, anim: fade }
+      - use: chip
+        id: lifts
+        props: { text: 'بجوار المصاعد الرئيسية', icon: check, color: '{{accent}}', size: 38 }
+        place: { x: 190, y: 520, w: 700, h: 104 }
+        enter: { at: "l2:'المصاعد'", anim: spring }
+        exit: { at: l3, anim: fade }
+
+      - use: label
+        id: hours_label
+        props: { text: 'مواعيد العمل', dot: true, align: center }
+        place: { x: 140, y: 150, w: 800, h: 60 }
+        enter: { at: "l3:'نعمل'", anim: wipe }
+      - use: timeline
+        id: hours_line
+        props:
+          start: '{{opens}}'
+          end: '{{closes}}'
+          color: '{{accent}}'
+          markers:
+            - { pos: 0.08, label: 'نفتح', at: "l3:'نعمل'+0.4" }
+            - { pos: 0.92, label: 'نغلق', at: "l3:'نعمل'+1.2" }
+        place: { x: 60, y: 250, w: 960, h: 260 }
+        enter: { at: "l3:'نعمل'+0.2", anim: wipe }
+      - use: chip
+        id: days
+        props: { text: '{{days}}', icon: clock, color: '{{accent}}', size: 38 }
+        place: { x: 190, y: 600, w: 700, h: 104 }
+        enter: { at: "l3:'نعمل'+1.8", anim: pop }
+
+  - id: team
+    at: l4
+    transition: push
+    elements:
+      - use: counter
+        id: staff
+        props:
+          from: 0
+          keyframes: [{ at: "l4:'فريق'", value: {{staff}}, dur: 1.2 }]
+          label: 'عدد أفراد الفريق'
+          color: '{{accent}}'
+        place: { x: 140, y: 160, w: 800, h: 320 }
+        enter: { at: "l4:'فريق'", anim: pop }
+      - use: chip
+        id: roles
+        props: { text: 'أطباء · تمريض · فنيون', icon: users, color: '{{accent}}', size: 34 }
+        place: { x: 140, y: 580, w: 780, h: 100 }
+        enter: { at: "l4:'وممرضًا'", anim: spring }
+
+  - id: book
+    at: l5
+    transition: push
+    camera: drift
+    elements:
+      - use: steps
+        id: book_steps
+        props:
+          color: '{{accent}}'
+          fontSize: 54
+          items:
+            - { title: 'التحويل', text: 'من طبيب الأسرة', icon: user, at: "l5:'تحويل'" }
+            - { title: 'اتصال أو تطبيق', text: 'خط الحجز', icon: phone, at: "l6:'اتصل'" }
+            - { title: 'اختر الوقت', text: 'الذي يناسبك', icon: clock, at: "l6:'الوقت'" }
+        place: { x: 160, y: 40, w: 760, h: 600 }
+        enter: { at: "l5:'لحجز'", anim: fade }
+      - use: chip
+        id: app
+        props: { text: 'تطبيق المرضى', icon: phone, color: '{{accent}}', size: 34 }
+        place: { x: 270, y: 700, w: 540, h: 96 }
+        enter: { at: "l6:'تطبيق'", anim: pop }
+
+  - id: emergency
+    at: l7
+    glow: red
+    transition: cut
+    elements:
+      - use: title
+        id: emergency_title
+        props: { text: 'طوارئ؟ **لا تنتظر**', size: 108, accent: red }
+        place: { x: 60, y: 200, w: 960, h: 300 }
+        enter: { at: "l7:'الطوارئ'", anim: reveal }
+      - use: chip
+        id: call
+        props: { text: 'اتصل برقم الطوارئ المحلي', icon: warn, color: red, size: 32 }
+        place: { x: 60, y: 580, w: 860, h: 96 }
+        enter: { at: "l7:'اتصل'", anim: pop }
+
+  - id: outro
+    at: l8
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'قريبًا'
+          prompt: 'اكتب في التعليقات'
+          next: 'كيف تحجز موعدك'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l8:'وسنشارك'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l8:'اكتب'", anim: rise }

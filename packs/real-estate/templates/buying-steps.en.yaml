@@ -1,0 +1,128 @@
+# Real estate · buying steps (template; slots are filled by `reelforge new --pack real-estate`).
+meta:
+  id: '{{id}}'
+  series: 'BUYER GUIDE'
+  title: 'Buying your first home'
+  episode: 1
+  preset: tiktok
+  theme: estate
+  lang: en-US
+  publish:
+    cover: 'Your first home in 5 steps'
+    caption: 'The five steps of buying a first home in {{city}}, explained by {{org}}. General information, not financial or legal advice: talk to a licensed lender, agent or notary.'
+    hashtags: ['#realestate', '#firsthome', '#homebuying', '#buyerguide']
+    pinned: 'Comment {{keyword}} for part two: {{next}}.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'Buying your first home in {{city}}? It comes down to five steps.'
+  - text: 'First, check what you can afford with a licensed lender.'
+  - text: 'Then visit homes and compare them on the same checklist.'
+  - text: 'Make an offer, and book an independent inspection.'
+  - text: 'Finally, sign at closing with a notary and get your keys.'
+  - text: 'From offer to keys it often takes about {{weeks}} weeks, but every case is different.'
+  - text: 'Comment {{keyword}} and follow {{org}} for part two: {{next}}.'
+
+chapters:
+  - { at: l1, label: '01 · THE PLAN' }
+  - { at: l2, label: '02 · FIVE STEPS' }
+  - { at: l6, label: '03 · HOW LONG' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: org
+        props: { text: '{{org}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'Buying'", anim: wipe }
+      - use: title
+        id: hook_title
+        props: { text: 'Your first home in **5 steps**', size: 108, accent: '{{accent}}' }
+        place: { x: 60, y: 250, w: 960, h: 320 }
+        enter: { at: "l1:'home'", anim: reveal }
+      - use: icon
+        id: hook_icon
+        props: { name: key, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'five'", anim: pop }
+
+  - id: steps
+    at: l2
+    transition: push
+    elements:
+      - use: steps
+        id: buy_steps
+        props:
+          color: '{{accent}}'
+          fontSize: 46
+          items:
+            - { title: 'Budget', text: 'With a licensed lender', at: "l2:'afford'" }
+            - { title: 'Visit and compare', text: 'One checklist for all', at: "l3:'visit'" }
+            - { title: 'Offer', text: 'In writing', at: "l4:'offer'" }
+            - { title: 'Inspection', text: 'Independent', at: "l4:'inspection'" }
+            - { title: 'Closing', text: 'Sign and get the keys', at: "l5:'closing'" }
+        place: { x: 160, y: 20, w: 760, h: 660 }
+        enter: { at: "l2:'First'", anim: fade }
+      - use: icon
+        id: icon_budget
+        props: { name: card, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 720, w: 160, h: 160 }
+        enter: { at: "l2:'lender'", anim: pop }
+        exit: { at: l3, anim: fade }
+      - use: icon
+        id: icon_visit
+        props: { name: check, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 720, w: 160, h: 160 }
+        enter: { at: "l3:'compare'", anim: pop }
+        exit: { at: l4, anim: fade }
+      - use: icon
+        id: icon_offer
+        props: { name: shield, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 720, w: 160, h: 160 }
+        enter: { at: "l4:'book'", anim: pop }
+        exit: { at: l5, anim: fade }
+      - use: icon
+        id: icon_keys
+        props: { name: key, color: '{{accent}}', ring: true, pulse: true }
+        place: { x: 460, y: 720, w: 160, h: 160 }
+        enter: { at: "l5:'keys'", anim: spring }
+
+  - id: time
+    at: l6
+    transition: zoom
+    elements:
+      - use: counter
+        id: weeks
+        props:
+          from: 0
+          keyframes: [{ at: "l6:'about'", value: {{weeks}}, dur: 1 }]
+          suffix: ' weeks'
+          label: 'FROM OFFER TO KEYS'
+          color: '{{accent}}'
+        place: { x: 140, y: 160, w: 800, h: 320 }
+        enter: { at: "l6:'From'", anim: pop }
+      - use: chip
+        id: differs
+        props: { text: 'Every case is different', icon: warn, color: dim, size: 36 }
+        place: { x: 190, y: 580, w: 700, h: 100 }
+        enter: { at: "l6:'case'", anim: spring }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'PART TWO'
+          next: '{{next}}'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'follow'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'Comment'", anim: rise }

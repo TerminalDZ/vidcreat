@@ -1,0 +1,52 @@
+# Education pack: concept explainers, study plans and enrollment guides for a fictional school.
+id: education
+name: { en: Education, ar: التعليم }
+description:
+  en: Explain one concept, share a study plan or walk students through enrollment.
+  ar: اشرح مفهومًا واحدًا، أو شارك خطة مذاكرة، أو اشرح خطوات التسجيل للطلاب.
+theme: campus
+playbook: skills/reelforge-industry-playbooks/references/education.md
+blueprints: [hook, process-steps, timeline, comparison, problem-solution, quote, cta]
+templates:
+  - id: concept-explainer
+    title: { en: Concept in a minute, ar: مفهوم في دقيقة }
+    description:
+      en: One concept broken into three parts and a result. Check the content for accuracy.
+      ar: مفهوم واحد مقسّم إلى ثلاثة أجزاء ونتيجة. راجع دقة المحتوى.
+    slots:
+      org: { label: School name, max: 24, default: { en: Westfield Academy, ar: أكاديمية ويستفيلد } }
+      subject: { label: Subject, max: 18, default: { en: Biology, ar: الأحياء } }
+      concept: { label: Concept, max: 22, default: { en: Photosynthesis, ar: البناء الضوئي } }
+      part1: { label: Part 1, max: 22, default: { en: Sunlight, ar: ضوء الشمس } }
+      part2: { label: Part 2, max: 22, default: { en: Water, ar: الماء } }
+      part3: { label: Part 3, max: 22, default: { en: Carbon dioxide, ar: ثاني أكسيد الكربون } }
+      result: { label: Result, max: 22, default: { en: Sugar and oxygen, ar: سكر وأكسجين } }
+      keyword: { label: Comment keyword, max: 10, default: { en: NEXT, ar: التالي } }
+      accent: { label: Accent color, type: color, default: lime }
+    files: { en: templates/concept-explainer.en.yaml, ar: templates/concept-explainer.ar.yaml }
+  - id: study-plan
+    title: { en: Study plan, ar: خطة مذاكرة }
+    description:
+      en: A calm plan for the days before an exam, with spaced review on a timeline.
+      ar: خطة هادئة للأيام قبل الامتحان، مع مراجعة متباعدة على خط زمني.
+    slots:
+      exam: { label: Exam name, max: 22, default: { en: the final exam, ar: الامتحان النهائي } }
+      days: { label: Days left, type: number, min: 1, max: 60, default: 7 }
+      hours: { label: Study hours per day, type: number, min: 1, max: 12, default: 3 }
+      keyword: { label: Comment keyword, max: 10, default: { en: PLAN, ar: خطة } }
+      accent: { label: Accent color, type: color, default: amber }
+    files: { en: templates/study-plan.en.yaml, ar: templates/study-plan.ar.yaml }
+  - id: enrollment-steps
+    title: { en: Enrollment steps, ar: خطوات التسجيل }
+    description:
+      en: Four enrollment steps for a program, with the deadline and the reply time.
+      ar: أربع خطوات للتسجيل في برنامج، مع آخر موعد ومدة الرد.
+    slots:
+      org: { label: School name, max: 24, default: { en: Brightpath College, ar: كلية برايتباث } }
+      program: { label: Program, max: 22, default: { en: Evening courses, ar: الدورات المسائية } }
+      deadline: { label: Deadline, max: 14, default: { en: 30 June, ar: 30 يونيو } }
+      days: { label: Reply time (days), type: number, min: 1, max: 90, default: 10 }
+      keyword: { label: Comment keyword, max: 10, default: { en: ENROLL, ar: تسجيل } }
+      accent: { label: Accent color, type: color, default: cyan }
+    files: { en: templates/enrollment-steps.en.yaml, ar: templates/enrollment-steps.ar.yaml }
+examples: [examples/photosynthesis-en, examples/photosynthesis-ar]

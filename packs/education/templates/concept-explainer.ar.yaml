@@ -1,0 +1,114 @@
+# Education · concept explainer, Arabic (template; slots are filled by `reelforge new --pack education`).
+meta:
+  id: '{{id}}'
+  series: '{{subject}} في دقيقة'
+  title: '{{concept}}'
+  episode: 1
+  preset: tiktok
+  theme: campus
+  lang: ar-EG
+  publish:
+    cover: '{{concept}} في دقيقة'
+    caption: '{{concept}} في ثلاثة أجزاء، من حصة {{subject}} في {{org}}. احفظه للمراجعة.'
+    hashtags: ['#مذاكرة', '#تعليم', '#مراجعة', '#studytok']
+    pinned: 'اكتب {{keyword}} للموضوع التالي.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'هل تستطيع أن تشرح {{concept}} في أقل من دقيقة؟ لنجرب معًا.'
+  - text: 'في حصة {{subject}} في {{org}}، نقسمه إلى ثلاثة أجزاء بسيطة.'
+  - text: 'الجزء الأول، وهو نقطة البداية: {{part1}}.'
+  - text: 'الجزء الثاني، وهو ما يجعل العملية تستمر: {{part2}}.'
+  - text: 'الجزء الثالث، وهو ما ينساه كثيرون: {{part3}}.'
+  - text: 'اجمع الأجزاء معًا، فتكون النتيجة: {{result}}.'
+  - text: 'احفظ الفيديو للمراجعة، واكتب {{keyword}} للموضوع التالي.'
+
+chapters:
+  - { at: l1, label: '01 · السؤال' }
+  - { at: l3, label: '02 · ثلاثة أجزاء' }
+  - { at: l6, label: '03 · النتيجة' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: subject
+        props: { text: '{{subject}}', dot: true, align: center }
+        place: { x: 140, y: 140, w: 800, h: 60 }
+        enter: { at: "l1:'هل'", anim: wipe }
+      - use: title
+        id: concept
+        props: { text: '**{{concept}}**', size: 96, accent: '{{accent}}' }
+        place: { x: 60, y: 210, w: 960, h: 320 }
+        enter: { at: "l1:'تشرح'", anim: reveal }
+      - use: chip
+        id: minute
+        props: { text: 'في أقل من دقيقة', icon: clock, color: '{{accent}}', size: 36 }
+        place: { x: 240, y: 560, w: 600, h: 96 }
+        enter: { at: "l1:'لنجرب'", anim: spring }
+      - use: chip
+        id: parts
+        props: { text: 'ثلاثة أجزاء بسيطة', icon: check, color: '{{accent}}', size: 36, variant: solid }
+        place: { x: 240, y: 700, w: 600, h: 96 }
+        enter: { at: "l2:'ثلاثة'", anim: pop }
+
+  - id: parts
+    at: l3
+    transition: push
+    elements:
+      - use: node
+        id: part1
+        props: { title: '{{part1}}', sub: 'الجزء 1 · البداية', icon: bolt, color: '{{accent}}' }
+        place: { x: 60, y: 60, w: 860, h: 200 }
+        enter: { at: "l3:'الأول'", anim: slide-l }
+      - use: node
+        id: part2
+        props: { title: '{{part2}}', sub: 'الجزء 2 · الاستمرار', icon: refresh, color: '{{accent}}' }
+        place: { x: 60, y: 300, w: 860, h: 200 }
+        enter: { at: "l4:'الثاني'", anim: slide-l }
+      - use: node
+        id: part3
+        props: { title: '{{part3}}', sub: 'الجزء 3 · كثيرًا ما يُنسى', icon: warn, color: amber }
+        place: { x: 60, y: 540, w: 860, h: 200 }
+        enter: { at: "l5:'الثالث'", anim: slide-l }
+
+  - id: result
+    at: l6
+    glow: lime
+    transition: zoom
+    elements:
+      - use: label
+        id: together
+        props: { text: 'عند جمع الأجزاء', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l6:'اجمع'", anim: wipe }
+      - use: title
+        id: result_title
+        props: { text: '**{{result}}**', size: 96, accent: '{{accent}}' }
+        place: { x: 60, y: 240, w: 960, h: 320 }
+        enter: { at: "l6:'النتيجة'", anim: reveal }
+      - use: icon
+        id: done
+        props: { name: check, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 620, w: 160, h: 160 }
+        enter: { at: "l6:'النتيجة'+0.6", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'احفظه للمراجعة'
+          prompt: 'اكتب في التعليقات'
+          next: 'الموضوع التالي'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'واكتب'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'احفظ'", anim: rise }

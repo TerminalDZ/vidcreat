@@ -1,0 +1,119 @@
+# Finance · compound interest, Arabic (template; slots are filled by `reelforge new --pack finance`).
+meta:
+  id: '{{id}}'
+  series: 'أساسيات المال'
+  title: 'الفائدة المركبة'
+  episode: 1
+  preset: tiktok
+  theme: ledger
+  lang: ar-EG
+  publish:
+    cover: 'فائدة على الفائدة'
+    caption: 'ما هي الفائدة المركبة، بمثال واحد. الأسعار الحقيقية تتغير، وللمنتجات رسوم ومخاطر. معلومات عامة وليست نصيحة مالية.'
+    hashtags: ['#أساسيات_المال', '#الفائدة_المركبة', '#ادخار']
+    pinned: 'معلومات عامة وليست نصيحة مالية. اسأل مستشارًا مرخصًا عن حالتك.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'كيف يكبر مبلغ صغير بمجرد الانتظار؟ اسمها الفائدة المركبة.'
+  - text: 'تكسب فائدة على مدخراتك، ثم فائدة على هذه الفائدة نفسها.'
+  - text: 'مثال توضيحي: {{start}} {{currency}} بفائدة {{rate}} في المئة سنويًا.'
+  - text: 'بعد {{years}} سنوات، قد يصبح المبلغ حوالي {{end}} {{currency}}.'
+  - text: 'الأسعار الحقيقية تتغير، وللمنتجات رسوم ومخاطر.'
+  - text: 'اسأل مستشارًا ماليًا مرخصًا قبل أي قرار يخص أموالك.'
+  - text: 'معلومات عامة وليست نصيحة مالية. تابع {{org}} لمزيد من الأساسيات.'
+
+chapters:
+  - { at: l1, label: '01 · الفكرة' }
+  - { at: l3, label: '02 · مثال' }
+  - { at: l5, label: '03 · انتبه' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: icon
+        id: hook_icon
+        props: { name: refresh, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 120, w: 160, h: 160 }
+        enter: { at: "l1:'مبلغ'", anim: pop }
+      - use: title
+        id: hook_title
+        props: { text: 'الفائدة **المركبة**', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 310, w: 960, h: 300 }
+        enter: { at: "l1:'الفائدة'", anim: reveal }
+      - use: chip
+        id: idea
+        props: { text: 'فائدة على الفائدة', icon: refresh, color: '{{accent}}', size: 38 }
+        place: { x: 190, y: 680, w: 700, h: 104 }
+        enter: { at: "l2:'نفسها'", anim: spring }
+
+  - id: example
+    at: l3
+    transition: zoom
+    elements:
+      - use: label
+        id: example_label
+        props: { text: 'قيم توضيحية · {{rate}}% سنويًا', dot: true, align: center }
+        place: { x: 100, y: 120, w: 880, h: 60 }
+        enter: { at: "l3:'مثال'", anim: wipe }
+      - use: counter
+        id: amount
+        props:
+          from: {{start}}
+          keyframes: [{ at: "l4:'يصبح'", value: {{end}}, dur: 1.6 }]
+          suffix: ' {{currency}}'
+          label: 'المبلغ · مثال'
+          color: '{{accent}}'
+          size: 120
+        place: { x: 60, y: 210, w: 960, h: 320 }
+        enter: { at: "l3:'مثال'+0.3", anim: pop }
+      - use: chip
+        id: years
+        props: { text: 'بعد {{years}} سنوات', icon: clock, color: '{{accent}}', size: 38 }
+        place: { x: 240, y: 600, w: 600, h: 104 }
+        enter: { at: "l4:'بعد'", anim: spring }
+
+  - id: risks
+    at: l5
+    glow: amber
+    transition: push
+    elements:
+      - use: chip
+        id: rates
+        props: { text: 'الأسعار تتغير', icon: refresh, color: amber, size: 30 }
+        place: { x: 620, y: 120, w: 400, h: 90 }
+        enter: { at: "l5:'الأسعار'", anim: pop }
+      - use: chip
+        id: fees
+        props: { text: 'رسوم', icon: card, color: amber, size: 30 }
+        place: { x: 340, y: 120, w: 240, h: 90 }
+        enter: { at: "l5:'رسوم'", anim: pop }
+      - use: chip
+        id: riskchip
+        props: { text: 'مخاطر', icon: warn, color: amber, size: 30 }
+        place: { x: 60, y: 120, w: 240, h: 90 }
+        enter: { at: "l5:'ومخاطر'", anim: pop }
+      - use: title
+        id: adviser
+        props: { text: 'اسأل **مستشارًا مرخصًا**', size: 96, accent: '{{accent}}' }
+        place: { x: 60, y: 290, w: 960, h: 320 }
+        enter: { at: "l6:'مرخصًا'", anim: reveal }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: label
+        id: disclaimer
+        props: { text: 'معلومات عامة وليست نصيحة مالية', dot: true, align: center }
+        place: { x: 60, y: 80, w: 960, h: 60 }
+        enter: { at: "l7:'معلومات'", anim: wipe }
+      - use: cta
+        id: next
+        props: { label: 'تابعنا', next: 'المزيد من أساسيات المال', color: '{{accent}}' }
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'تابع'", anim: rise }

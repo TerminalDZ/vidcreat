@@ -1,0 +1,126 @@
+# Government · what to bring (template; slots are filled by `reelforge new --pack government`).
+meta:
+  id: '{{id}}'
+  series: 'PUBLIC SERVICES'
+  title: 'What to bring'
+  episode: 1
+  preset: tiktok
+  theme: civic
+  lang: en-US
+  publish:
+    cover: 'Your appointment: what to bring'
+    caption: 'What to bring to your appointment with {{city}}: confirmation, {{item1}}, {{item2}} and sometimes {{item3}}. Requirements can change: check the official website.'
+    hashtags: ['#publicservices', '#checklist', '#citygov']
+    pinned: 'Comment {{keyword}} and save this list for your visit.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'Going to {{city}} for an appointment? Here is what to bring.'
+  - text: 'First, your appointment confirmation, printed or on your phone.'
+  - text: 'You will also need {{item1}}, and {{item2}}.'
+  - text: 'Some services also ask for {{item3}}, so read your letter.'
+  - text: 'Arrive about {{minutes}} minutes early to pass security and find the desk.'
+  - text: 'Requirements can change, so check the official website for your case.'
+  - text: 'Comment {{keyword}} and save this list for your visit.'
+
+chapters:
+  - { at: l1, label: '01 · YOUR VISIT' }
+  - { at: l2, label: '02 · THE LIST' }
+  - { at: l5, label: '03 · ON THE DAY' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    elements:
+      - use: label
+        id: city
+        props: { text: '{{city}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'Going'", anim: wipe }
+      - use: title
+        id: hook_title
+        props: { text: 'What to **bring**', size: 116, accent: '{{accent}}' }
+        place: { x: 60, y: 250, w: 960, h: 300 }
+        enter: { at: "l1:'appointment'", anim: reveal }
+      - use: icon
+        id: hook_icon
+        props: { name: check, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'bring'", anim: pop }
+
+  - id: list
+    at: l2
+    transition: push
+    elements:
+      - use: chip
+        id: confirmation
+        props: { text: 'Appointment confirmation', icon: mail, color: '{{accent}}', size: 38 }
+        place: { x: 60, y: 60, w: 860, h: 120 }
+        enter: { at: "l2:'confirmation'", anim: slide-r }
+      - use: chip
+        id: item1
+        props: { text: '{{item1}}', icon: check, color: '{{accent}}', size: 38 }
+        place: { x: 60, y: 230, w: 860, h: 120 }
+        enter: { at: "l3:'need'", anim: slide-r }
+      - use: chip
+        id: item2
+        props: { text: '{{item2}}', icon: check, color: '{{accent}}', size: 38 }
+        place: { x: 60, y: 400, w: 860, h: 120 }
+        enter: { at: "l3:'need'+1.2", anim: slide-r }
+      - use: chip
+        id: item3
+        props: { text: '{{item3}}', icon: warn, color: amber, size: 34 }
+        place: { x: 60, y: 570, w: 860, h: 120 }
+        enter: { at: "l4:'services'", anim: slide-r }
+
+  - id: arrive
+    at: l5
+    transition: zoom
+    elements:
+      - use: counter
+        id: minutes
+        props:
+          from: 0
+          keyframes: [{ at: "l5:'Arrive'", value: {{minutes}}, dur: 1 }]
+          suffix: ' min'
+          label: 'ARRIVE EARLY'
+          color: '{{accent}}'
+        place: { x: 140, y: 160, w: 800, h: 320 }
+        enter: { at: "l5:'Arrive'", anim: pop }
+      - use: chip
+        id: security
+        props: { text: 'Security, then the right desk', icon: shield, color: '{{accent}}', size: 34 }
+        place: { x: 160, y: 580, w: 760, h: 100 }
+        enter: { at: "l5:'security'", anim: pop }
+
+  - id: rules
+    at: l6
+    transition: push
+    elements:
+      - use: title
+        id: official
+        props: { text: 'Check the **official website**', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 200, w: 960, h: 300 }
+        enter: { at: "l6:'Requirements'", anim: reveal }
+      - use: icon
+        id: globe
+        props: { name: globe, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 580, w: 160, h: 160 }
+        enter: { at: "l6:'official'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'SAVE THIS LIST'
+          next: 'Your visit, step by step'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'save'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'Comment'", anim: rise }

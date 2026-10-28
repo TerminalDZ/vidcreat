@@ -1,0 +1,57 @@
+# Ports and logistics pack: container flows, terminal facts and route launches for a fictional port.
+id: ports-logistics
+name: { en: Ports & logistics, ar: الموانئ والخدمات اللوجستية }
+description:
+  en: Explain how cargo moves through a port, share terminal numbers and announce new routes.
+  ar: اشرح كيف تتحرك البضائع داخل الميناء، وشارك أرقام المحطة، وأعلن عن الخطوط الجديدة.
+theme: harbor
+playbook: skills/reelforge-industry-playbooks/references/ports-logistics.md
+blueprints: [hook, process-steps, stat-reveal, bar-stats, comparison, before-after, cta]
+templates:
+  - id: container-journey
+    title: { en: Container journey, ar: رحلة الحاوية }
+    description:
+      en: A container's path from ship to gate in four stages, the typical time and the most common delay.
+      ar: مسار الحاوية من السفينة حتى البوابة في أربع مراحل، والمدة المعتادة، وأكثر سبب للتأخير.
+    slots:
+      org: { label: Port or terminal name, max: 22, default: { en: Port of Azur, ar: ميناء أزور } }
+      days: { label: Typical days from ship to gate, type: number, min: 1, max: 60, default: 3 }
+      next: { label: Next episode topic, max: 30, default: { en: How truck slots work, ar: مواعيد الشاحنات } }
+      keyword: { label: Comment keyword, max: 10, default: { en: SLOTS, ar: SLOTS } }
+      accent: { label: Accent color, type: color, default: amber }
+    files: { en: templates/container-journey.en.yaml, ar: templates/container-journey.ar.yaml }
+  - id: terminal-in-numbers
+    title: { en: Terminal in numbers, ar: المحطة بالأرقام }
+    description:
+      en: Yearly volume, cranes, berths and gate hours of one terminal, as the numbers you provide.
+      ar: الحجم السنوي والرافعات والأرصفة ومواعيد البوابات لمحطة واحدة، بالأرقام التي تقدمها.
+    slots:
+      org: { label: Terminal name, max: 22, default: { en: Port of Azur, ar: ميناء أزور } }
+      teu: { label: Containers last year (TEU), type: number, min: 1, max: 99999999, default: 1250000 }
+      cranes: { label: Ship-to-shore cranes, type: number, min: 1, max: 200, default: 14 }
+      berths: { label: Berths, type: number, min: 1, max: 100, default: 6 }
+      hours: { label: Gate hours (e.g. 24/7), max: 12, default: { en: 24/7, ar: 24/7 } }
+      keyword: { label: Comment keyword, max: 10, default: { en: BERTH, ar: BERTH } }
+      accent: { label: Accent color, type: color, default: cyan }
+    files: { en: templates/terminal-in-numbers.en.yaml, ar: templates/terminal-in-numbers.ar.yaml }
+  - id: new-route
+    title: { en: New route, ar: خط ملاحي جديد }
+    description:
+      en: Announce a direct service with its operator, weekly sailings, transit time and first sailing date.
+      ar: أعلن عن خدمة مباشرة مع المشغل وعدد الرحلات الأسبوعية ومدة الـ transit وموعد أول رحلة.
+    slots:
+      org: { label: Your port, max: 16, default: { en: Port of Azur, ar: ميناء أزور } }
+      dest: { label: Destination port, max: 16, default: { en: Port of Belmar, ar: ميناء بلمار } }
+      carrier:
+        {
+          label: Operator (fictional or your own),
+          max: 22,
+          default: { en: Bluewater Freight, ar: بلووتر فريت },
+        }
+      calls: { label: Sailings per week, type: number, min: 1, max: 14, default: 2 }
+      days: { label: Transit days, type: number, min: 1, max: 90, default: 9 }
+      starts: { label: First sailing date, max: 14, default: { en: 1 March, ar: أول مارس } }
+      keyword: { label: Comment keyword, max: 10, default: { en: ROUTE, ar: ROUTE } }
+      accent: { label: Accent color, type: color, default: cyan }
+    files: { en: templates/new-route.en.yaml, ar: templates/new-route.ar.yaml }
+examples: [examples/azur-container-en, examples/azur-container-ar]

@@ -1,0 +1,128 @@
+# Ports · container journey (template; slots are filled by `reelforge new --pack ports-logistics`).
+meta:
+  id: '{{id}}'
+  series: 'PORT BASICS'
+  title: 'A container journey'
+  episode: 1
+  preset: tiktok
+  theme: harbor
+  lang: en-US
+  publish:
+    cover: 'Ship to gate in 4 stages'
+    caption: 'How a container moves through {{org}}: quay, yard, customs and gate. Times are examples; customs rules differ by country, so ask your forwarder or a licensed broker.'
+    hashtags: ['#logistics', '#shipping', '#supplychain', '#containers']
+    pinned: 'Comment {{keyword}} for part two: {{next}}.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'How does a container get from the ship to your warehouse at {{org}}?'
+  - text: 'First, a crane lifts it off the vessel and onto the quay.'
+  - text: 'Next, it waits in the yard until customs clears the documents.'
+  - text: 'Then a truck slot is booked, and the gate checks it out.'
+  - text: 'From ship to gate, this takes about {{days}} days, as an example.'
+  - text: 'Missing documents cause most delays, so send them before the ship arrives.'
+  - text: 'Comment {{keyword}} for part two: {{next}}.'
+
+chapters:
+  - { at: l1, label: '01 · THE QUESTION' }
+  - { at: l2, label: '02 · THE STAGES' }
+  - { at: l6, label: '03 · THE DELAY' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: org
+        props: { text: '{{org}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'How'", anim: wipe }
+      - use: title
+        id: hook_title
+        props: { text: 'Ship to **warehouse**', size: 112, accent: '{{accent}}' }
+        place: { x: 60, y: 250, w: 960, h: 300 }
+        enter: { at: "l1:'container'", anim: reveal }
+      - use: icon
+        id: hook_icon
+        props: { name: queue, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'warehouse'", anim: pop }
+
+  - id: journey
+    at: l2
+    transition: push
+    elements:
+      - use: flow
+        id: stages
+        props:
+          color: cyan
+          accent: '{{accent}}'
+          fontSize: 30
+          token: { at: "l2:'lifts'", dur: 9, color: '{{accent}}' }
+          stages:
+            - { label: 'Quay', sub: 'Crane', icon: queue, at: "l2:'quay'" }
+            - { label: 'Yard', sub: 'Waiting', icon: hourglass, at: "l3:'yard'" }
+            - { label: 'Customs', sub: 'Documents', icon: shield, at: "l3:'customs'" }
+            - { label: 'Gate', sub: 'Truck out', icon: check, at: "l4:'gate'" }
+        place: { x: 60, y: 120, w: 960, h: 320 }
+        enter: { at: "l2:'crane'", anim: fade }
+      - use: chip
+        id: clears
+        props: { text: 'Customs clears the papers', icon: shield, color: '{{accent}}', size: 34 }
+        place: { x: 160, y: 520, w: 760, h: 100 }
+        enter: { at: "l3:'clears'", anim: spring }
+      - use: chip
+        id: slot
+        props: { text: 'Truck slot booked', icon: clock, color: '{{accent}}', size: 34 }
+        place: { x: 160, y: 660, w: 760, h: 100 }
+        enter: { at: "l4:'truck'", anim: spring }
+
+  - id: time
+    at: l5
+    transition: zoom
+    elements:
+      - use: counter
+        id: days
+        props:
+          from: 0
+          keyframes: [{ at: "l5:'about'", value: {{days}}, dur: 1 }]
+          suffix: ' days'
+          label: 'SHIP TO GATE · EXAMPLE'
+          color: '{{accent}}'
+        place: { x: 140, y: 200, w: 800, h: 320 }
+        enter: { at: "l5:'ship'", anim: pop }
+
+  - id: delay
+    at: l6
+    glow: red
+    transition: cut
+    elements:
+      - use: chip
+        id: missing
+        props: { text: 'Missing documents', icon: warn, color: red, size: 46 }
+        place: { x: 160, y: 180, w: 760, h: 120 }
+        enter: { at: "l6:'Missing'", anim: pop }
+        fx: [{ at: "l6:'delays'", do: shake, amp: 10 }]
+      - use: title
+        id: early
+        props: { text: 'Send them **before arrival**', size: 96, accent: '{{accent}}' }
+        place: { x: 60, y: 380, w: 960, h: 240 }
+        enter: { at: "l6:'before'", anim: reveal }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'PART TWO'
+          next: '{{next}}'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'part'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'Comment'", anim: rise }

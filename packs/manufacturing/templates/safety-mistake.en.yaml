@@ -1,0 +1,135 @@
+# Manufacturing · safety mistake (template; slots are filled by `reelforge new --pack manufacturing`).
+meta:
+  id: '{{id}}'
+  series: 'SAFETY FIRST'
+  title: 'The one-second mistake'
+  episode: 1
+  preset: tiktok
+  theme: industrial
+  lang: en-US
+  publish:
+    cover: 'The one-second mistake'
+    caption: 'Reaching into a jammed machine takes one second. The rule at {{plant}}: {{rule}}. Always follow your official site procedure.'
+    hashtags: ['#safetyfirst', '#manufacturing', '#workplacesafety']
+    pinned: 'Always follow your official site procedure. Comment {{keyword}} for part two.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'The most common mistake on the line takes only one second.'
+  - text: 'A machine jams, and someone reaches in to clear it.'
+  - text: 'If the machine restarts, that second can cause a serious injury.'
+  - text: 'At {{plant}}, the rule is simple: {{rule}}.'
+  - text: 'Stop the machine, lock it, and test that it cannot start.'
+  - text: 'And wear {{ppe}}, exactly as your safety procedure says.'
+  - text: 'Always follow your official site procedure. Comment {{keyword}} for part two.'
+
+chapters:
+  - { at: l1, label: '01 · THE MISTAKE' }
+  - { at: l4, label: '02 · THE RULE' }
+  - { at: l7, label: '03 · NEXT' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: red
+    elements:
+      - use: title
+        id: hook_title
+        props: { text: 'The most common **mistake**', size: 104, accent: red }
+        place: { x: 60, y: 200, w: 960, h: 320 }
+        enter: { at: "l1:'common'", anim: reveal }
+      - use: icon
+        id: warn
+        props: { name: warn, color: red, ring: true, pulse: true }
+        place: { x: 460, y: 600, w: 160, h: 160 }
+        enter: { at: "l1:'second'", anim: pop }
+
+  - id: jam
+    at: l2
+    transition: cut
+    elements:
+      - use: node
+        id: machine
+        props: { title: 'Machine', sub: 'Running', icon: cpu, color: cyan }
+        place: { x: 190, y: 120, w: 700, h: 200 }
+        enter: { at: "l2:'machine'", anim: pop }
+        states:
+          - { at: "l2:'jams'", set: { status: warn, sub: 'Jammed' } }
+          - { at: "l3:'restarts'", set: { status: err, sub: 'Restarting' } }
+      - use: chip
+        id: reach
+        props: { text: 'Reaching in', icon: x, color: red, size: 40 }
+        place: { x: 240, y: 400, w: 600, h: 110 }
+        enter: { at: "l2:'reaches'", anim: pop }
+      - use: stamp
+        id: danger
+        props: { text: 'DANGER', color: red, size: 120 }
+        place: { x: 200, y: 560, w: 680, h: 240 }
+        enter: { at: "l3:'serious'", anim: stamp }
+
+  - id: rule
+    at: l4
+    glow: '{{accent}}'
+    transition: push
+    elements:
+      - use: label
+        id: rule_label
+        props: { text: 'The rule at {{plant}}', dot: true, align: center }
+        place: { x: 100, y: 100, w: 880, h: 60 }
+        enter: { at: "l4:'rule'", anim: wipe }
+      - use: title
+        id: rule_title
+        props: { text: '**{{rule}}**', size: 84, accent: '{{accent}}' }
+        place: { x: 60, y: 180, w: 960, h: 340 }
+        enter: { at: "l4:'simple'", anim: reveal }
+      - use: chip
+        id: stop
+        props: { text: 'Stop', icon: x, color: '{{accent}}', size: 36 }
+        place: { x: 60, y: 620, w: 260, h: 100 }
+        enter: { at: "l5:'Stop'", anim: pop }
+      - use: chip
+        id: lock
+        props: { text: 'Lock', icon: lock, color: '{{accent}}', size: 36 }
+        place: { x: 360, y: 620, w: 260, h: 100 }
+        enter: { at: "l5:'lock'", anim: pop }
+      - use: chip
+        id: test
+        props: { text: 'Test', icon: check, color: '{{accent}}', size: 36 }
+        place: { x: 660, y: 620, w: 260, h: 100 }
+        enter: { at: "l5:'test'", anim: pop }
+
+  - id: ppe
+    at: l6
+    transition: zoom
+    elements:
+      - use: icon
+        id: shield
+        props: { name: shield, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 140, w: 160, h: 160 }
+        enter: { at: "l6:'wear'", anim: pop }
+      - use: title
+        id: ppe_title
+        props: { text: 'Wear **{{ppe}}**', size: 96, accent: '{{accent}}' }
+        place: { x: 60, y: 320, w: 960, h: 290 }
+        enter: { at: "l6:'wear'+0.3", anim: reveal }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: label
+        id: official
+        props: { text: 'Always follow your official site procedure', dot: true, align: center }
+        place: { x: 60, y: 80, w: 960, h: 60 }
+        enter: { at: "l7:'Always'", anim: wipe }
+      - use: cta
+        id: next
+        props:
+          label: 'PART TWO'
+          next: 'Lockout, step by step'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'part'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'Comment'", anim: rise }

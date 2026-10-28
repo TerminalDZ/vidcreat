@@ -1,0 +1,139 @@
+# Tech · system design concept (template; slots are filled by `reelforge new --pack tech`).
+meta:
+  id: '{{id}}'
+  series: 'SYSTEM DESIGN'
+  title: '{{concept}}'
+  episode: 1
+  preset: tiktok
+  theme: default
+  lang: en-US
+  publish:
+    cover: 'Flooded API?'
+    caption: '{{concept}} in one minute: a {{component}} in front of your servers, a limit per client, a 429 for the rest, and the shared-counter trap.'
+    hashtags: ['#systemdesign', '#backend', '#programming', '#softwareengineering']
+    pinned: 'Comment {{keyword}} for the next episode: {{next}}.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'Your API just got flooded with requests. What now?'
+  - text: 'The fix has a name, and it is called {{concept}}.'
+  - text: 'A {{component}} sits between the clients and your servers.'
+  - text: 'Each client may send {{limit}} {{unit}}, and not one more.'
+  - text: 'Extra requests wait, or get a 429 Too Many Requests.'
+  - text: 'The trap: keep the counter in a shared store, not in local memory.'
+  - text: 'Comment {{keyword}} for the next episode: {{next}}.'
+
+chapters:
+  - { at: l1, label: '01 · THE PROBLEM' }
+  - { at: l2, label: '02 · THE FIX' }
+  - { at: l6, label: '03 · THE TRAP' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: red
+    elements:
+      - use: node
+        id: api
+        props: { title: 'API', sub: 'api.example.com', icon: server, color: violet }
+        place: { x: 330, y: 80, w: 420, h: 170 }
+        enter: { at: "l1:'API'", anim: pop }
+        states:
+          - { at: "l1:'flooded'", set: { status: err, sub: '503 · down' } }
+        fx:
+          - { at: "l1:'flooded'", do: shake, amp: 16 }
+      - use: title
+        id: hook_title
+        props: { text: 'Flooded **API**', size: 120, accent: red }
+        place: { x: 60, y: 320, w: 960, h: 260 }
+        enter: { at: "l1:'flooded'", anim: reveal }
+      - use: particles
+        id: flood
+        props: { kind: herd, count: 70, dur: 1.8, color: red, at: "l1:'requests'", to: { x: 540, y: 165 } }
+
+  - id: fix
+    at: l2
+    glow: '{{accent}}'
+    transition: push
+    elements:
+      - use: label
+        id: fix_label
+        props: { text: 'The fix', dot: true, align: center }
+        place: { x: 140, y: 200, w: 800, h: 60 }
+        enter: { at: "l2:'fix'", anim: wipe }
+      - use: title
+        id: concept
+        props: { text: '**{{concept}}**', size: 116, accent: '{{accent}}' }
+        place: { x: 60, y: 280, w: 960, h: 300 }
+        enter: { at: "l2:'called'", anim: reveal }
+
+  - id: arch
+    at: l3
+    transition: push
+    elements:
+      - use: node
+        id: clients
+        props: { title: 'Clients', icon: users, color: cyan }
+        place: { x: 270, y: 40, w: 540, h: 160 }
+        enter: { at: "l3:'clients'", anim: pop }
+      - use: node
+        id: limiter
+        props: { title: '{{component}}', icon: shield, color: '{{accent}}' }
+        place: { x: 270, y: 280, w: 540, h: 160 }
+        enter: { at: "l3:'sits'", anim: pop }
+      - use: node
+        id: servers
+        props: { title: 'Servers', icon: server, color: violet }
+        place: { x: 270, y: 520, w: 540, h: 160 }
+        enter: { at: "l3:'servers'", anim: pop }
+      - use: arrow
+        id: in
+        props: { from: clients.bottom, to: limiter.top, color: cyan, packets: [{ at: "l4:'send'", dur: 0.8 }] }
+        enter: { at: "l3:'sits'+0.3", anim: draw }
+      - use: arrow
+        id: out
+        props: { from: limiter.bottom, to: servers.top, color: '{{accent}}', packets: [{ at: "l4:'send'+0.8", dur: 0.8 }] }
+        enter: { at: "l3:'servers'+0.3", anim: draw }
+      - use: chip
+        id: limit
+        props: { text: '{{limit}} {{unit}} per client', icon: clock, color: '{{accent}}', size: 34 }
+        place: { x: 160, y: 760, w: 760, h: 100 }
+        enter: { at: "l4:'Each'", anim: spring }
+      - use: stamp
+        id: tooMany
+        layer: overlay
+        props: { text: '429', color: red, size: 110 }
+        place: { x: 620, y: 300, w: 380, h: 180 }
+        enter: { at: "l5:'429'", anim: stamp }
+
+  - id: trap
+    at: l6
+    glow: amber
+    transition: zoom
+    elements:
+      - use: trap
+        id: trap_card
+        props: { sub: 'Local counters', until: "l6:'shared'" }
+        enter: { at: "l6:'trap'", anim: glitch }
+      - use: title
+        id: shared
+        props: { text: 'Keep the counter **shared**', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 200, w: 960, h: 300 }
+        enter: { at: "l6:'shared'", anim: reveal }
+      - use: chip
+        id: local
+        props: { text: 'Not in local memory', icon: x, color: red, size: 36, strike: "l6:'memory'" }
+        place: { x: 190, y: 580, w: 700, h: 104 }
+        enter: { at: "l6:'local'", anim: pop }
+
+  - id: outro
+    at: l7
+    glow: '{{accent}}'
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props: { next: '{{next}}', keyword: '{{keyword}}', color: '{{accent}}', at: "l7:'next'" }
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'Comment'", anim: rise }

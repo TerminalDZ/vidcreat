@@ -1,0 +1,119 @@
+# Tech · a request's path, Arabic (template; slots are filled by `reelforge new --pack tech`).
+meta:
+  id: '{{id}}'
+  series: 'SYSTEM DESIGN'
+  title: 'رحلة الـ request'
+  episode: 1
+  preset: tiktok
+  theme: default
+  lang: ar-EG
+  publish:
+    cover: 'إيه اللي بيحصل لما تدوس Buy'
+    caption: 'رحلة request واحد في {{app}}: الـ DNS والـ CDN والـ load balancer والـ API والـ database، في حوالي {{ms}} millisecond.'
+    hashtags: ['#systemdesign', '#backend', '#برمجة', '#مبرمجين']
+    pinned: 'اكتب {{keyword}} للجزء التاني: {{next}}.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'إيه اللي بيحصل في الـ {{ms}} millisecond بعد ما تدوس Buy في {{app}}؟'
+  - text: 'الأول، الـ DNS بيحول الاسم لعنوان.'
+  - text: 'الـ CDN بيرد على أي حاجة static من server قريب منك.'
+  - text: 'والـ load balancer بيختار API server سليم.'
+  - text: 'الـ API بيسأل الـ database، وبعدين يرجعلك الرد.'
+  - text: 'كل hop بيزود وقت، فـ hops أقل يعني app أسرع.'
+  - text: 'اكتب {{keyword}} للجزء التاني: {{next}}.'
+
+chapters:
+  - { at: l1, label: '01 · الضغطة' }
+  - { at: l2, label: '02 · الطريق' }
+  - { at: l6, label: '03 · الدرس' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: app
+        props: { text: '{{app}}', dot: true, align: center }
+        place: { x: 140, y: 120, w: 800, h: 60 }
+        enter: { at: "l1:'إيه'", anim: wipe }
+      - use: counter
+        id: ms
+        props:
+          from: 0
+          keyframes: [{ at: "l1:'بيحصل'", value: {{ms}}, dur: 1.2 }]
+          suffix: ' ms'
+          label: 'من الضغطة للرد'
+          color: '{{accent}}'
+        place: { x: 140, y: 200, w: 800, h: 320 }
+        enter: { at: "l1:'بيحصل'", anim: pop }
+      - use: chip
+        id: buy
+        props: { text: 'Buy', icon: cart, color: '{{accent}}', size: 44, variant: solid }
+        place: { x: 340, y: 620, w: 400, h: 120 }
+        enter: { at: "l1:'تدوس'", anim: pop }
+        fx: [{ at: "l1:'Buy'", do: bump }]
+
+  - id: path
+    at: l2
+    transition: push
+    elements:
+      - use: flow
+        id: hops
+        props:
+          color: cyan
+          accent: '{{accent}}'
+          fontSize: 26
+          token: { at: "l2:'DNS'", dur: 12, color: '{{accent}}' }
+          stages:
+            - { label: 'DNS', icon: globe, at: "l2:'DNS'" }
+            - { label: 'CDN', icon: cloud, at: "l3:'CDN'" }
+            - { label: 'LB', icon: queue, at: "l4:'load'" }
+            - { label: 'API', icon: server, at: "l5:'API'" }
+            - { label: 'DB', icon: db, at: "l5:'database'" }
+        place: { x: 60, y: 80, w: 960, h: 300 }
+        enter: { at: "l2:'الأول'", anim: fade }
+      - use: chip
+        id: static
+        props: { text: 'الـ static من server قريب', icon: cloud, color: '{{accent}}', size: 32 }
+        place: { x: 160, y: 440, w: 760, h: 96 }
+        enter: { at: "l3:'static'", anim: pop }
+      - use: chip
+        id: healthy
+        props: { text: 'servers سليمة بس', icon: check, color: '{{accent}}', size: 32 }
+        place: { x: 160, y: 570, w: 760, h: 96 }
+        enter: { at: "l4:'سليم'", anim: pop }
+      - use: chip
+        id: back
+        props: { text: 'الرد بيرجعلك', icon: refresh, color: '{{accent}}', size: 32 }
+        place: { x: 160, y: 700, w: 760, h: 96 }
+        enter: { at: "l5:'الرد'", anim: pop }
+
+  - id: lesson
+    at: l6
+    transition: zoom
+    elements:
+      - use: title
+        id: lesson_title
+        props: { text: 'hops أقل، **app أسرع**', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 190, w: 960, h: 320 }
+        enter: { at: "l6:'hop'", anim: reveal }
+      - use: icon
+        id: bolt
+        props: { name: bolt, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 580, w: 160, h: 160 }
+        enter: { at: "l6:'أسرع'", anim: pop }
+
+  - id: outro
+    at: l7
+    glow: '{{accent}}'
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props: { label: 'الجزء التاني', prompt: 'اكتب في الكومنتات', next: '{{next}}', keyword: '{{keyword}}', color: '{{accent}}', at: "l7:'للجزء'" }
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

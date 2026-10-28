@@ -1,0 +1,147 @@
+# Real estate · property tour, Arabic (template; slots are filled by `reelforge new --pack real-estate`).
+meta:
+  id: '{{id}}'
+  series: 'جولة عقارية'
+  title: '{{place}}'
+  episode: 1
+  preset: tiktok
+  theme: estate
+  lang: ar-EG
+  publish:
+    cover: 'جولة داخل {{place}}'
+    caption: 'جولة سريعة في {{place}} في {{area}} مع {{org}}. السعر: {{price}}. لأسئلة التمويل أو الأسئلة القانونية تحدث مع وسيط أو جهة تمويل مرخصة.'
+    hashtags: ['#عقارات', '#جولة_عقارية', '#بيت_جديد', '#realestate']
+    pinned: 'اكتب {{keyword}} لحجز معاينة.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'تفكر في الانتقال إلى {{area}}؟ تعال في جولة سريعة داخل {{place}}.'
+  - text: 'يضم المنزل {{rooms}} غرف نوم، ومساحة معيشة تقارب {{size}} مترًا مربعًا.'
+  - text: 'المطبخ المفتوح وغرفة المعيشة يدخلهما الضوء الطبيعي طوال اليوم.'
+  - text: 'والتفصيلة التي يلاحظها الزوار أولًا هي {{feature}}.'
+  - text: 'المدارس والمحلات والحديقة كلها على بعد خطوات قليلة.'
+  - text: 'السعر: {{price}}. اسأل وسيطًا مرخصًا أو جهة التمويل عن التمويل والرسوم.'
+  - text: 'تحب تشوفه بنفسك؟ اكتب {{keyword}} لحجز معاينة مع {{org}}.'
+
+chapters:
+  - { at: l1, label: '01 · المنزل' }
+  - { at: l5, label: '02 · المنطقة' }
+  - { at: l6, label: '03 · المعاينة' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: org
+        props: { text: '{{org}}', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'تفكر'", anim: wipe }
+      - use: title
+        id: place
+        props: { text: '**{{place}}**', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 250, w: 960, h: 300 }
+        enter: { at: "l1:'جولة'", anim: reveal }
+      - use: chip
+        id: area
+        props: { text: '{{area}}', icon: globe, color: '{{accent}}', size: 38 }
+        place: { x: 190, y: 620, w: 700, h: 104 }
+        enter: { at: "l1:'تعال'", anim: spring }
+
+  - id: specs
+    at: l2
+    transition: push
+    elements:
+      - use: label
+        id: specs_label
+        props: { text: 'المنزل', dot: true, align: center }
+        place: { x: 140, y: 140, w: 800, h: 60 }
+        enter: { at: "l2:'المنزل'", anim: wipe }
+      - use: stat-card
+        id: rooms
+        props: { label: 'غرف النوم', value: {{rooms}}, icon: key, accent: '{{accent}}' }
+        place: { x: 570, y: 240, w: 430, h: 280 }
+        enter: { at: "l2:'نوم'", anim: rise }
+      - use: stat-card
+        id: size
+        props: { label: 'المساحة', value: {{size}}, suffix: ' m²', icon: globe, accent: '{{accent}}', size: 84 }
+        place: { x: 80, y: 240, w: 430, h: 280 }
+        enter: { at: "l2:'ومساحة'", anim: rise }
+
+  - id: inside
+    at: l3
+    transition: zoom
+    camera: drift
+    elements:
+      - use: title
+        id: light
+        props: { text: 'مطبخ مفتوح و**ضوء طوال اليوم**', size: 96, accent: '{{accent}}' }
+        place: { x: 60, y: 120, w: 960, h: 300 }
+        enter: { at: "l3:'المطبخ'", anim: reveal }
+      - use: node
+        id: feature
+        props: { title: '{{feature}}', sub: 'أول ما يلاحظه الزوار', icon: check, color: '{{accent}}', status: ok }
+        place: { x: 160, y: 500, w: 760, h: 210 }
+        enter: { at: "l4:'والتفصيلة'", anim: pop }
+
+  - id: area_walk
+    at: l5
+    transition: push
+    elements:
+      - use: label
+        id: walk_label
+        props: { text: 'على بعد خطوات', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l5:'المدارس'", anim: wipe }
+      - use: flow
+        id: walk
+        props:
+          color: '{{accent}}'
+          fontSize: 34
+          token: false
+          stages:
+            - { label: 'مدارس', icon: users, at: "l5:'المدارس'" }
+            - { label: 'محلات', icon: cart, at: "l5:'والمحلات'" }
+            - { label: 'حديقة', icon: globe, at: "l5:'والحديقة'" }
+        place: { x: 60, y: 280, w: 960, h: 300 }
+        enter: { at: "l5:'المدارس'+0.2", anim: fade }
+
+  - id: price
+    at: l6
+    glow: '{{accent}}'
+    transition: zoom
+    elements:
+      - use: label
+        id: price_label
+        props: { text: 'السعر', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l6:'السعر'", anim: wipe }
+      - use: title
+        id: price_value
+        props: { text: '**{{price}}**', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 250, w: 960, h: 260 }
+        enter: { at: "l6:'السعر'+0.4", anim: reveal }
+      - use: chip
+        id: advice
+        props: { text: 'أسئلة التمويل؟ اسأل وسيطًا مرخصًا', icon: shield, color: dim, size: 28 }
+        place: { x: 60, y: 580, w: 860, h: 96 }
+        enter: { at: "l6:'مرخصًا'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'احجز معاينة'
+          prompt: 'اكتب في التعليقات'
+          next: '{{place}}'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'معاينة'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'تحب'", anim: rise }

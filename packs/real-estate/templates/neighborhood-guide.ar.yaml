@@ -1,0 +1,137 @@
+# Real estate · neighborhood guide, Arabic (template; slots are filled by `reelforge new --pack real-estate`).
+meta:
+  id: '{{id}}'
+  series: 'دليل الحي'
+  title: '{{area}}'
+  episode: 1
+  preset: tiktok
+  theme: estate
+  lang: ar-EG
+  publish:
+    cover: 'الحياة في {{area}}'
+    caption: 'كيف تبدو الحياة اليومية في {{area}}: القهوة والمدرسة والحديقة والمواصلات. زر المنطقة في أوقات مختلفة قبل أن تقرر.'
+    hashtags: ['#عقارات', '#دليل_الحي', '#سكن']
+    pinned: 'اكتب {{keyword}} لعروض البيوت في {{area}}.'
+
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+
+script:
+  - text: 'كيف تبدو الحياة فعلًا في {{area}}؟ إليك دليلًا سريعًا.'
+  - text: 'الصباح يبدأ في {{cafe}}، على بعد خطوات من الميدان الرئيسي.'
+  - text: 'أقرب مدرسة هي {{school}}، وتقع بجوار خط الأتوبيس مباشرة.'
+  - text: 'وفي عطلة الأسبوع نذهب إلى {{park}}، بممراتها على ضفة الماء.'
+  - text: 'ووسط المدينة على بعد حوالي {{minutes}} دقيقة بالترام.'
+  - text: 'لكل منطقة مزايا وعيوب، فزرها في أوقات مختلفة من اليوم.'
+  - text: 'اكتب {{keyword}} وسترسل لك {{org}} بيوتًا معروضة للبيع بالقرب منك.'
+
+chapters:
+  - { at: l1, label: '01 · المنطقة' }
+  - { at: l2, label: '02 · يوم هنا' }
+  - { at: l6, label: '03 · قبل الانتقال' }
+
+scenes:
+  - id: hook
+    at: l1
+    glow: '{{accent}}'
+    camera: push-in
+    elements:
+      - use: label
+        id: org
+        props: { text: 'دليل الحي', dot: true, align: center }
+        place: { x: 140, y: 170, w: 800, h: 60 }
+        enter: { at: "l1:'كيف'", anim: wipe }
+      - use: title
+        id: area
+        props: { text: '**{{area}}**', size: 100, accent: '{{accent}}' }
+        place: { x: 60, y: 250, w: 960, h: 300 }
+        enter: { at: 'l1+1.2', anim: reveal }
+      - use: icon
+        id: hook_icon
+        props: { name: globe, color: '{{accent}}', ring: true }
+        place: { x: 460, y: 640, w: 160, h: 160 }
+        enter: { at: "l1:'دليلًا'", anim: pop }
+
+  - id: day
+    at: l2
+    transition: push
+    elements:
+      - use: node
+        id: cafe
+        props: { title: '{{cafe}}', sub: 'قهوة الصباح', icon: bubble, color: '{{accent}}' }
+        place: { x: 480, y: 60, w: 540, h: 170 }
+        enter: { at: "l2:'الصباح'", anim: pop }
+      - use: node
+        id: school
+        props: { title: '{{school}}', sub: 'بجوار خط الأتوبيس', icon: users, color: '{{accent}}' }
+        place: { x: 60, y: 300, w: 540, h: 170 }
+        enter: { at: "l3:'أقرب'", anim: pop }
+      - use: node
+        id: park
+        props: { title: '{{park}}', sub: 'ممرات على الماء', icon: globe, color: '{{accent}}' }
+        place: { x: 380, y: 560, w: 540, h: 170 }
+        enter: { at: "l4:'عطلة'", anim: pop }
+      - use: arrow
+        id: walk1
+        props: { from: cafe.left, to: school.top, route: elbow, color: '{{accent}}', dashed: true }
+        enter: { at: "l3:'مدرسة'", anim: draw }
+      - use: arrow
+        id: walk2
+        props: { from: school.bottom, to: park.left, route: elbow, color: '{{accent}}', dashed: true }
+        enter: { at: "l4:'بممراتها'", anim: draw }
+
+  - id: commute
+    at: l5
+    transition: zoom
+    elements:
+      - use: counter
+        id: minutes
+        props:
+          from: 0
+          keyframes: [{ at: "l5:'حوالي'", value: {{minutes}}, dur: 1 }]
+          suffix: ' دقيقة'
+          label: 'إلى وسط المدينة'
+          color: '{{accent}}'
+        place: { x: 140, y: 160, w: 800, h: 320 }
+        enter: { at: "l5:'ووسط'", anim: pop }
+      - use: chip
+        id: tram
+        props: { text: 'بالترام', icon: clock, color: '{{accent}}', size: 40 }
+        place: { x: 290, y: 580, w: 500, h: 104 }
+        enter: { at: "l5:'بالترام'", anim: spring }
+
+  - id: visit
+    at: l6
+    glow: amber
+    transition: push
+    elements:
+      - use: title
+        id: visit_title
+        props: { text: 'زرها في **أوقات مختلفة**', size: 104, accent: '{{accent}}' }
+        place: { x: 60, y: 180, w: 960, h: 300 }
+        enter: { at: "l6:'منطقة'", anim: reveal }
+      - use: chip
+        id: morning
+        props: { text: 'صباحًا', icon: clock, color: '{{accent}}', size: 36 }
+        place: { x: 520, y: 560, w: 380, h: 96 }
+        enter: { at: "l6:'فزرها'", anim: pop }
+      - use: chip
+        id: evening
+        props: { text: 'مساءً', icon: clock, color: '{{accent}}', size: 36 }
+        place: { x: 80, y: 560, w: 380, h: 96 }
+        enter: { at: "l6:'اليوم'", anim: pop }
+
+  - id: outro
+    at: l7
+    transition: slide-up
+    elements:
+      - use: cta
+        id: next
+        props:
+          label: 'بيوت قريبة'
+          prompt: 'اكتب في التعليقات'
+          next: 'بيوت للبيع في {{area}}'
+          keyword: '{{keyword}}'
+          color: '{{accent}}'
+          at: "l7:'بيوتًا'"
+        place: { x: 60, y: 200, w: 860, h: 560 }
+        enter: { at: "l7:'اكتب'", anim: rise }

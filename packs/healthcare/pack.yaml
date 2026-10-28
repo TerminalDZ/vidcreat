@@ -1,0 +1,60 @@
+# Healthcare pack: calm, plain-language explainers for patients and families (fictional hospital).
+id: healthcare
+name: { en: Healthcare, ar: الرعاية الصحية }
+description:
+  en: Patient guides for a hospital or clinic. General information only, never medical advice.
+  ar: أدلة للمرضى في مستشفى أو عيادة. معلومات عامة فقط، وليست نصيحة طبية.
+theme: clinical
+playbook: skills/reelforge-industry-playbooks/references/healthcare.md
+blueprints: [hook, process-steps, stat-reveal, comparison, timeline, cta]
+templates:
+  - id: patient-journey
+    title: { en: Patient journey, ar: رحلة المريض }
+    description:
+      en: What happens at a first visit, from reception to the doctor, in four steps.
+      ar: ماذا يحدث في الزيارة الأولى، من الاستقبال حتى الطبيب، في أربع خطوات.
+    slots:
+      org: { label: Hospital name, max: 26, default: { en: Northwind Hospital, ar: مستشفى نورثويند } }
+      desk: { label: Where patients check in, max: 22, default: { en: the main desk, ar: مكتب الاستقبال } }
+      wait: { label: Typical check-in time (minutes), type: number, min: 1, max: 120, default: 10 }
+      next:
+        {
+          label: Next episode topic,
+          max: 30,
+          default: { en: Preparing for a lab test, ar: التحضير لتحليل الدم },
+        }
+      keyword: { label: Comment keyword, max: 10, default: { en: VISIT, ar: زيارة } }
+      accent: { label: Accent color, type: color, default: cyan }
+    files: { en: templates/patient-journey.en.yaml, ar: templates/patient-journey.ar.yaml }
+  - id: department-intro
+    title: { en: Department intro, ar: تعريف بقسم }
+    description:
+      en: Introduce one department, its opening hours, its team size and how to book.
+      ar: تعريف بقسم واحد ومواعيده وحجم الفريق وطريقة الحجز.
+    slots:
+      org: { label: Hospital name, max: 26, default: { en: Northwind Hospital, ar: مستشفى نورثويند } }
+      dept: { label: Department name, max: 22, default: { en: Cardiology, ar: قسم القلب } }
+      floor: { label: Where it is, max: 18, default: { en: Floor 3, ar: الدور الثالث } }
+      opens: { label: Opening time, max: 8, default: { en: '8:00', ar: '8:00' } }
+      closes: { label: Closing time, max: 8, default: { en: '18:00', ar: '18:00' } }
+      days: { label: Opening days, max: 22, default: { en: Monday to Friday, ar: من الأحد إلى الخميس } }
+      staff: { label: Team size, type: number, min: 1, max: 999, default: 24 }
+      keyword: { label: Comment keyword, max: 10, default: { en: BOOK, ar: حجز } }
+      accent: { label: Accent color, type: color, default: lime }
+    files: { en: templates/department-intro.en.yaml, ar: templates/department-intro.ar.yaml }
+  - id: health-tip
+    title: { en: Health awareness tip, ar: نصيحة توعية صحية }
+    description:
+      en: One general awareness habit with three simple reminders, ending with "talk to your doctor".
+      ar: عادة توعوية عامة مع ثلاث تذكيرات بسيطة، وفي النهاية "استشر طبيبك".
+    slots:
+      org: { label: Hospital name, max: 26, default: { en: Northwind Hospital, ar: مستشفى نورثويند } }
+      topic: { label: Topic (2-4 words), max: 24, default: { en: Drinking water, ar: شرب المياه } }
+      tip1: { label: Reminder 1, max: 26, default: { en: Keep a bottle nearby, ar: زجاجة مياه قريبة منك } }
+      tip2: { label: Reminder 2, max: 26, default: { en: A glass with every meal, ar: كوب مع كل وجبة } }
+      tip3:
+        { label: Reminder 3, max: 26, default: { en: A little more on hot days, ar: أكثر في الأيام الحارة } }
+      num: { label: Tip number in your series, type: number, min: 1, max: 99, default: 1 }
+      accent: { label: Accent color, type: color, default: lime }
+    files: { en: templates/health-tip.en.yaml, ar: templates/health-tip.ar.yaml }
+examples: [examples/first-visit-en, examples/first-visit-ar]
