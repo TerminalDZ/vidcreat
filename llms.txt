@@ -1,0 +1,26 @@
+# ReelForge
+
+> Local tool that turns a voice recording and one episode.yaml into finished 1080×1920 vertical explainer videos (TikTok, Reels, Shorts): 62 animated components timed to spoken words, English and Arabic (right-to-left) word-by-word captions, sound effects, mastered audio and platform-ready MP4s. No AI in the render engine (deterministic DOM/SVG frames in headless Chromium, encoded by FFmpeg); optional local speech alignment (`reelforge align`, models downloaded once by `reelforge align --setup`, offline afterwards) and scene suggestions. Agents drive it through the `reelforge mcp` server. Apache-2.0; docs at https://terminaldz.github.io/vidcreat, source at https://github.com/TerminalDZ/vidcreat.
+
+## For agents
+- [AGENTS.md](AGENTS.md): workflow, episode.yaml essentials, layout rules, quality checklist, code guide
+- [AI integration](docs/guide/ai.md): MCP stdio and HTTP, REST/OpenAPI, toolsets, tool tiers, skills, local and cloud models, security
+- [MCP setup for every client](docs/reference/ai-clients.md): Claude Code/Desktop, Cursor, VS Code Copilot, Windsurf, Codex, Gemini CLI, Zed, Continue, LM Studio, OpenAI-compatible
+- [MCP tools and REST endpoints](docs/reference/mcp-tools.md): every tool with its arguments
+
+## Reference
+- [Authoring guide](docs/authoring.md): spec, time expressions, placement, animation, validation rules
+- [Component reference](docs/components.md): every component's props and defaults
+- [Episode format](docs/reference/episode-format.md): every key of episode.yaml
+- [Command line](docs/reference/cli.md): every command and option
+- [Pack catalog](docs/reference/packs.md): industry packs, templates and slots
+- [JSON Schema](schema/episode.schema.json): `reelforge schema` writes it
+- [Timing, cues and alignment](docs/guide/timing.md): recording, automatic alignment, marking cues by ear
+
+## Project
+- [CONTRIBUTING.md](CONTRIBUTING.md): development setup, architecture, quality gate
+- [LICENSE](LICENSE): Apache-2.0 (docs and examples: [CC BY 4.0](docs/LICENSE-CONTENT.md))
+
+## Examples
+- [examples/season1](examples/season1): the English "System Design" series (9 episodes)
+- [examples/season1-arabic](examples/season1-arabic): the same series in Arabic with English terms
