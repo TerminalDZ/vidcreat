@@ -1,0 +1,71 @@
+:root {
+  --vp-c-brand-1: #4f7d00;
+  --vp-c-brand-2: #5f9400;
+  --vp-c-brand-3: #6aa300;
+  --vp-c-brand-soft: rgba(120, 190, 20, 0.16);
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(120deg, #6aa300 20%, #1597c7);
+}
+
+.dark {
+  --vp-c-brand-1: #b8ff3c;
+  --vp-c-brand-2: #a3eb2a;
+  --vp-c-brand-3: #8fd11f;
+  --vp-c-brand-soft: rgba(184, 255, 60, 0.14);
+  --vp-home-hero-name-background: linear-gradient(120deg, #b8ff3c 20%, #55dcff);
+}
+
+/* Arabic locale: Readex Pro for Arabic and Latin text, a little more line height. */
+html[lang='ar'] {
+  --vp-font-family-base:
+    'Readex Pro Variable', 'Inter', ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+html[lang='ar'] .VPHero .name,
+html[lang='ar'] .VPHero .text {
+  line-height: 1.35;
+}
+
+html[lang='ar'] .vp-doc p,
+html[lang='ar'] .vp-doc li {
+  line-height: 1.9;
+}
+
+/* Code always reads left to right, also inside right-to-left pages. */
+html[dir='rtl'] .vp-doc div[class*='language-'],
+html[dir='rtl'] .vp-doc div[class*='language-'] pre,
+html[dir='rtl'] .vp-doc div[class*='language-'] code {
+  direction: ltr;
+  text-align: left;
+}
+
+/* Inline code stays in one piece (a line break inside `--lang en` reorders it in RTL); long ones scroll. */
+html[dir='rtl'] .vp-doc :not(pre) > code {
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+html[dir='rtl'] .vp-doc div[class*='language-'] > span.lang {
+  right: auto;
+  left: 12px;
+}
+
+html[dir='rtl'] .vp-doc div[class*='language-'] > button.copy {
+  right: auto;
+  left: 12px;
+}
+
+/* Rendered component frames in the reference. */
+.vp-doc .frame {
+  display: block;
+  width: 216px;
+  max-width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--vp-c-divider);
+  margin: 12px 0 4px;
+}
