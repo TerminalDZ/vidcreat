@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "reelforge": {
+      "command": "node",
+      "args": ["packages/cli/bin/reelforge.js", "mcp"],
+      "cwd": ".",
+      "timeout": 600000
+    }
+  }
+}
