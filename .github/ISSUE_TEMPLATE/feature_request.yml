@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest an improvement to ReelForge.
+title: 'feat: '
+labels: [enhancement, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For open-ended ideas, start a [discussion](https://github.com/TerminalDZ/vidcreat/discussions) first.
+        New components and industry packs have their own templates.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do, and what gets in the way today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How should it work? Commands, YAML or screenshots of the editor are welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Project constraints
+      options:
+        - label: The proposal keeps rendering deterministic (same inputs, same frames).
+        - label: I am willing to help implement it.

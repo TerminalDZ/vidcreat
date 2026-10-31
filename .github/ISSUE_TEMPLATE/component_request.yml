@@ -1,0 +1,52 @@
+name: Component request
+description: Propose a new animated component for episodes.
+title: 'component: '
+labels: [component, enhancement, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check the [component reference](https://github.com/TerminalDZ/vidcreat/blob/main/docs/components.md) first:
+        many visuals can be built from the existing 62 components.
+  - type: input
+    id: name
+    attributes:
+      label: Component name
+      placeholder: gauge
+    validations:
+      required: true
+  - type: textarea
+    id: purpose
+    attributes:
+      label: What does it explain?
+      description: The idea it visualizes, and an example spoken line it would appear on.
+    validations:
+      required: true
+  - type: textarea
+    id: props
+    attributes:
+      label: Proposed props
+      description: The properties as they would appear in `episode.yaml`.
+      render: yaml
+      placeholder: |
+        - use: gauge
+          props: { value: 72, max: 100, label: 'CPU' }
+          enter: { at: "l3:'load'", anim: pop }
+    validations:
+      required: true
+  - type: textarea
+    id: motion
+    attributes:
+      label: Motion and states
+      description: How it enters, what changes over time (states, keyframes), and how it exits.
+  - type: textarea
+    id: references
+    attributes:
+      label: Sketches or references
+      description: Drawings or frames that show the look. Only share material you have the right to share.
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to implement it (see "Add a component" in CONTRIBUTING.md).
