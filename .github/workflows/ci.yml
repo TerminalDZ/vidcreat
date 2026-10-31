@@ -1,0 +1,158 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            playwright-cache: ~/.cache/ms-playwright
+          - os: windows-latest
+            playwright-cache: ~\AppData\Local\ms-playwright
+          - os: macos-latest
+            playwright-cache: ~/Library/Caches/ms-playwright
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install ffmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install ffmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ffmpeg
+
+      - name: Install ffmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg -y --no-progress
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Read Playwright version
+        id: playwright
+        shell: bash
+        run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright Chromium
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ matrix.playwright-cache }}
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
+      - name: Install pinned Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install chromium
+
+      - name: Install Chromium system libraries (Linux)
+        if: runner.os == 'Linux'
+        run: pnpm exec playwright install-deps chromium
+
+      - name: Build
+        run: pnpm build
+
+      - name: Docs are up to date
+        run: node scripts/check-docs-fresh.mjs
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint (ESLint, Prettier, mojibake check)
+        run: pnpm lint
+
+      - name: Unit tests
+        if: runner.os != 'Linux'
+        run: pnpm test:unit
+
+      - name: Unit tests with coverage (NFR-11)
+        if: runner.os == 'Linux'
+        run: pnpm coverage
+
+      - name: Browser and integration tests (golden frames, determinism, render, studio)
+        run: pnpm test:browser
+
+      - name: License check (NFR-12)
+        run: pnpm check:licenses
+
+      - name: Doctor
+        run: pnpm reelforge doctor
+
+      - name: Validate Season 1 examples
+        shell: bash
+        run: for ep in examples/season1/ep0*; do pnpm -s reelforge validate "$ep" || exit 1; done
+
+      - name: Agent eval (scripted mock model, offline)
+        run: node scripts/eval-agents.mjs --mock
+
+      - name: Alignment accuracy
+        run: node scripts/eval-align.mjs
+
+      - name: Docs build (offline guide and the dashboard's /docs/ site)
+        run: pnpm docs
+
+      - name: Docs site build (fails on dead links)
+        run: pnpm docs:site
+
+      - name: Offline render (NFR-8, networking disabled)
+        if: runner.os == 'Linux'
+        run: |
+          sudo unshare --net -- env "PATH=$PATH" HOME="$HOME" PLAYWRIGHT_BROWSERS_PATH="$HOME/.cache/ms-playwright" \
+            node packages/cli/bin/reelforge.js render fixtures/mini --workers 2 --fast
+
+      - name: Upload renders and golden diffs
+        if: always() && runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: renders-and-diffs
+          path: |
+            fixtures/mini/out/*.mp4
+            fixtures/mini/out/*.jpg
+            fixtures/golden/**/*.diff.png
+            coverage/
+          if-no-files-found: ignore
+
+  links:
+    name: Markdown links
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # Component frames are linked from the site root (/components/…), which is docs/public.
+      - name: Check relative links (offline)
+        uses: lycheeverse/lychee-action@v2
+        with:
+          fail: true
+          args: >-
+            --offline
+            --no-progress
+            --root-dir ${{ github.workspace }}/docs/public
+            --exclude-path node_modules
+            --exclude-path documentation
+            --exclude-path docs/.site
+            --exclude-path fixtures
+            './**/*.md'

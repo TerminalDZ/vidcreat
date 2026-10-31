@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://terminaldz.github.io/vidcreat
+    about: Installation, the editor, episode authoring, troubleshooting and FAQ.
+  - name: Questions and ideas (Discussions)
+    url: https://github.com/TerminalDZ/vidcreat/discussions
+    about: Ask how to do something, share episodes and discuss ideas before opening an issue.
+  - name: Report a security vulnerability
+    url: https://github.com/TerminalDZ/vidcreat/security/advisories/new
+    about: Report privately. Please do not open a public issue for security problems.

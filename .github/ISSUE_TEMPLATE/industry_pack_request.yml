@@ -1,0 +1,52 @@
+name: Industry pack request
+description: Propose a pack of templates, themes and examples for an industry or topic.
+title: 'pack: '
+labels: [pack, enhancement, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Industry packs live in `packs/<industry>/` with a validated manifest. Describe the audience and the
+        videos the pack should make easy.
+  - type: input
+    id: industry
+    attributes:
+      label: Industry or topic
+      placeholder: healthcare, finance, cooking, education…
+    validations:
+      required: true
+  - type: textarea
+    id: audience
+    attributes:
+      label: Audience and goal
+      description: Who makes these videos, who watches them, and what should the viewer take away?
+    validations:
+      required: true
+  - type: textarea
+    id: episodes
+    attributes:
+      label: Typical episodes
+      description: Three to five example episode titles or scripts the pack should cover.
+    validations:
+      required: true
+  - type: textarea
+    id: contents
+    attributes:
+      label: Proposed contents
+      description: Templates, theme colors, vocabulary for scene suggestions, icons or components that are missing.
+  - type: dropdown
+    id: languages
+    attributes:
+      label: Languages
+      multiple: true
+      options:
+        - English
+        - Arabic
+        - Other (describe above)
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I can provide example scripts that I wrote and may share under CC BY 4.0.
+        - label: I am willing to build the pack.

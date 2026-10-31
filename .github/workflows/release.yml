@@ -1,0 +1,87 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write # create the draft GitHub Release
+  id-token: write # npm provenance, once publishing is enabled
+
+jobs:
+  release:
+    name: Build, test and draft the release
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install pinned Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Check the tag matches the package version
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json version $version" >&2
+            exit 1
+          fi
+
+      - run: pnpm build
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm check:licenses
+      - run: pnpm test:unit
+      - run: pnpm test:browser
+
+      - name: Pack npm tarballs
+        run: |
+          mkdir -p dist
+          pnpm -r pack --pack-destination "$GITHUB_WORKSPACE/dist"
+          ls -l dist
+
+      - name: Extract release notes from CHANGELOG.md
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const version = process.env.GITHUB_REF_NAME.replace(/^v/, "");
+            const lines = fs.readFileSync("CHANGELOG.md", "utf8").split("\n");
+            const start = lines.findIndex((l) => l.startsWith(`## [${version}]`));
+            if (start < 0) { console.error(`No "## [${version}]" section in CHANGELOG.md`); process.exit(1); }
+            let end = lines.findIndex((l, i) => i > start && /^## |^\[[^\]]+\]: /.test(l));
+            if (end < 0) end = lines.length;
+            fs.writeFileSync("RELEASE_NOTES.md", lines.slice(start + 1, end).join("\n").trim() + "\n");
+          '
+          cat RELEASE_NOTES.md
+
+      - name: Draft GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          name: ReelForge ${{ github.ref_name }}
+          body_path: RELEASE_NOTES.md
+          files: dist/*.tgz
+
+      # Publishing to npm is disabled until the @reelforge scope is ready.
+      # To enable it, add an automation token as the NPM_TOKEN repository secret and uncomment the step.
+      # `npm publish --provenance --access public` attaches a signed provenance statement (needs the
+      # id-token: write permission above). pnpm replaces workspace:* ranges with real versions.
+      #
+      # - name: Publish to npm
+      #   run: pnpm -r publish --access public --provenance --no-git-checks
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

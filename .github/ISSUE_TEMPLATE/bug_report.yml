@@ -1,0 +1,85 @@
+name: Bug report
+description: Something does not work as documented.
+title: 'bug: '
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please search [existing issues](https://github.com/TerminalDZ/vidcreat/issues) first.
+        Security problems must **not** be reported here; see [SECURITY.md](https://github.com/TerminalDZ/vidcreat/blob/main/SECURITY.md).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: The exact commands or clicks. A minimal `episode.yaml` helps a lot.
+      placeholder: |
+        1. reelforge new ep1
+        2. reelforge render ep1 --silent --verbose
+        3. …
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Rendering / output files
+        - Editor
+        - Dashboard
+        - Cues / speech alignment
+        - Captions (English or Arabic)
+        - Validation
+        - CLI
+        - MCP server
+        - Installation
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: ReelForge version
+      placeholder: '1.0.0'
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of `reelforge doctor --json`
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Command output
+      description: Full output of the failing command with `--verbose`.
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: I removed private content from the files and logs above.
+          required: true
