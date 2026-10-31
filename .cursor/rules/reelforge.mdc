@@ -1,0 +1,16 @@
+---
+description: How to make ReelForge explainer videos (episode.yaml, MCP tools) and work on the code
+globs:
+  - 'episodes/**/episode.yaml'
+  - 'examples/**/episode.yaml'
+  - 'packages/**/*.ts'
+alwaysApply: true
+---
+
+# ReelForge
+
+Read `AGENTS.md` at the project root first (Part 1: making videos, Part 2: the code). Task guides
+live in `skills/`; the `get_guide` tool reads them.
+
+Use the `reelforge` MCP server (`.cursor/mcp.json`) and look at `preview_frames` images before you
+say an episode is done.
