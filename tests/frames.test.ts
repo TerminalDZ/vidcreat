@@ -4,7 +4,7 @@ import path from 'node:path';
 import type { Browser } from 'playwright';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createCapturer, launchBrowser, openRuntime } from '@reelforge/renderer';
-import { matchGolden, ROOT, timelineOf } from './helpers.js';
+import { GOLDEN_LIMIT, matchGolden, ROOT, timelineOf } from './helpers.js';
 
 let browser: Browser;
 beforeAll(async () => {
@@ -109,7 +109,7 @@ describe('caption fixture suite (SRS §9.3)', () => {
         await cap.frame(c.t),
         path.join(ROOT, 'fixtures/golden/captions/frames', `${c.name}.png`),
       );
-      expect(r.ratio, c.name).toBeLessThanOrEqual(0.002);
+      expect(r.ratio, c.name).toBeLessThanOrEqual(GOLDEN_LIMIT);
     }
     await rp.close();
   });
@@ -125,7 +125,7 @@ describe('component golden frames (NFR-11)', () => {
         await cap.frame(s.end - 0.2),
         path.join(ROOT, 'fixtures/golden/components/frames', `${s.id}.png`),
       );
-      expect(r.ratio, s.id).toBeLessThanOrEqual(0.002);
+      expect(r.ratio, s.id).toBeLessThanOrEqual(GOLDEN_LIMIT);
     }
     await rp.close();
   });

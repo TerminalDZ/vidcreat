@@ -28,9 +28,19 @@ export function downscale(png: PNG): PNG {
   return out;
 }
 
+/** The platform the golden PNGs were rendered on. */
+export const GOLDEN_PLATFORM: NodeJS.Platform = 'win32';
 /**
- * Compares a frame with its golden PNG (pixelmatch threshold 0.1, ≤ 0.2% differing pixels).
- * With UPDATE_GOLDEN=1 (or a missing golden) the reference is (re)written.
+ * Share of differing pixels a frame may have against its golden: 0.2 % on the platform that made
+ * the goldens, 0.6 % elsewhere, where Chromium rasterizes glyph edges slightly differently (text-heavy
+ * frames measured 0.22–0.25 % on Linux and macOS). Same-machine determinism is checked exactly by the
+ * frame-hash test in frames.test.ts, not by this tolerance.
+ */
+export const GOLDEN_LIMIT = process.platform === GOLDEN_PLATFORM ? 0.002 : 0.006;
+
+/**
+ * Compares a frame with its golden PNG (pixelmatch threshold 0.1, at most GOLDEN_LIMIT differing
+ * pixels). With UPDATE_GOLDEN=1 (or a missing golden) the reference is (re)written.
  */
 export function matchGolden(frame: Buffer, file: string): { ratio: number; written: boolean } {
   const img = downscale(PNG.sync.read(frame));
@@ -44,6 +54,6 @@ export function matchGolden(frame: Buffer, file: string): { ratio: number; writt
   const diff = new PNG({ width: img.width, height: img.height });
   const n = pixelmatch(img.data, ref.data, diff.data, img.width, img.height, { threshold: 0.1 });
   const ratio = n / (img.width * img.height);
-  if (ratio > 0.002) writeFileSync(file.replace(/\.png$/, '.diff.png'), PNG.sync.write(diff));
+  if (ratio > GOLDEN_LIMIT) writeFileSync(file.replace(/\.png$/, '.diff.png'), PNG.sync.write(diff));
   return { ratio, written: false };
 }

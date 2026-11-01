@@ -101,7 +101,8 @@ describe('gallery UI', () => {
     page.on('pageerror', (e) => errors.push(e.message));
     await page.goto(hub.url);
     await page.click('#galleryLink');
-    await page.waitForURL(/\/gallery$/);
+    // The page is usable once its DOM is ready; component frames load lazily afterwards.
+    await page.waitForURL(/\/gallery$/, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('.ccard');
     expect(await page.locator('.ccard').count()).toBeGreaterThanOrEqual(60);
     expect(await page.locator('.ccard[data-comp="title"] .shot img').count()).toBe(1);

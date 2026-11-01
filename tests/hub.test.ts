@@ -189,10 +189,14 @@ describe('dashboard render cancel', () => {
     const ws = new WebSocket(`ws://127.0.0.1:${hub.port}/ws`);
     await new Promise((r) => ws.once('open', r));
     let cancelled = false;
+    // The socket first replays the previous (finished) job; only this test's job counts.
+    let started = false;
     const end = new Promise<{ status: string }>((resolve) => {
       ws.on('message', async (d) => {
         const m = JSON.parse(String(d));
         if (m.type !== 'job') return;
+        if (m.job.status === 'running') started = true;
+        if (!started) return;
         if (!cancelled && m.job.phase === 'frames' && m.job.done > 3) {
           cancelled = true;
           await call('POST', '/api/render/cancel', {});
