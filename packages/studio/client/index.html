@@ -9,6 +9,7 @@
   <body data-mode="edit">
     <header id="top">
       <div class="brand" title="ReelForge Studio"><i></i><span>ReelForge</span></div>
+      <button class="tbtn drawer-btn" id="leftToggle" data-icon="layers" title="Layers, components and script" aria-label="Layers, components and script" aria-controls="left" aria-expanded="false"></button>
       <div class="doc">
         <b id="epTitle">Loading…</b>
         <span id="epId" class="mono"></span>
@@ -40,6 +41,7 @@
       <button id="issuesPill" class="pill" title="Review the checks (Alt+3)"></button>
       <button id="paletteBtn" class="search-btn" title="Search every command (⌘K / Ctrl+K)" data-icon="search" data-size="14"><span>Search</span><kbd>⌘K</kbd></button>
       <button class="tbtn" id="helpBtn" title="Keyboard shortcuts (?)" data-icon="keyboard" aria-label="Keyboard shortcuts"></button>
+      <button class="tbtn drawer-btn" id="rightToggle" data-icon="sliders" title="Inspector" aria-label="Inspector" aria-controls="right" aria-expanded="false"></button>
       <button id="renderBtn" class="btn primary" title="Render the video (⌘/Ctrl+Enter)" data-icon="render" data-size="15">Render</button>
     </header>
 
@@ -73,6 +75,7 @@
         <div id="reviewPanel"></div>
       </aside>
     </div>
+    <div id="scrim" hidden></div>
     <div class="split h" id="splitB" role="separator" aria-orientation="horizontal"></div>
     <footer id="timeline" aria-label="Timeline"></footer>
 

@@ -207,7 +207,7 @@ main {
 }
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(420px, 100%), 1fr));
   gap: 16px;
   margin-bottom: 34px;
 }
@@ -370,6 +370,8 @@ dialog {
   color: var(--ink);
   padding: 22px 24px;
   width: min(560px, 94vw);
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
 }
 dialog::backdrop {
   background: rgba(0, 0, 0, 0.6);
@@ -495,7 +497,8 @@ dialog.player {
 }
 dialog.player video {
   display: block;
-  height: min(78vh, 900px);
+  height: auto;
+  width: min(calc(min(78vh, 900px) * 9 / 16), calc(96vw - 28px));
   aspect-ratio: 9 / 16;
   background: #000;
   border-radius: 10px;
@@ -539,5 +542,71 @@ dialog.player video {
   }
   main {
     padding: 18px 14px 60px;
+  }
+  .hero {
+    padding: 20px 18px;
+  }
+  .section-head {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+  #toasts {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+  .toast {
+    max-width: none;
+  }
+}
+
+/* Phones: brand and "New episode" on the first row, status and docs below. */
+@media (max-width: 560px) {
+  .top {
+    flex-wrap: wrap;
+    height: auto;
+    /* The line break item adds a row of its own, so this gap counts twice. */
+    row-gap: 4px;
+    padding: 10px 14px;
+  }
+  .top::after {
+    content: '';
+    order: 1;
+    flex-basis: 100%;
+  }
+  .brand {
+    flex: 1;
+  }
+  .ver,
+  .top .spacer {
+    display: none;
+  }
+  #health,
+  #docsLink {
+    order: 2;
+  }
+  #docsLink {
+    height: 28px;
+    padding: 0 10px;
+    font-size: 12.5px;
+  }
+  dialog {
+    padding: 18px 16px;
+  }
+  dialog .row {
+    flex-direction: column;
+    gap: 0;
+  }
+  dialog label.narrow {
+    flex: 1;
+  }
+  .card {
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+  .thumb {
+    width: 92px;
+    height: 164px;
   }
 }

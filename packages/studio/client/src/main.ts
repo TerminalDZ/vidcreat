@@ -1137,6 +1137,35 @@ document
   .forEach((b) => b.addEventListener('click', () => b.closest('dialog')?.close()));
 $<HTMLDialogElement>('#outputsDlg').addEventListener('close', () => $<HTMLVideoElement>('#outVideo').pause());
 
+// ------------------------------------------------------------------ compact layout (tablets, phones)
+// Below 900 px the side panels become drawers over the canvas; the breakpoint matches style.css.
+const compact = matchMedia('(max-width: 900px)');
+let drawer: 'left' | 'right' | null = null;
+function setDrawer(side: 'left' | 'right' | null): void {
+  drawer = compact.matches ? side : null;
+  document.body.classList.toggle('drawer-left', drawer === 'left');
+  document.body.classList.toggle('drawer-right', drawer === 'right');
+  $('#scrim').hidden = !drawer;
+  $('#leftToggle').setAttribute('aria-expanded', String(drawer === 'left'));
+  $('#rightToggle').setAttribute('aria-expanded', String(drawer === 'right'));
+}
+$('#leftToggle').addEventListener('click', () => setDrawer(drawer === 'left' ? null : 'left'));
+$('#rightToggle').addEventListener('click', () => setDrawer(drawer === 'right' ? null : 'right'));
+$('#scrim').addEventListener('click', () => setDrawer(null));
+compact.addEventListener('change', () => setDrawer(null));
+window.addEventListener(
+  'keydown',
+  (e) => {
+    // Escape inside a field still cancels the field edit; the next Escape closes the drawer.
+    const field = (e.target as HTMLElement).closest?.('input, textarea, select, [contenteditable="true"]');
+    if (e.key === 'Escape' && drawer && !field) {
+      e.stopPropagation();
+      setDrawer(null);
+    }
+  },
+  true,
+);
+
 initCanvas({
   stage: $('#stage'),
   viewport: $('#viewport'),

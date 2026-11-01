@@ -80,6 +80,8 @@ const P: Record<string, string> = {
   sound:
     '<path d="M4 9.5v5h3.5L12 19V5L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>',
   diamond: '<path d="m12 4 8 8-8 8-8-8z" fill="currentColor" stroke="none"/>',
+  sliders:
+    '<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
 };
 
 /** Component name → icon. */
