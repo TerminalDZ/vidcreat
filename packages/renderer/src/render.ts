@@ -28,6 +28,19 @@ import { renderAll, splitRanges } from './workers.js';
 
 export type Phase = 'validate' | 'frames' | 'concat' | 'audio' | 'master' | 'share' | 'extras' | 'done';
 
+/**
+ * Removes a file or folder, retrying while Windows still holds it open (a just-killed ffmpeg or
+ * Chromium releases its handles a moment later). A file that stays locked is left behind rather than
+ * replacing the error the caller is about to report.
+ */
+function removeQuietly(target: string): void {
+  try {
+    rmSync(target, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+  } catch {
+    /* still locked: leave it; the next render cleans up */
+  }
+}
+
 export interface Progress {
   phase: Phase;
   done: number;
@@ -349,7 +362,7 @@ export async function renderEpisode(paths: EpisodePaths, opts: RenderOptions = {
     }
   } catch (e) {
     if (signal?.aborted) {
-      for (const f of written) rmSync(f, { force: true });
+      for (const f of written) removeQuietly(f);
       throw new RenderError('Render aborted; partial files removed', issues);
     }
     if (e instanceof RenderError) throw new RenderError(e.message, issues);
@@ -357,7 +370,7 @@ export async function renderEpisode(paths: EpisodePaths, opts: RenderOptions = {
   } finally {
     signal?.removeEventListener('abort', onAbort);
     if ((success || signal?.aborted || !opts.keepTmp) && existsSync(tmp)) {
-      if (!opts.keepTmp || success) rmSync(tmp, { recursive: true, force: true });
+      if (!opts.keepTmp || success) removeQuietly(tmp);
     }
     const parent = path.join(paths.out, '.tmp');
     try {
