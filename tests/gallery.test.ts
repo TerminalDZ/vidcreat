@@ -100,9 +100,10 @@ describe('gallery UI', () => {
     const errors: string[] = [];
     page.on('pageerror', (e) => errors.push(e.message));
     await page.goto(hub.url);
-    await page.click('#galleryLink');
-    // The page is usable once its DOM is ready; component frames load lazily afterwards.
-    await page.waitForURL(/\/gallery$/, { waitUntil: 'domcontentloaded' });
+    // The header links to the gallery. Open it directly: on a fresh CI machine the dashboard may show
+    // its setup-check dialog first, which (being modal) swallows clicks on the header.
+    expect(await page.getAttribute('#galleryLink', 'href')).toBe('/gallery');
+    await page.goto(new URL('/gallery', hub.url).href, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('.ccard');
     expect(await page.locator('.ccard').count()).toBeGreaterThanOrEqual(60);
     expect(await page.locator('.ccard[data-comp="title"] .shot img').count()).toBe(1);
