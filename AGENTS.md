@@ -29,10 +29,12 @@ node packages/cli/bin/reelforge.js mcp      # or: ./reelforge mcp · reelforge.c
 | `create_episode`                                         | start a new episode from a script (draft cues are written for you)           |
 | `edit_episode`                                           | structured edits (`set` / `delete` / `insert` / `move` by YAML path)         |
 | `write_episode_yaml`                                     | replace the whole file (validated before writing)                            |
-| `validate_episode`                                       | run all checks (V-1…V-13) with line numbers and fix hints                    |
+| `validate_episode`                                       | run all checks (V-1…V-14) with line numbers and fix hints                    |
 | `preview_frames`                                         | **look** at frames (returned as images); always check your work              |
 | `list_components` / `get_component_schema`               | the 21 components and their exact props                                      |
+| `suggest_scene`                                          | element ideas for a line (component, props, enter word); optional local LLM  |
 | `draft_cues` / `set_cues`                                | estimated or known line timings                                              |
+| `align_cues`                                             | cues for every line and word, aligned automatically to `voice.wav`           |
 | `render_episode` / `get_render_status` / `cancel_render` | render in the background, poll, cancel                                       |
 | `open_editor`                                            | give the person a URL to the visual editor to fine-tune and mark cues        |
 | `doctor`                                                 | check Node.js, FFmpeg, Chromium and fonts                                    |
@@ -42,6 +44,7 @@ Without MCP, use the command line (`./reelforge` on macOS/Linux, `reelforge.cmd`
 ```bash
 ./reelforge new ep10 --lang en --series "SYSTEM DESIGN"   # episodes/ep10/episode.yaml
 ./reelforge cue ep10 --draft                              # estimated cues (no recording yet)
+./reelforge align ep10                                    # cues from voice.wav (lines + words)
 ./reelforge validate ep10 --json                          # machine-readable issues
 ./reelforge snap ep10 l1+1 "l3:'bucket'" --out /tmp/f     # PNG frames to look at
 ./reelforge render ep10 --silent --json                   # render without a voice
@@ -57,11 +60,15 @@ Without MCP, use the command line (`./reelforge` on macOS/Linux, `reelforge.cmd`
 3. **Design scenes.** Put one idea in each scene, usually 4–7 scenes in an episode. Each scene
    starts on a line (`at: l3`). Make each element enter **on the word that names it**, for example
    `enter: { at: "l3:'bucket'" }`. This word-sync is what makes ReelForge videos feel alive.
-4. **Validate** and fix every error and warning.
+   `suggest_scene` gives a valid starting point per line (component, props, enter word).
+4. **Validate** and fix every error and warning. V-14 flags lines spoken faster than ~3.5 words/s
+   (too fast to read in captions) and a hook that starts after 3 s.
 5. **Preview** frames shortly after things enter (`l3:'bucket'+0.8`). Check overlap, text overflow
    and that the platform UI is clear. Iterate until it looks clean.
-6. **Hand over.** The person records `voice.wav`, marks cues by ear in the editor (Cues mode,
-   Space key) and renders. Until then the draft cues give realistic timing.
+6. **Hand over.** The person records `voice.wav`. `align_cues` (or `reelforge align`) marks every
+   line and word from the recording; the person listens through once in the editor (Cues mode) and
+   fixes any line by ear, then renders. Until then the draft cues give realistic timing. Phone
+   recordings: set `audio: { denoise: true }` to remove background noise when rendering.
 
 ### episode.yaml essentials
 
@@ -76,7 +83,7 @@ meta:
   lang: en-US # en-US → left-to-right captions; ar-EG → right-to-left
   publish: { cover: 'Flooded API?', caption: '…', hashtags: ['#systemdesign'], pinned: '…' }
 
-audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 }
+audio: { voice: voice.wav, sfx: auto, sfx_gain_db: -16 } # denoise: true for noisy recordings
 
 script: # ids default to l1, l2, … by position
   - text: 'Your API just got flooded with requests.'
@@ -152,7 +159,8 @@ are strict.
 
 - Don't invent component names or props. Use the schemas.
 - Don't write absolute seconds when a word expression exists. Words survive re-recording.
-- Don't edit `cues.json` by hand unless asked. Cues are marked by ear in the editor.
+- Don't edit `cues.json` by hand unless asked. Use `align_cues` with a recording, or let the person
+  mark cues by ear in the editor. `align_cues` never replaces hand-marked cues unless `force: true`.
 - Don't delete the person's files under `out/`. Re-rendering overwrites them.
 - Rendering takes minutes. Start it and poll; don't block on it.
 
@@ -166,7 +174,10 @@ FFmpeg as an external binary, Vite for the browser clients and Vitest for tests.
 ```
 packages/
   audio/     WAV I/O, envelopes, onset detection, procedural SFX
-  core/      schema (zod), time expressions, captions, themes, presets, compiler → Timeline, lint
+  core/      schema (zod), time expressions, captions, themes, presets, compiler → Timeline, lint,
+             auto cues (DSP), keyword smart insert
+  assist/    optional helpers: cue alignment (DSP / Whisper + Silero VAD, models installed on
+             demand into the user cache), local LLM scene suggestions (Ollama)
   runtime/   browser page: pure render(t) for every component (DOM/SVG)
   renderer/  Chromium workers → x264 segments → concat, loudness, ffprobe checks, doctor
   studio/    local servers: dashboard (hub), editor/cue/review studio; Vite clients in client/
@@ -188,6 +199,8 @@ packages/
 pnpm install && pnpm build
 pnpm typecheck && pnpm lint
 pnpm test:unit          # fast
+REELFORGE_TEST_MODELS=1 pnpm test:unit   # + real Whisper / Ollama (after `reelforge align --setup`)
+node scripts/eval-assist.mjs             # cue accuracy and speed against ground truth
 pnpm test               # + browser/integration (needs FFmpeg and Chromium)
 pnpm format             # prettier
 UPDATE_GOLDEN=1 pnpm test:browser   # refresh golden frames after an intended visual change

@@ -502,6 +502,7 @@ Each case MUST have a golden-frame test (§11).
 | V-11 | info | A scene with no element entering in its first 1.5 s (dead air) |
 | V-12 | warn | An element enters < 0.1 s before its scene ends (blink) |
 | V-13 | error | Unknown component name or font not found |
+| V-14 | warn / info | Pacing: a line spoken faster than 3.5 words/s (cue to next cue), the hook starting after 3 s (warn); a silence of 1.5 s or more inside the recording (info). Not run on draft cues |
 
 V-6 to V-10 run in a headless measuring pass at each element's fully-entered time. The results are cached by scene hash.
 

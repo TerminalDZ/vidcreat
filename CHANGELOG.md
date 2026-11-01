@@ -3,6 +3,33 @@
 All notable changes to ReelForge are documented here. The project follows
 [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+
+- **Automatic cues** (`reelforge align`, **Auto-mark from voice** in Cues mode, **Auto cues** on the
+  dashboard, MCP `align_cues`): every line and word aligned to the recording. Works without any model
+  (pause detection + dynamic programming over the known script, ~0.05 s per minute of voice). Optional
+  speech models (`reelforge align --setup`, installed on demand into the user cache, ~180 MB): Whisper
+  word timings matched to the script by fuzzy DTW, and Silero VAD for speech vs music/noise. Measured on
+  recorded speech with known timings: every line within 100 ms (mean 15 ms), also under background music.
+  Hand-marked cues are never replaced without confirmation; the editor makes it one undo step.
+- **Voice noise cleanup**: `audio.denoise: true` / `render --denoise` / a checkbox in the render dialogs.
+  RNNoise (bundled 290 KB model, ffmpeg `arnndn`) before loudness mastering; ~15 dB less noise between
+  sentences in tests, voice level unchanged.
+- **V-14 pacing check**: lines spoken faster than 3.5 words/s (too fast to read in captions), a hook
+  that starts after 3 s, and silences of 1.5 s or more in the recording.
+- **Smart insert**: suggestions per line in the editor's Insert panel and MCP `suggest_scene` — a keyword
+  dictionary (English and Arabic) that picks the component, fills its props from the line and makes it
+  enter on the word that names it. Optional local LLM (Ollama, `qwen2.5:1.5b`) with output constrained to
+  the component schemas.
+
+### Fixed
+
+- Renders failed the output check with `pixel format yuvj420p` on ffmpeg 7+: frames are now converted to
+  limited-range BT.709 yuv420p.
+- The dashboard and editor are responsive (side panels become drawers on tablets and phones).
+
 ## 1.0.0 — 2026-10-16
 
 First public release.

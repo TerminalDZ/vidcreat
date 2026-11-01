@@ -21,7 +21,7 @@ sound effects and platform-ready encoding, all designed in a visual editor.
 | `reelforge cue <id>`                       | the editor in Cues mode: mark the start of each script line while listening (writes `cues.json`)                |
 | `reelforge dev <id>`                       | the editor in Review mode: checks, safe zones, element outlines                                                 |
 | `reelforge mcp`                            | Model Context Protocol server for AI agents                                                                     |
-| `reelforge validate <id>`                  | schema, cues, timing, overlap, safe zones, text overflow (V-1…V-13)                                             |
+| `reelforge validate <id>`                  | schema, cues, timing, overlap, safe zones, text overflow (V-1…V-14)                                             |
 | `reelforge render <id>`                    | `out/<id>.master.mp4`, `out/<id>.share.mp4`, `.srt`, `.sheet.jpg`, `publish.md` (`--all` renders every episode) |
 | `reelforge snap <id> <t…>`                 | PNG frames at times (or `l7`, `l7:'word'`) plus a contact sheet; `--cover` writes `out/<id>.cover.png`          |
 | `reelforge theme new <name> --accent #hex` | generate a series theme from one accent color                                                                   |

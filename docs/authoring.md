@@ -171,5 +171,7 @@ safe-zone rectangles, share size and maximum duration — edit them without touc
 | V-11 | info  | nothing enters in a scene's first 1.5 s                |
 | V-12 | warn  | element enters < 0.1 s before its scene ends           |
 | V-13 | error | unknown component or font                              |
+| V-14 | warn  | line spoken > 3.5 words/s, or hook starts after 3 s    |
+| V-14 | info  | silence of 1.5 s or more in the recording              |
 
 `reelforge validate <id> --strict` fails on warnings too (use it in CI).
