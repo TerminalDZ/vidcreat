@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: 'If you use ReelForge in your work, please cite it as below.'
+title: 'ReelForge'
+abstract: >-
+  ReelForge turns a voice recording and one episode.yaml into 1080x1920 vertical explainer videos.
+  Its render engine is deterministic (DOM/SVG in headless Chromium, encoded by FFmpeg) and contains no
+  AI; optional local helpers provide speech alignment and scene suggestions.
+type: software
+authors:
+  - given-names: Idriss
+    family-names: Boukmouche
+    email: boukemoucheidriss@gmail.com
+version: 1.0.0
+date-released: '2026-11-01'
+license: Apache-2.0
+repository-code: 'https://github.com/TerminalDZ/vidcreat'
+url: 'https://terminaldz.github.io/vidcreat'
+keywords:
+  - video
+  - explainer video
+  - vertical video
+  - captions
+  - deterministic rendering
+  - speech alignment
