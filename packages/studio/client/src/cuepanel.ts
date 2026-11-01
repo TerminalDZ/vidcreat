@@ -1,6 +1,6 @@
 /** Cues mode (FR-CUE-1…7): press Space at the start of each line while listening; Review mode: lint. */
 import type { Issue } from '@reelforge/core';
-import { app, esc, fmt, h } from './app.js';
+import { app, esc, fmt, h, toast } from './app.js';
 import { latinKey } from './commands.js';
 import { CueModel } from './cue.js';
 import { icon } from './icons.js';
@@ -27,6 +27,10 @@ export function initCuePanel(c: Ctx): void {
       <span id="cueStats" class="mono dim"></span>
       <label class="check" title="Snap marks to the nearest voice onset (A)"><input type="checkbox" id="autoSnap" /> Snap to voice</label>
     </div>
+    <div class="autocue">
+      <button class="btn sm" id="autoCueBtn" title="Find every line and word in the recording automatically; then fix mistakes by ear">${icon('wave', 14)}<span>Auto-mark from voice</span></button>
+      <span id="autoCueInfo" class="dim small"></span>
+    </div>
     <div class="howto">
       <div><kbd>Space</kbd> mark the next line as you hear it start</div>
       <div><kbd>K</kbd> play / pause · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> speed 0.5× 0.75× 1×</div>
@@ -36,11 +40,99 @@ export function initCuePanel(c: Ctx): void {
   root.querySelector<HTMLInputElement>('#autoSnap')!.addEventListener('change', (e) => {
     model.autoSnap = (e.target as HTMLInputElement).checked;
   });
+  root.querySelector('#autoCueBtn')!.addEventListener('click', () => void autoMark());
+  void refreshAssist();
   document.addEventListener('rf:select-line', (e) => {
     model.selected = (e as CustomEvent<string>).detail;
     model.wordMode = false;
     renderLines(true);
   });
+}
+
+interface AssistInfo {
+  whisper: boolean;
+  vad: boolean;
+  manualCues: boolean;
+  voice: boolean;
+  aligning: boolean;
+}
+let assist: AssistInfo | null = null;
+/** Per-line confidence of the last automatic alignment (lines below 0.5 deserve a listen). */
+let confidence: Record<string, number> = {};
+
+async function refreshAssist(): Promise<void> {
+  try {
+    assist = (await (await fetch('/api/assist')).json()) as AssistInfo;
+  } catch {
+    assist = null;
+  }
+  const info = document.querySelector('#autoCueInfo');
+  const btn = document.querySelector<HTMLButtonElement>('#autoCueBtn');
+  if (!info || !btn) return;
+  btn.disabled = !assist?.voice || Boolean(assist?.aligning) || Boolean(btn.dataset.busy);
+  info.textContent = !assist?.voice
+    ? 'needs a voice recording'
+    : assist.whisper
+      ? `Whisper${assist.vad ? ' + VAD' : ''} · word-accurate`
+      : `pauses${assist.vad ? ' + VAD' : ''} · run \`reelforge align --setup\` for Whisper`;
+}
+
+/** Asks the server to align every line and word to the recording (undoable). */
+export async function autoMark(): Promise<void> {
+  const btn = document.querySelector<HTMLButtonElement>('#autoCueBtn')!;
+  const label = btn.querySelector('span')!;
+  if (btn.dataset.busy) return;
+  // Busy from the first click: the status check below is a network round trip.
+  btn.dataset.busy = '1';
+  btn.disabled = true;
+  label.textContent = 'Listening…';
+  await refreshAssist();
+  const stop = () => {
+    label.textContent = 'Auto-mark from voice';
+    delete btn.dataset.busy;
+    void refreshAssist();
+  };
+  if (!assist?.voice) {
+    stop();
+    return toast('Add a voice recording first', 'err');
+  }
+  let force = false;
+  if (assist.manualCues) {
+    if (!confirm('Replace the cues you marked by hand with automatic ones? (Undo brings yours back.)'))
+      return stop();
+    force = true;
+  }
+  label.textContent = assist.whisper ? 'Listening… (Whisper)' : 'Listening…';
+  try {
+    const res = await fetch('/api/cues/auto', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ force }),
+    });
+    const j = (await res.json()) as {
+      error?: string;
+      engine?: string;
+      vad?: boolean;
+      matched?: number;
+      confidence?: Record<string, number>;
+      ms?: { total: number };
+      note?: string;
+      pauses?: { at: number; len: number }[];
+    };
+    if (!res.ok) throw new Error(j.error ?? res.statusText);
+    dirty = false;
+    confidence = j.confidence ?? {};
+    const shaky = Object.values(confidence).filter((v) => v < 0.5).length;
+    toast(
+      `Marked ${Object.keys(confidence).length} lines with ${j.engine}${j.vad ? ' + VAD' : ''} in ${((j.ms?.total ?? 0) / 1000).toFixed(1)} s${j.matched !== undefined ? ` · ${Math.round(j.matched * 100)}% of words heard` : ''}. ${shaky ? `${shaky} line(s) to check by ear (amber).` : 'Listen through once and fix any line with Space.'}${j.note ? ` ${j.note}` : ''}`,
+      'ok',
+    );
+  } catch (e) {
+    toast(`Auto-mark failed: ${(e as Error).message}`, 'err');
+  } finally {
+    label.textContent = 'Auto-mark from voice';
+    stop();
+  }
 }
 
 export function syncCueModel(): void {
@@ -90,6 +182,9 @@ export function renderLines(force = false): void {
     li.classList.toggle('next', id === next && !model.selected);
     li.classList.toggle('sel', id === model.selected);
     li.classList.toggle('bad', bad.has(id));
+    const conf = confidence[id];
+    li.classList.toggle('shaky', conf !== undefined && conf < 0.5);
+    li.title = conf !== undefined ? `Automatic cue, confidence ${Math.round(conf * 100)}%` : '';
     li.querySelector('.tm')!.textContent = v === undefined ? '—' : fmt(v);
     const wordsEl = li.querySelector('.words') as HTMLElement;
     const showWords = id === model.selected && (model.wordMode || (model.words[id]?.length ?? 0) > 0);

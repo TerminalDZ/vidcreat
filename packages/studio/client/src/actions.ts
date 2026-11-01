@@ -104,6 +104,39 @@ export async function insertElement(
   });
 }
 
+export interface SuggestedElement {
+  use: string;
+  props: Record<string, unknown>;
+  enter: { at: string; anim: string };
+}
+
+/**
+ * Inserts a smart-insert suggestion into the scene playing at `time` (the start of its line),
+ * below the elements already there so it rarely overlaps them.
+ */
+export async function insertSuggestion(s: SuggestedElement, time: number): Promise<void> {
+  const meta = app.meta?.components.find((c) => c.name === s.use);
+  if (!meta) return;
+  if (!app.scenes.length) return toast('Add a scene first', 'err');
+  const si = app.sceneIndexAt(time);
+  const scene = app.compiledScene(si);
+  const el: SpecElement = { use: s.use, id: uniqueId(s.use), props: clone(s.props) };
+  if (!meta.fill && !meta.endpoints.length) {
+    const area = scene?.origin ?? { x: 0, y: 0, w: 1080, h: 1920 };
+    const w = Math.min(meta.size.w, area.w - 120);
+    const h = Math.min(meta.size.h, area.h);
+    const below = (scene?.elements ?? [])
+      .filter((e) => e.layer !== 'overlay' && e.component !== 'particles' && e.component !== 'trap')
+      .reduce((m, e) => Math.max(m, e.box.y + e.box.h), 40);
+    const y = below + 30 + h <= area.h ? below + 30 : Math.max(0, Math.round((area.h - h) / 2));
+    el.place = { x: Math.round((area.w - w) / 2), y, w, h };
+  }
+  el.enter = { at: s.enter.at, anim: s.enter.anim } as SpecElement['enter'];
+  await editAndSelect([{ op: 'insert', path: ['scenes', si, 'elements'], value: el }], `Add ${s.use}`, {
+    id: el.id!,
+  });
+}
+
 /** The new selection must be queued before the edit: the recompiled state can arrive first. */
 async function editAndSelect(ops: EditOp[], label: string, sel: { id: string }): Promise<boolean> {
   pendingSelect = { id: sel.id, until: Date.now() + 5000 };

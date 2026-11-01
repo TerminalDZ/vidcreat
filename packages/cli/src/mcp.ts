@@ -32,11 +32,13 @@ import {
   readCues,
   resolveEpisode,
   resolveTime,
+  suggestForLine,
   writeCues,
   type CompileResult,
   type EpisodePaths,
   type Issue,
 } from '@reelforge/core';
+import { alignEpisode, llmStatus, suggestWithLlm, type AlignEngine } from '@reelforge/assist';
 import { ffmpegBin, measureTimeline, runDoctor, snapFrames } from '@reelforge/renderer';
 import { applyOps, parseOps, RenderRunner, startStudio, type EditOp, type Studio } from '@reelforge/studio';
 import { ffmpegDecode } from './decode.js';
@@ -442,7 +444,7 @@ export async function startMcp(opts: { root: string; version: string }): Promise
       name: 'validate_episode',
       title: 'Validate an episode',
       description:
-        'Run every check (V-1…V-13: schema, cues, timing, overlaps, off-screen elements, platform safe zones, text overflow measured in the real browser, caption length). Each issue has a line, time and fix hint.',
+        'Run every check (V-1…V-14: schema, cues, timing, pacing, overlaps, off-screen elements, platform safe zones, text overflow measured in the real browser, caption length). Each issue has a line, time and fix hint.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -635,6 +637,103 @@ export async function startMcp(opts: { root: string; version: string }): Promise
       },
     },
     {
+      name: 'suggest_scene',
+      title: 'Suggest elements for a line',
+      description:
+        'Suggest on-screen elements for one script line: component, valid props and an enter time on the word that names it (e.g. "race" → lanes, "token bucket" → bucket, numbers → counter). Instant keyword dictionary by default; llm: true asks a small local model through Ollama when it is installed (slow on CPU, optional). Insert a suggestion with edit_episode (op insert into ["scenes", i, "elements"]).',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          episode: EPISODE,
+          line: { type: 'string', description: 'Script line id, e.g. "l3"' },
+          llm: { type: 'boolean', default: false },
+        },
+        required: ['episode', 'line'],
+        additionalProperties: false,
+      },
+      annotations: { readOnlyHint: true },
+      run: async (a) => {
+        const p = ep(a.episode);
+        const r = compile(p);
+        const i = r.script.findIndex((l) => l.id === a.line);
+        if (i < 0)
+          throw new ToolError(
+            `Unknown line "${String(a.line)}" (lines: ${r.script.map((l) => l.id).join(', ')})`,
+          );
+        const dict = suggestForLine(r.script[i], { first: i === 0 });
+        let ai: { suggestions: unknown[]; ms: number; model: string } | undefined;
+        let note = '';
+        if (a.llm) {
+          const st = await llmStatus();
+          if (st.available) {
+            const cue = r.timeline?.cues[String(a.line)] ?? 0;
+            const scene = r.timeline?.scenes.find((s) => s.start <= cue + 1e-3 && s.end > cue);
+            ai = await suggestWithLlm(r.script[i], {
+              lang: r.spec?.meta.lang,
+              context: [r.script[i - 1]?.text, r.script[i + 1]?.text].filter((x): x is string => Boolean(x)),
+              elementIds: scene?.elements.map((e) => e.id) ?? [],
+            });
+          } else
+            note = st.running
+              ? ` (model ${st.model} not pulled)`
+              : ' (Ollama is not running; dictionary only)';
+        }
+        const all = [...(ai?.suggestions ?? []), ...dict];
+        return text(
+          `${all.length} suggestion(s) for ${String(a.line)}${note}:\n${JSON.stringify(all, null, 2)}`,
+          { suggestions: all, llm: ai ? { model: ai.model, ms: ai.ms } : null },
+        );
+      },
+    },
+    {
+      name: 'align_cues',
+      title: 'Align cues to the recording',
+      description:
+        'Mark cues automatically from the voice recording: every line start and every word (cues.json, flagged auto). Engine "auto" uses Whisper word timings matched to the known script when the optional speech models are installed (`reelforge align --setup`), otherwise pause detection (fast, no model). Lines with confidence < 0.5 deserve a listen. Refuses to replace cues marked by hand unless force: true.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          episode: EPISODE,
+          engine: { type: 'string', enum: ['auto', 'dsp', 'whisper'], default: 'auto' },
+          words: { type: 'boolean', default: true, description: 'Also place every word' },
+          force: { type: 'boolean', default: false, description: 'Replace cues marked by hand' },
+        },
+        required: ['episode'],
+        additionalProperties: false,
+      },
+      run: async (a, ctx) => {
+        const p = ep(a.episode);
+        ctx.progress(0, 1, 'aligning');
+        try {
+          const r = await alignEpisode(p, {
+            engine: (a.engine as AlignEngine | undefined) ?? 'auto',
+            words: a.words !== false,
+            force: a.force === true,
+            decode: ffmpegDecode,
+          });
+          const shaky = Object.entries(r.confidence)
+            .filter(([, v]) => v < 0.5)
+            .map(([k]) => k);
+          const s = issueSummary(compile(p).issues);
+          return text(
+            `Aligned ${Object.keys(r.cues.cues).length} line(s) with ${r.engine}${r.vad ? ' + VAD' : ''} in ${(r.ms.total / 1000).toFixed(1)} s${r.matched !== undefined ? ` (${Math.round(r.matched * 100)}% of words heard)` : ''}.${shaky.length ? ` Check by ear: ${shaky.join(', ')}.` : ''}${r.note ? ` ${r.note}` : ''} ${s.errors} error(s), ${s.warnings} warning(s).`,
+            {
+              engine: r.engine,
+              vad: r.vad,
+              matched: r.matched,
+              cues: r.cues.cues,
+              confidence: r.confidence,
+              pauses: r.pauses,
+              ms: r.ms,
+              issues: s,
+            },
+          );
+        } catch (e) {
+          throw new ToolError((e as Error).message);
+        }
+      },
+    },
+    {
       name: 'render_episode',
       title: 'Render an episode',
       description:
@@ -651,6 +750,10 @@ export async function startMcp(opts: { root: string; version: string }): Promise
           fast: { type: 'boolean', default: false, description: 'Quick lower-quality draft' },
           shareMb: { type: 'number', minimum: 5, maximum: 500 },
           sfx: { type: 'boolean', default: true },
+          denoise: {
+            type: 'boolean',
+            description: 'Remove background noise from the voice (default: audio.denoise in episode.yaml)',
+          },
         },
         required: ['episode'],
         additionalProperties: false,
@@ -664,6 +767,7 @@ export async function startMcp(opts: { root: string; version: string }): Promise
             fast: Boolean(a.fast),
             shareMb: a.shareMb as number | undefined,
             sfx: a.sfx !== false,
+            denoise: typeof a.denoise === 'boolean' ? a.denoise : undefined,
           });
           return text(`Render started (job ${job.id}). Poll get_render_status.`, { job: { ...job } });
         } catch (e) {

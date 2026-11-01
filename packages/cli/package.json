@@ -19,6 +19,7 @@
     "build": "tsc -b"
   },
   "dependencies": {
+    "@reelforge/assist": "workspace:*",
     "@reelforge/audio": "workspace:*",
     "@reelforge/core": "workspace:*",
     "@reelforge/renderer": "workspace:*",

@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@eslint/js": "9.39.1",
+    "@reelforge/assist": "workspace:*",
     "@reelforge/audio": "workspace:*",
     "@reelforge/cli": "workspace:*",
     "@reelforge/core": "workspace:*",

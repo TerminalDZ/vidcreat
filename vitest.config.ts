@@ -6,6 +6,7 @@ const r = (p: string) => path.resolve(__dirname, p);
 const alias = {
   '@reelforge/core': r('packages/core/src/index.ts'),
   '@reelforge/audio': r('packages/audio/src/index.ts'),
+  '@reelforge/assist': r('packages/assist/src/index.ts'),
 };
 
 export default defineConfig({

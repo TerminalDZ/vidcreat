@@ -1215,6 +1215,12 @@ function episodeView(): Node[] {
         undefined,
         'inline',
       ),
+      row(
+        'Clean up noise',
+        toggle(['audio', 'denoise'], a.denoise, { def: false, label: 'noise cleanup' }),
+        'Removes hiss, hum and room noise from the voice when rendering (RNNoise)',
+        'inline',
+      ),
     ]),
     section('chapters', `Chapters · ${(app.spec.chapters ?? []).length}`, [chaptersEditor()]),
   );

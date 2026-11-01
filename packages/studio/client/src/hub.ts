@@ -17,7 +17,7 @@ interface Episode {
   lines: number;
   scenes: number;
   duration: number;
-  cues: { marked: number; draft: boolean } | null;
+  cues: { marked: number; draft: boolean; auto: boolean } | null;
   voice: { file: string; duration: number } | null;
   issues: { errors: number; warnings: number; first?: string };
   outputs: OutputFile[];
@@ -148,7 +148,9 @@ function fillCard(card: HTMLElement, ep: Episode): void {
     ? `<span class="chip warn" title="Mark when each sentence starts">no cues</span>`
     : ep.cues.draft
       ? `<span class="chip warn" title="Estimated cues: mark real ones after recording">draft cues</span>`
-      : `<span class="chip ${marked >= total ? 'ok' : 'warn'}">cues ${marked}/${total}</span>`;
+      : ep.cues.auto
+        ? `<span class="chip ok" title="Aligned automatically from the recording: listen through once in Mark cues">auto cues ${marked}/${total}</span>`
+        : `<span class="chip ${marked >= total ? 'ok' : 'warn'}">cues ${marked}/${total}</span>`;
   const voiceChip = ep.voice
     ? `<span class="chip ok" title="${esc(ep.voice.file)}">voice ${fmtDur(ep.voice.duration)}</span>`
     : `<span class="chip warn">no voice</span>`;
@@ -194,6 +196,14 @@ function fillCard(card: HTMLElement, ep: Episode): void {
   const img = new Image();
   img.onload = img.onerror = () => thumb.classList.remove('loading');
   img.src = `/api/thumb?ep=${encodeURIComponent(ep.key)}&v=${v}`;
+  if (ep.voice && ep.lines) {
+    const b = document.createElement('button');
+    b.className = 'btn sm';
+    b.dataset.act = 'autocue';
+    b.title = 'Find every line and word in the recording automatically';
+    b.textContent = 'Auto cues';
+    card.querySelector('[data-act="cue"]')!.after(b);
+  }
   if (!ep.cues && ep.lines) {
     const b = document.createElement('button');
     b.className = 'btn sm ghost';
@@ -275,6 +285,31 @@ document.addEventListener('click', async (e) => {
       case 'voice':
         $<HTMLInputElement>('#voiceInput').click();
         break;
+      case 'autocue': {
+        const manual = Boolean(ep.cues && !ep.cues.draft && !ep.cues.auto);
+        if (manual && !confirm('Replace the cues you marked by hand with automatic ones?')) break;
+        btn.setAttribute('disabled', '');
+        btn.textContent = 'Listening…';
+        try {
+          const r = await api<{
+            engine: string;
+            vad: boolean;
+            ms: { total: number };
+            note?: string;
+            confidence: Record<string, number>;
+          }>('/api/cues/auto', { ep: ep.key, force: manual });
+          const shaky = Object.values(r.confidence).filter((v) => v < 0.5).length;
+          toast(
+            `Cues marked with ${r.engine}${r.vad ? ' + VAD' : ''} in ${(r.ms.total / 1000).toFixed(1)} s. ${shaky ? `${shaky} line(s) to check by ear. ` : ''}Listen through once in Mark cues.${r.note ? ` ${r.note}` : ''}`,
+            'ok',
+          );
+        } finally {
+          btn.removeAttribute('disabled');
+          btn.textContent = 'Auto cues';
+        }
+        await refresh();
+        break;
+      }
       case 'draft':
         await api('/api/cues/draft', { ep: ep.key });
         toast('Draft cues created. Mark real cues after recording.', 'ok');
@@ -350,6 +385,8 @@ $<HTMLDialogElement>('#renderDlg').addEventListener('close', async () => {
         sfx: val('sfx').checked,
         fast: val('fast').checked,
         silent: val('silent').checked,
+        // Unchecked keeps the episode's own audio.denoise setting.
+        denoise: val('denoise').checked || undefined,
       },
     });
     job = r.job;
@@ -427,9 +464,10 @@ $<HTMLFormElement>('#newForm').addEventListener('submit', async (e) => {
 async function checkHealth(): Promise<void> {
   const pill = $('#health');
   try {
-    const { checks } = await api<{ checks: { name: string; ok: boolean; detail: string; fix?: string }[] }>(
-      '/api/doctor',
-    );
+    const { checks, assist } = await api<{
+      checks: { name: string; ok: boolean; detail: string; fix?: string }[];
+      assist?: { installed: boolean; whisper: Record<string, boolean>; vad: boolean; sizeMb: number };
+    }>('/api/doctor');
     const bad = checks.filter((c) => !c.ok);
     pill.className = `pill ${bad.length ? 'bad' : 'ok'}`;
     pill.textContent = bad.length
@@ -443,6 +481,18 @@ async function checkHealth(): Promise<void> {
           }</li>`,
       )
       .join('');
+    if (assist) {
+      // Optional: word-accurate automatic cues. Not a setup issue when missing.
+      const ready = assist.installed && Object.values(assist.whisper).some(Boolean);
+      $('#doctorList').insertAdjacentHTML(
+        'beforeend',
+        `<li><span class="st ${ready ? 'ok' : ''}">${ready ? '✓' : '○'}</span><span>Speech models (optional) <span class="dim small">${
+          ready
+            ? `Whisper${assist.vad ? ' + VAD' : ''} · ${assist.sizeMb} MB`
+            : 'automatic cues use pause detection'
+        }</span></span>${ready ? '' : '<span class="fix">For word-accurate automatic cues: reelforge align --setup</span>'}</li>`,
+      );
+    }
     if (bad.length) $<HTMLDialogElement>('#doctorDlg').showModal();
   } catch {
     pill.className = 'pill bad';

@@ -1,6 +1,6 @@
 /** MCP server: protocol handshake, tools, edits, validation and frame previews over stdio. */
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -84,6 +84,8 @@ describe('reelforge mcp', () => {
       'validate_episode',
       'preview_frames',
       'render_episode',
+      'align_cues',
+      'suggest_scene',
     ])
       expect(names).toContain(n);
     expect(tools.every((t) => t.inputSchema.type === 'object')).toBe(true);
@@ -188,5 +190,53 @@ describe('reelforge mcp', () => {
 
     const missing = await tool('get_episode', { episode: '../../etc' });
     expect(missing.isError).toBe(true);
+  });
+
+  it('suggests elements for a line and aligns cues to a recording', async () => {
+    const script = (
+      readFileSync(path.join(ROOT, 'fixtures/align/en-david-fast/episode.yaml'), 'utf8').match(
+        /- text: '.*'/g,
+      ) ?? []
+    ).map((l) => l.slice(9, -1).replace(/''/g, "'"));
+    const made = await tool('create_episode', { id: 'ep2', title: 'Limits', script });
+    expect(made.isError).toBeFalsy();
+
+    const sug = await tool('suggest_scene', { episode: 'ep2', line: 'l3' });
+    const list = (
+      sug.structuredContent as { suggestions: { use: string; props: unknown; enter: { at: string } }[] }
+    ).suggestions;
+    expect(list.map((s) => s.use)).toContain('bucket'); // "The classic design is a token bucket."
+    const bucket = list.find((s) => s.use === 'bucket')!;
+    expect(bucket.enter.at).toMatch(/^l3:'(token|bucket)/);
+    const ins = await tool('edit_episode', {
+      episode: 'ep2',
+      ops: [
+        {
+          op: 'insert',
+          path: ['scenes', 0, 'elements'],
+          value: { use: 'bucket', id: 'b1', props: bucket.props, enter: bucket.enter },
+        },
+      ],
+    });
+    expect(ins.isError).toBeFalsy();
+    expect((await tool('suggest_scene', { episode: 'ep2', line: 'l99' })).isError).toBe(true);
+
+    // No recording yet → a clear error; with one → automatic cues, flagged auto.
+    expect((await tool('align_cues', { episode: 'ep2', engine: 'dsp' })).isError).toBe(true);
+    const dir = path.join(root, 'episodes/ep2');
+    copyFileSync(path.join(ROOT, 'fixtures/align/en-david-fast/voice.wav'), path.join(dir, 'voice.wav'));
+    const aligned = await tool('align_cues', { episode: 'ep2', engine: 'dsp' });
+    expect(aligned.isError).toBeFalsy();
+    const truth = JSON.parse(
+      readFileSync(path.join(ROOT, 'fixtures/align/en-david-fast/truth.json'), 'utf8'),
+    ) as {
+      lines: Record<string, number>;
+    };
+    const cues = JSON.parse(readFileSync(path.join(dir, 'cues.json'), 'utf8')) as {
+      auto: boolean;
+      cues: Record<string, number>;
+    };
+    expect(cues.auto).toBe(true);
+    for (const [id, t] of Object.entries(truth.lines)) expect(Math.abs(cues.cues[id] - t)).toBeLessThan(0.1);
   });
 });

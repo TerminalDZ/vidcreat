@@ -36,6 +36,7 @@ import {
   writeCues,
   type EpisodePaths,
 } from '@reelforge/core';
+import { alignEpisode, AssistError, assistStatus, type AlignEngine } from '@reelforge/assist';
 import { ffmpegBin, measureTimeline, runDoctor, snapFrames } from '@reelforge/renderer';
 import { WebSocketServer, type WebSocket } from 'ws';
 import { listen, readBody, safeJoin, sendFile } from './http.js';
@@ -78,7 +79,7 @@ export interface EpisodeSummary {
   lines: number;
   scenes: number;
   duration: number;
-  cues: { marked: number; draft: boolean } | null;
+  cues: { marked: number; draft: boolean; auto: boolean } | null;
   voice: { file: string; duration: number } | null;
   issues: { errors: number; warnings: number; first?: string };
   outputs: OutputFile[];
@@ -157,6 +158,7 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
   const log = opts.log ?? (() => undefined);
   const studios = new Map<string, Studio>();
   const summaryCache = new Map<string, { stamp: string; summary: EpisodeSummary }>();
+  let aligning = false;
   const runner = new RenderRunner({ decode: opts.decode, log });
   runner.subscribe((j) => {
     if (j.status !== 'running') summaryCache.delete(j.key);
@@ -226,7 +228,13 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
       lines: r.script.length,
       scenes: spec?.scenes.length ?? 0,
       duration: vd ?? r.timeline?.duration ?? 0,
-      cues: cuesFile ? { marked: Object.keys(cuesFile.cues).length, draft: Boolean(cuesFile.draft) } : null,
+      cues: cuesFile
+        ? {
+            marked: Object.keys(cuesFile.cues).length,
+            draft: Boolean(cuesFile.draft),
+            auto: Boolean(cuesFile.auto),
+          }
+        : null,
       voice: vd !== undefined ? { file: path.basename(voiceFile), duration: vd } : null,
       issues: {
         errors: errors.length,
@@ -484,7 +492,7 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
       const q = (k: string) => url.searchParams.get(k) ?? '';
       if (req.method === 'GET' || req.method === 'HEAD') {
         if (p === '/api/project') return json(res, 200, project());
-        if (p === '/api/doctor') return json(res, 200, { checks: await runDoctor() });
+        if (p === '/api/doctor') return json(res, 200, { checks: await runDoctor(), assist: assistStatus() });
         if (p === '/api/thumb') {
           const f = await thumbnail(q('ep'));
           if (!f) throw new HttpError(404, 'No thumbnail');
@@ -548,6 +556,34 @@ export async function startHub(opts: HubOptions): Promise<Hub> {
           writeCues(ep.cues, d);
           summaryCache.delete(String(body.ep));
           return json(res, 200, { ok: true });
+        }
+        case '/api/cues/auto': {
+          const ep = resolveKey(body.ep);
+          if (aligning) throw new HttpError(409, 'Already aligning another episode; wait for it to finish');
+          aligning = true;
+          try {
+            const engine = ['auto', 'dsp', 'whisper'].includes(String(body.engine))
+              ? (body.engine as AlignEngine)
+              : 'auto';
+            const r = await alignEpisode(ep, { engine, force: body.force === true, decode: opts.decode });
+            summaryCache.delete(String(body.ep));
+            broadcast({ type: 'project' });
+            return json(res, 200, {
+              ok: true,
+              engine: r.engine,
+              vad: r.vad,
+              matched: r.matched,
+              confidence: r.confidence,
+              ms: r.ms,
+              note: r.note,
+            });
+          } catch (e) {
+            if (e instanceof AssistError)
+              throw new HttpError(/by hand/.test(e.message) ? 409 : 422, e.message);
+            throw e;
+          } finally {
+            aligning = false;
+          }
         }
         case '/api/reveal': {
           const ep = resolveKey(body.ep);

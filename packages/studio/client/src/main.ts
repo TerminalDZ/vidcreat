@@ -27,7 +27,15 @@ import {
 } from './canvas.js';
 import { Clock } from './clock.js';
 import { handleKey, openContextMenu, openHelp, openPalette, register } from './commands.js';
-import { cueKey, initCuePanel, initReview, renderIssues, renderLines, syncCueModel } from './cuepanel.js';
+import {
+  autoMark,
+  cueKey,
+  initCuePanel,
+  initReview,
+  renderIssues,
+  renderLines,
+  syncCueModel,
+} from './cuepanel.js';
 import { icon } from './icons.js';
 import { initInspector, renderInspector } from './inspector.js';
 import { initPanels, renderPanels, setTab } from './panels.js';
@@ -350,6 +358,9 @@ function openRenderDialog(): void {
   const silent = $<HTMLInputElement>('#rSilent');
   silent.checked = !app.state?.voice;
   $('#rVoiceNote').hidden = Boolean(app.state?.voice);
+  const denoise = $<HTMLInputElement>('#rDenoise');
+  denoise.checked = Boolean((app.spec.audio as { denoise?: boolean } | undefined)?.denoise);
+  denoise.disabled = !app.state?.voice;
   const errors = app.issues.filter((i) => i.level === 'error');
   $('#rErrors').hidden = !errors.length;
   $('#rErrors').textContent = errors.length
@@ -368,6 +379,7 @@ $('#renderForm').addEventListener('submit', (e) => {
     sfx: $<HTMLInputElement>('#rSfx').checked,
     silent: $<HTMLInputElement>('#rSilent').checked,
     fast: $<HTMLInputElement>('#rFast').checked,
+    denoise: $<HTMLInputElement>('#rDenoise').checked,
   };
   dlg.close();
   app.render(options).then(
@@ -761,6 +773,13 @@ register(
     keys: ['T'],
     modes: ['edit', 'dev'],
     run: () => toggleOverlay('time'),
+  },
+  {
+    id: 'auto-cues',
+    title: 'Auto-mark cues from the voice recording',
+    group: 'Cues',
+    icon: 'wave',
+    run: () => (setMode('cue'), void autoMark()),
   },
   {
     id: 'snap',

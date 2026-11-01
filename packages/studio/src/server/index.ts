@@ -21,12 +21,22 @@ import {
   listResources,
   readCues,
   sha1,
+  suggestForLine,
   TRANSITIONS,
   type CompileResult,
   type EpisodePaths,
   type Issue,
   type Timeline,
 } from '@reelforge/core';
+import {
+  alignEpisode,
+  AssistError,
+  assistStatus,
+  hasManualCues,
+  llmStatus,
+  suggestWithLlm,
+  type AlignEngine,
+} from '@reelforge/assist';
 import { SOUNDS, type PcmAudio } from '@reelforge/audio';
 import { RUNTIME_DIR } from '@reelforge/runtime';
 import { WebSocketServer, type WebSocket } from 'ws';
@@ -96,6 +106,7 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
   let measureSeq = 0;
 
   const history = new History();
+  let aligning = false;
   const renderer = opts.renderer ?? new RenderRunner({ decode: opts.decode, log });
   const renderKey = opts.renderKey ?? paths.id;
   let lastSpec: Record<string, unknown> | null = null;
@@ -239,6 +250,25 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
         return;
       }
       if (p === '/api/meta') return json(res, 200, meta());
+      if (p === '/api/suggest') {
+        const id = url.searchParams.get('line') ?? '';
+        const i = state.script.findIndex((l) => l.id === id);
+        if (i < 0) return json(res, 422, { error: `Unknown line "${id}"` });
+        return json(res, 200, {
+          suggestions: suggestForLine(state.script[i], { first: i === 0 }),
+          llm: await llmStatus(),
+        });
+      }
+      if (p === '/api/assist') {
+        const s = assistStatus();
+        return json(res, 200, {
+          whisper: s.installed && s.whisper.base,
+          vad: s.installed && s.vad,
+          manualCues: hasManualCues(paths.cues),
+          voice: Boolean(result.voice),
+          aligning,
+        });
+      }
       if (p.startsWith('/episode/out/'))
         return sendFile(req, res, safeJoin(paths.out, p.slice('/episode/out/'.length)));
       if (p === '/api/state') {
@@ -342,10 +372,68 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
         case '/api/render/cancel':
           if (renderer.job?.key === renderKey) renderer.cancel();
           return json(res, 200, { ok: true });
+        case '/api/suggest/llm': {
+          const id = String(body.line ?? '');
+          const i = state.script.findIndex((l) => l.id === id);
+          if (i < 0) return json(res, 422, { error: `Unknown line "${id}"` });
+          const st = await llmStatus();
+          if (!st.available)
+            return json(res, 409, {
+              error: st.running
+                ? `The local model ${st.model} is not pulled: run \`ollama pull ${st.model}\``
+                : 'Ollama is not running (optional: install it from ollama.com, then `ollama pull qwen2.5:1.5b`)',
+            });
+          const scene = result.timeline?.scenes.find(
+            (s) =>
+              s.start <= (result.timeline?.cues[id] ?? 0) + 1e-3 && s.end > (result.timeline?.cues[id] ?? 0),
+          );
+          const r = await suggestWithLlm(state.script[i], {
+            lang: result.spec?.meta.lang,
+            context: [state.script[i - 1]?.text, state.script[i + 1]?.text].filter((x): x is string =>
+              Boolean(x),
+            ),
+            elementIds: scene?.elements.map((e) => e.id) ?? [],
+          });
+          return json(res, 200, r);
+        }
+        case '/api/cues/auto': {
+          if (aligning) return json(res, 409, { error: 'Already aligning; wait for it to finish' });
+          aligning = true;
+          try {
+            const engine = ['auto', 'dsp', 'whisper'].includes(String(body.engine))
+              ? (body.engine as AlignEngine)
+              : 'auto';
+            const r = await alignEpisode(paths, {
+              engine,
+              force: body.force === true,
+              words: body.words !== false,
+              decode: opts.decode,
+              writer: (file, text) => history.write(file, text, 'Auto cues'),
+            });
+            refresh();
+            return json(res, 200, {
+              ok: true,
+              engine: r.engine,
+              vad: r.vad,
+              matched: r.matched,
+              confidence: r.confidence,
+              pauses: r.pauses,
+              ms: r.ms,
+              note: r.note,
+            });
+          } finally {
+            aligning = false;
+          }
+        }
         default:
           return json(res, 404, { error: 'Unknown endpoint' });
       }
     } catch (e) {
+      if (e instanceof AssistError)
+        return json(res, /by hand/.test(e.message) ? 409 : 422, {
+          error: e.message,
+          manual: /by hand/.test(e.message),
+        });
       if (e instanceof EditError) return json(res, e.status, { error: e.message });
       if (e instanceof RenderBusyError) return json(res, 409, { error: e.message });
       throw e;
@@ -404,7 +492,9 @@ export async function startStudio(opts: StudioOptions): Promise<Studio> {
           }
         : parsed.data.audio,
       updated: new Date().toISOString(),
+      // Saved from the cue marker: the person has listened, so these are no longer estimates.
       draft: undefined,
+      auto: undefined,
     };
     history.write(paths.cues, `${JSON.stringify(data, null, 2)}\n`, 'Edit cues');
     compile();

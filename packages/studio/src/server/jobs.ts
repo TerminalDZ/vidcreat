@@ -24,6 +24,8 @@ export interface RenderOptions {
   sfx?: boolean;
   silent?: boolean;
   fast?: boolean;
+  /** Clean background noise from the voice (undefined: episode's audio.denoise). */
+  denoise?: boolean;
 }
 
 export class RenderBusyError extends Error {}
@@ -70,6 +72,7 @@ export class RenderRunner {
       sfx: o.sfx !== false,
       silent: Boolean(o.silent),
       fast: Boolean(o.fast),
+      denoise: typeof o.denoise === 'boolean' ? o.denoise : undefined,
       signal: abort.signal,
       compile: { decode: this.opts.decode },
       onLog: this.opts.log,

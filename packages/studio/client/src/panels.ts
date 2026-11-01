@@ -2,13 +2,16 @@
 import {
   addScene,
   deleteLine,
+  effectiveCues,
   insertElement,
   insertLine,
+  insertSuggestion,
   moveElementTo,
   moveLine,
   renameElement,
+  type SuggestedElement,
 } from './actions.js';
-import { app, esc, fmt, h } from './app.js';
+import { app, esc, fmt, h, toast } from './app.js';
 import { COMPONENT_ICON, icon } from './icons.js';
 
 interface Ctx {
@@ -183,6 +186,103 @@ const GROUPS: [string, string[]][] = [
   ['Effects & endings', ['particles', 'trap', 'cta']],
 ];
 
+// ------------------------------------------------------------------ smart insert
+interface Sug extends SuggestedElement {
+  reason: string;
+  word: string;
+}
+interface SugResult {
+  suggestions: Sug[];
+  llm?: { available: boolean; running: boolean; model: string };
+}
+/** Suggestions per line (keyed by id and text, so editing the line refreshes them). */
+const sugCache = new Map<string, Promise<SugResult>>();
+const llmCache = new Map<string, Sug[]>();
+let llmBusy = '';
+
+/** The script line playing at the playhead. */
+function lineAtPlayhead(): { id: string; text: string; start: number } | null {
+  const cues = effectiveCues();
+  const t = ctx.time() + 0.05;
+  let best: { id: string; text: string; start: number } | null = null;
+  for (const l of app.state?.script ?? []) {
+    const s = cues[l.id];
+    if (s !== undefined && s <= t && (!best || s >= best.start)) best = { ...l, start: s };
+  }
+  return (
+    best ??
+    (app.state?.script[0] ? { ...app.state.script[0], start: cues[app.state.script[0].id] ?? 0 } : null)
+  );
+}
+
+function suggestBlock(): HTMLElement {
+  const box = h('div', { class: 'sug', id: 'sugBlock' });
+  const line = lineAtPlayhead();
+  if (!line) return box;
+  const key = `${line.id}\u0000${line.text}`;
+  if (!sugCache.has(key))
+    sugCache.set(
+      key,
+      fetch(`/api/suggest?line=${encodeURIComponent(line.id)}`).then((r) => r.json() as Promise<SugResult>),
+    );
+  box.append(
+    h('div', { class: 'lib-group' }, `Suggested for ${line.id}`),
+    h('div', { class: 'sug-line', dir: 'auto', text: line.text }),
+  );
+  const list = h('div', { class: 'sug-list' });
+  box.append(list);
+  const fill = (items: Sug[], source: string) => {
+    for (const s of items) {
+      const b = h('button', {
+        class: 'sug-item',
+        title: `${s.reason}\nEnters on “${s.word}” (${s.enter.at})`,
+      });
+      b.innerHTML = `${icon(COMPONENT_ICON[s.use] ?? 'box', 16)}<b>${esc(s.use)}</b><span class="dim">on “${esc(s.word)}”</span>${source ? `<em>${esc(source)}</em>` : ''}`;
+      b.addEventListener('click', () => void insertSuggestion(s, line.start));
+      list.append(b);
+    }
+  };
+  void sugCache.get(key)!.then((r) => {
+    if (!box.isConnected) return;
+    fill(r.suggestions ?? [], '');
+    const ai = llmCache.get(key);
+    if (ai) fill(ai, 'AI');
+    if (r.llm?.available) {
+      const ask = h('button', {
+        class: 'btn sm ghost',
+        title: `Ask the local model (${r.llm.model}, Ollama). Runs on your computer; can take up to a minute on a laptop CPU.`,
+      });
+      ask.innerHTML = `${icon('sparkles', 14)}<span>${llmBusy === key ? 'Thinking… (local AI)' : ai ? 'Ask local AI again' : 'Ask local AI'}</span>`;
+      ask.toggleAttribute('disabled', Boolean(llmBusy));
+      ask.addEventListener('click', async () => {
+        llmBusy = key;
+        renderPanels(true);
+        try {
+          const res = await fetch('/api/suggest/llm', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ line: line.id }),
+          });
+          const j = (await res.json()) as { suggestions?: Sug[]; error?: string; ms?: number };
+          if (!res.ok) throw new Error(j.error ?? res.statusText);
+          llmCache.set(key, j.suggestions ?? []);
+          toast(
+            `Local AI: ${(j.suggestions ?? []).length} idea(s) in ${((j.ms ?? 0) / 1000).toFixed(0)} s`,
+            'ok',
+          );
+        } catch (e) {
+          toast(`Local AI: ${(e as Error).message}`, 'err');
+        } finally {
+          llmBusy = '';
+          renderPanels(true);
+        }
+      });
+      box.append(ask);
+    }
+  });
+  return box;
+}
+
 function renderInsert(body: HTMLElement): void {
   const comps = app.meta?.components ?? [];
   const search = h('input', {
@@ -208,6 +308,7 @@ function renderInsert(body: HTMLElement): void {
   });
   const q = query.trim().toLowerCase();
   const wrap = h('div', { class: 'lib' });
+  if (!q) wrap.append(suggestBlock());
   for (const [group, names] of GROUPS) {
     const items = names
       .map((n) => comps.find((c) => c.name === n))

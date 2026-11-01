@@ -11,6 +11,9 @@ importers:
       '@eslint/js':
         specifier: 9.39.1
         version: 9.39.1
+      '@reelforge/assist':
+        specifier: workspace:*
+        version: link:packages/assist
       '@reelforge/audio':
         specifier: workspace:*
         version: link:packages/audio
@@ -75,10 +78,22 @@ importers:
         specifier: 8.21.3
         version: 8.21.3
 
+  packages/assist:
+    dependencies:
+      '@reelforge/audio':
+        specifier: workspace:*
+        version: link:../audio
+      '@reelforge/core':
+        specifier: workspace:*
+        version: link:../core
+
   packages/audio: {}
 
   packages/cli:
     dependencies:
+      '@reelforge/assist':
+        specifier: workspace:*
+        version: link:../assist
       '@reelforge/audio':
         specifier: workspace:*
         version: link:../audio
@@ -148,6 +163,9 @@ importers:
 
   packages/studio:
     dependencies:
+      '@reelforge/assist':
+        specifier: workspace:*
+        version: link:../assist
       '@reelforge/audio':
         specifier: workspace:*
         version: link:../audio

@@ -18,6 +18,7 @@
     "build": "tsc -b && vite build"
   },
   "dependencies": {
+    "@reelforge/assist": "workspace:*",
     "@reelforge/audio": "workspace:*",
     "@reelforge/core": "workspace:*",
     "@reelforge/renderer": "workspace:*",

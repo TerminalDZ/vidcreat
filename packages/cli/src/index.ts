@@ -29,6 +29,14 @@ import {
   snapFrames,
   type Progress,
 } from '@reelforge/renderer';
+import {
+  alignEpisode,
+  assistStatus,
+  setupAssist,
+  WHISPER_MODELS,
+  type AlignEngine,
+  type WhisperSize,
+} from '@reelforge/assist';
 import { startHub, startStudio, type StudioMode } from '@reelforge/studio';
 import { ffmpegDecode } from './decode.js';
 import { openBrowser } from './open.js';
@@ -155,6 +163,75 @@ async function cmdCue(
   await serve(p, 'cue', o, g);
 }
 
+interface AlignFlags {
+  engine?: AlignEngine;
+  model?: WhisperSize;
+  vad?: boolean;
+  words?: boolean;
+  force?: boolean;
+  dryRun?: boolean;
+  setup?: boolean;
+  status?: boolean;
+}
+
+async function cmdAlign(id: string | undefined, o: AlignFlags, g: Globals) {
+  if (o.status) {
+    const s = assistStatus();
+    return out(g, s, () => {
+      const yes = (b: boolean) => (b ? c.green('installed') : c.dim('not installed'));
+      console.log(`speech runtime  ${yes(s.installed)} (transformers.js ${s.version})`);
+      for (const k of Object.keys(WHISPER_MODELS) as WhisperSize[])
+        console.log(`whisper ${k.padEnd(7)} ${yes(s.whisper[k])}`);
+      console.log(`silero VAD      ${yes(s.vad)}`);
+      console.log(c.dim(`${s.dir} · ${s.sizeMb} MB`));
+    });
+  }
+  if (o.setup) {
+    const t0 = Date.now();
+    const s = await setupAssist({
+      models: [o.model ?? 'base'],
+      onLog: (m) => (g.json ? undefined : console.error(c.dim(m))),
+    });
+    out(g, s, () =>
+      console.log(
+        `${c.green('✓')} speech alignment ready (${s.sizeMb} MB in ${s.dir}, ${fmtDur((Date.now() - t0) / 1000)})`,
+      ),
+    );
+    if (!id) return;
+  }
+  if (!id) return usage('align needs an episode id (or --setup / --status)');
+  const p = episode(id, g);
+  const r = await alignEpisode(p, {
+    engine: o.engine,
+    model: o.model,
+    vad: o.vad === false ? false : undefined,
+    words: o.words,
+    force: o.force,
+    write: !o.dryRun,
+    decode: ffmpegDecode,
+    onProgress: (s) => g.verbose && !g.json && console.error(c.dim(`${s}…`)),
+  });
+  out(g, r, () => {
+    const how = `${r.engine}${r.engine === 'whisper' ? ` ${o.model ?? 'base'}` : ''}${r.vad ? ' + VAD' : ''}`;
+    const matched = r.matched !== undefined ? `, ${Math.round(r.matched * 100)}% of words matched` : '';
+    const lines = Object.keys(r.cues.cues).length;
+    console.log(
+      `${c.green('✓')} aligned ${lines} line(s) with ${how}${matched} in ${fmtDur(r.ms.total / 1000)}${r.written ? ` → ${path.relative(process.cwd(), r.file)}` : ' (dry run)'}`,
+    );
+    if (r.note) console.log(c.yellow(`  ${r.note}`));
+    const shaky = Object.entries(r.confidence).filter(([, v]) => v < 0.5);
+    if (shaky.length)
+      console.log(
+        `  ${c.yellow('check by ear:')} ${shaky.map(([k, v]) => `${k} (${Math.round(v * 100)}%)`).join(', ')}`,
+      );
+    for (const ps of r.pauses)
+      console.log(
+        c.dim(`  ${ps.len.toFixed(1)} s of silence at ${ps.at}s${ps.before ? ` before ${ps.before}` : ''}`),
+      );
+    console.log(c.dim(`next: listen through in \`reelforge cue ${id}\` and fix any line with Space`));
+  });
+}
+
 async function serve(
   p: EpisodePaths,
   mode: StudioMode,
@@ -272,6 +349,7 @@ interface RenderFlags {
   silent?: boolean;
   share?: boolean;
   measure?: boolean;
+  denoise?: boolean;
 }
 
 async function cmdRender(id: string, o: RenderFlags, g: Globals) {
@@ -326,6 +404,7 @@ async function cmdRender(id: string, o: RenderFlags, g: Globals) {
       silent: o.silent,
       skipShare: o.share === false,
       measure: o.measure,
+      denoise: o.denoise,
       signal: ac.signal,
       onProgress,
       onLog: (m) => {
@@ -587,6 +666,28 @@ export function buildProgram(): Command {
     .action((id, o, cmd) => cmdCue(id, o, globals(cmd)));
 
   program
+    .command('align')
+    .description('mark cues automatically from the voice recording (lines and words; writes cues.json)')
+    .argument('[id]', 'episode id or path')
+    .addOption(
+      new Option('--engine <name>', 'auto: whisper when installed, else dsp').choices([
+        'auto',
+        'dsp',
+        'whisper',
+      ]),
+    )
+    .addOption(
+      new Option('--model <size>', 'whisper model size (default base)').choices(['tiny', 'base', 'small']),
+    )
+    .option('--no-vad', 'detect speech by energy only (skip Silero VAD)')
+    .option('--no-words', 'only line cues')
+    .option('--force', 'replace cues you marked by hand')
+    .option('--dry-run', 'print the result without writing cues.json')
+    .option('--setup', 'install the optional speech models (one time, ~180 MB in the user cache)')
+    .option('--status', 'show which speech models are installed')
+    .action((id, o, cmd) => cmdAlign(id, o, globals(cmd)));
+
+  program
     .command('edit')
     .description('open the visual editor: canvas, layers, inspector and timeline (writes episode.yaml)')
     .argument('<id>', 'episode id or path')
@@ -638,6 +739,8 @@ export function buildProgram(): Command {
     .option('--silent', 'allow rendering without a voice recording')
     .option('--keep-tmp', 'keep out/.tmp/<run-id>/ on failure')
     .option('--no-measure', 'skip the headless V-9/V-10 checks')
+    .option('--denoise', 'remove background noise from the voice (default: audio.denoise)')
+    .option('--no-denoise', 'keep the voice as recorded, even when audio.denoise is true')
     .action((id, o, cmd) =>
       o.all
         ? cmdRenderAll(id, o, globals(cmd))
