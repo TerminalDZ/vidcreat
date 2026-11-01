@@ -68,6 +68,8 @@ const audio = z
     sfx: z.enum(['auto', 'none', 'manual']).default('auto'),
     sfx_gain_db: z.number().min(-60).max(12).default(-16),
     duck: z.boolean().default(true),
+    /** Remove background noise from the voice (RNNoise via ffmpeg arnndn) before mastering. */
+    denoise: z.boolean().default(false),
     extra: z
       .array(z.object({ at: time(), sound: sound(), gain_db: z.number().optional() }).strict())
       .default([]),

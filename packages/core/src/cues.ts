@@ -14,6 +14,8 @@ export const cuesSchema = z
     words: z.record(z.array(z.number().nonnegative())).default({}),
     updated: z.string().optional(),
     draft: z.boolean().optional(),
+    /** Aligned automatically from the recording; worth a listen before publishing. */
+    auto: z.boolean().optional(),
   })
   .strict();
 

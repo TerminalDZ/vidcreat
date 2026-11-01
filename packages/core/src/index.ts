@@ -8,6 +8,8 @@ export * from './theme.js';
 export * from './preset.js';
 export * from './project.js';
 export * from './cues.js';
+export * from './autocue.js';
+export * from './suggest.js';
 export * from './yamlsrc.js';
 export * from './lint.js';
 export * from './compile.js';

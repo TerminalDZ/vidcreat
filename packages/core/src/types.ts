@@ -231,7 +231,7 @@ export interface Timeline {
   flashes: Flash[];
   shakes: CameraShake[];
   sfx: TimelineSfx[];
-  audio: { sfxGainDb: number; duck: boolean; envelope: number[] };
+  audio: { sfxGainDb: number; duck: boolean; denoise: boolean; envelope: number[] };
   script: ScriptLineInfo[];
   cues: Record<string, number>;
   /** Base URL (relative to the runtime page) for episode assets. */

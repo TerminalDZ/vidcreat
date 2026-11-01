@@ -173,6 +173,22 @@ scenes:
     }
   });
 
+  it('V-14 flags lines too fast for captions and a late hook, but not draft cues', () => {
+    const dir = path.join(LINT, 'v14-pacing');
+    const r = compileEpisode(episodePaths(dir, ROOT), { voice: null });
+    const v14 = r.issues.filter((i) => i.rule === 'V-14');
+    expect(v14.map((i) => i.message)).toEqual([
+      expect.stringMatching(/hook \(l1\) starts at 3\.6s/),
+      expect.stringMatching(/Line l2 is spoken at 6\.8 words\/s/),
+    ]);
+    expect(v14.every((i) => i.level === 'warn' && i.line)).toBe(true);
+    const cues = JSON.parse(readFileSync(path.join(dir, 'cues.json'), 'utf8')) as CuesFile;
+    const draft = compileEpisode(episodePaths(dir, ROOT), { voice: null, cues: { ...cues, draft: true } });
+    expect(draft.issues.some((i) => i.rule === 'V-14')).toBe(false);
+    const auto = compileEpisode(episodePaths(dir, ROOT), { voice: null, cues: { ...cues, auto: true } });
+    expect(auto.issues.some((i) => i.rule === 'V-3' && /aligned automatically/.test(i.message))).toBe(true);
+  });
+
   it('resolves scene references, layout helpers and arrow sides', () => {
     const r = compileDir(
       tmpEpisode(

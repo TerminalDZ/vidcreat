@@ -4,9 +4,11 @@
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import {
+  analyzeSpeech,
   decodeWav,
   frameEnvelope,
   hashString,
+  pausesIn,
   toMono,
   type PcmAudio,
   type SoundName,
@@ -20,7 +22,7 @@ import type { EpisodePaths } from './project.js';
 import { episodeSchema, type ElementSpec, type EpisodeSpec, type SceneSpec } from './schema/episode.js';
 import { hasArabic, splitWords } from './text.js';
 import { loadTheme, resolveColor, resolvedTheme } from './theme.js';
-import { evalTime, parseTime, TimeError, type TimeContext } from './time.js';
+import { evalTime, parseTime, TimeError, type LineTiming, type TimeContext } from './time.js';
 import type {
   CameraShake,
   EnterAnim,
@@ -89,6 +91,74 @@ export function draftCues(script: { id: string; text: string }[], audioFile = 'v
     t += letters / DRAFT_LPS + DRAFT_GAP;
   }
   return { version: 1, audio: { file: audioFile, duration: round3(t + 0.6) }, cues, words: {}, draft: true };
+}
+
+/** Captions stop being readable above about this many spoken words per second. */
+export const PACE_MAX_WPS = 3.5;
+/** The hook should start within this many seconds, or viewers swipe away. */
+export const HOOK_MAX_START = 3;
+
+/** Silences longer than this inside the recording are worth trimming. */
+export const LONG_PAUSE = 1.5;
+const pauseCache = new Map<string, { at: number; len: number }[]>();
+
+/** Long silences between spoken words (energy analysis, ~10 ms per minute, cached per recording). */
+export function longSilences(voice: VoiceInfo): { at: number; len: number }[] {
+  const hit = pauseCache.get(voice.sha1);
+  if (hit) return hit;
+  const map = analyzeSpeech(voice.mono, voice.sampleRate);
+  const out = pausesIn(map, map.first, map.last, Math.round(LONG_PAUSE / map.hop)).map((p) => ({
+    at: round3(p.from * map.hop),
+    len: round3((p.to - p.from) * map.hop),
+  }));
+  if (pauseCache.size > 16) pauseCache.clear();
+  pauseCache.set(voice.sha1, out);
+  return out;
+}
+
+/**
+ * V-14 pacing: words per second of each line (from its cue to the next), a late hook, and long
+ * silences inside the recording.
+ */
+function lintPacing(
+  c: Compiler,
+  script: { id: string; text: string }[],
+  timings: Map<string, LineTiming>,
+  voice: VoiceInfo | null,
+): void {
+  const lines = script.map((s) => timings.get(s.id)).filter((l): l is LineTiming => Boolean(l));
+  lines.forEach((l, i) => {
+    const words = splitWords(script[i].text).length;
+    const span = l.next - l.start;
+    if (words < 3 || span <= 0) return;
+    const wps = words / span;
+    if (wps > PACE_MAX_WPS)
+      c.issue(
+        'V-14',
+        'warn',
+        `Line ${l.id} is spoken at ${wps.toFixed(1)} words/s: too fast to read in captions (aim for ≤ ${PACE_MAX_WPS})`,
+        ['script', i],
+        { hint: 'Split the line, cut words, or leave a short pause before the next line', time: l.start },
+      );
+  });
+  if (voice)
+    for (const p of longSilences(voice))
+      c.issues.push({
+        rule: 'V-14',
+        level: 'info',
+        message: `${p.len.toFixed(1)} s of silence at ${p.at}s in the recording`,
+        hint: 'Viewers swipe during long pauses: trim it in your audio editor, or fill it with something on screen',
+        file: c.src.file,
+        time: p.at,
+      });
+  if (lines.length && lines[0].start > HOOK_MAX_START)
+    c.issue(
+      'V-14',
+      'warn',
+      `The hook (${lines[0].id}) starts at ${round3(lines[0].start)}s; start speaking within ${HOOK_MAX_START} s`,
+      ['script', 0],
+      { hint: 'Trim the silence at the start of the recording', time: lines[0].start },
+    );
 }
 
 export function loadVoice(file: string, decode?: (file: string) => PcmAudio): VoiceInfo {
@@ -404,6 +474,13 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
       message: 'cues.json holds draft (estimated) cues; mark real cues before publishing',
       file: paths.cues,
     });
+  } else if (cues.auto) {
+    c.issues.push({
+      rule: 'V-3',
+      level: 'info',
+      message: 'cues.json was aligned automatically from the recording; listen through once in Cues mode',
+      file: paths.cues,
+    });
   }
   const cueMap: Record<string, number> = {};
   let prevCue = -Infinity;
@@ -491,6 +568,7 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
 
   // ---- time context
   const lines = buildLineTimings(script, cueMap, duration, cues.words);
+  if (!cues.draft) lintPacing(c, script, lines, voice);
   const sceneIds = spec.scenes.map((s) => s.id);
   c.ctx = {
     lines,
@@ -894,7 +972,12 @@ export function compileEpisode(paths: EpisodePaths, opts: CompileOptions = {}): 
     flashes: c.flashes.sort((a, b) => a.t - b.t),
     shakes: c.shakes.sort((a, b) => a.t - b.t),
     sfx: deduped,
-    audio: { sfxGainDb: spec.audio.sfx_gain_db, duck: spec.audio.duck, envelope },
+    audio: {
+      sfxGainDb: spec.audio.sfx_gain_db,
+      duck: spec.audio.duck,
+      denoise: spec.audio.denoise,
+      envelope,
+    },
     script: script.map((l) => {
       const lt = lines.get(l.id)!;
       return {
