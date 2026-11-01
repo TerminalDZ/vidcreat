@@ -15,13 +15,32 @@ export function shareVideoKbps(shareMb: number, duration: number, audioKbps = AU
   return Math.floor((shareMb * 8192 * 0.97) / duration) - audioKbps;
 }
 
+/**
+ * Limited-range BT.709 yuv420p. JPEG frames decode as full range, and FFmpeg ≥ 7 carries that range
+ * through `-pix_fmt yuv420p`, so the H.264 stream ends up as yuvj420p (rejected by some platforms).
+ * The scale filter does the actual conversion; the flags tag the stream to match.
+ */
+export const YUV420_TV = [
+  '-vf',
+  'scale=out_range=tv:out_color_matrix=bt709:flags=accurate_rnd+full_chroma_int,format=yuv420p',
+  '-pix_fmt',
+  'yuv420p',
+  '-color_range',
+  'tv',
+  '-colorspace',
+  'bt709',
+  '-color_primaries',
+  'bt709',
+  '-color_trc',
+  'bt709',
+];
+
 const H264 = [
   '-c:v',
   'libx264',
   '-profile:v',
   'high',
-  '-pix_fmt',
-  'yuv420p',
+  ...YUV420_TV,
   '-fps_mode',
   'cfr',
   '-g',

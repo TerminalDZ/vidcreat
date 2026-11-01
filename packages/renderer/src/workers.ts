@@ -3,6 +3,7 @@ import { rmSync } from 'node:fs';
 import type { Timeline } from '@reelforge/core';
 import type { Browser } from 'playwright';
 import { createCapturer } from './capture.js';
+import { YUV420_TV } from './encode.js';
 import { spawnPipe } from './ffmpeg.js';
 import { launchBrowser, openRuntime } from './host.js';
 
@@ -61,8 +62,7 @@ export async function renderRange(range: FrameRange, o: WorkerOptions): Promise<
     'veryfast',
     '-crf',
     '14',
-    '-pix_fmt',
-    'yuv420p',
+    ...YUV420_TV,
     '-r',
     String(o.tl.fps),
     range.file,
