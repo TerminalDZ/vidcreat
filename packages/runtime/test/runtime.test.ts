@@ -13,31 +13,41 @@ import { Engine } from '../src/engine.js';
 import { resolveState } from '../src/scene.js';
 import { COMPONENT_NAMES } from '@reelforge/core';
 
-/** DOM snapshot independent of the order in which style properties/classes were first written. */
+/**
+ * DOM snapshot independent of the order in which style properties/classes were first written.
+ * Walks the live tree instead of cloning it (a clone of the whole gallery per sample exhausts the
+ * heap on CI runners). Hidden subtrees do not contribute pixels, so their content is left out.
+ */
 function canonical(root: HTMLElement): string {
-  const c = root.cloneNode(true) as HTMLElement;
-  // Hidden subtrees do not contribute pixels; their stale styles are irrelevant.
-  for (const el of [...c.querySelectorAll<HTMLElement>('*')])
-    if (el.style.display === 'none') {
-      el.replaceChildren();
-      el.setAttribute('style', 'display: none');
+  const out: string[] = [];
+  const sorted = (s: string, sep: RegExp, join: string) =>
+    s
+      .split(sep)
+      .map((x) => x.trim())
+      .filter(Boolean)
+      .sort()
+      .join(join);
+  const walk = (node: Node): void => {
+    if (node.nodeType === 3) {
+      out.push(node.textContent ?? '');
+      return;
     }
-  for (const el of [c, ...c.querySelectorAll<HTMLElement>('*')]) {
-    const st = el.getAttribute('style');
-    if (st)
-      el.setAttribute(
-        'style',
-        st
-          .split(';')
-          .map((x) => x.trim())
-          .filter(Boolean)
-          .sort()
-          .join(';'),
-      );
-    const cl = el.getAttribute('class');
-    if (cl) el.setAttribute('class', cl.split(/\s+/).filter(Boolean).sort().join(' '));
-  }
-  return c.innerHTML;
+    if (node.nodeType !== 1) return;
+    const el = node as HTMLElement;
+    const hidden = el.style?.display === 'none';
+    const attrs = [...el.attributes]
+      .map((a) => {
+        if (a.name === 'style') return `style="${hidden ? 'display: none' : sorted(a.value, /;/, ';')}"`;
+        if (a.name === 'class') return `class="${sorted(a.value, /\s+/, ' ')}"`;
+        return `${a.name}="${a.value}"`;
+      })
+      .sort();
+    out.push(`<${el.tagName.toLowerCase()} ${attrs.join(' ')}>`);
+    if (!hidden) for (const c of el.childNodes) walk(c);
+    out.push(`</${el.tagName.toLowerCase()}>`);
+  };
+  for (const c of root.childNodes) walk(c);
+  return out.join('');
 }
 
 let gallery: Timeline;
