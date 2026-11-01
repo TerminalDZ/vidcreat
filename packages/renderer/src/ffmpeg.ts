@@ -9,14 +9,23 @@ export interface FfmpegInfo {
   version?: string;
   major?: number;
   encoders: { libx264: boolean; aac: boolean; mjpeg: boolean };
-  filters: { loudnorm: boolean; sidechaincompress: boolean; alimiter: boolean };
+  filters: { loudnorm: boolean; sidechaincompress: boolean; alimiter: boolean; arnndn: boolean };
   error?: string;
 }
 
-export function probeFfmpeg(): FfmpegInfo {
+let probed: FfmpegInfo | undefined;
+
+/** Probes the ffmpeg binary once per process (three spawns); `fresh` re-probes. */
+export function probeFfmpeg(fresh = false): FfmpegInfo {
+  if (probed && !fresh) return probed;
+  probed = probeOnce();
+  return probed;
+}
+
+function probeOnce(): FfmpegInfo {
   const empty = {
     encoders: { libx264: false, aac: false, mjpeg: false },
-    filters: { loudnorm: false, sidechaincompress: false, alimiter: false },
+    filters: { loudnorm: false, sidechaincompress: false, alimiter: false, arnndn: false },
   };
   const v = spawnSync(ffmpegBin(), ['-hide_banner', '-version'], { encoding: 'utf8' });
   if (v.error || v.status !== 0) return { ok: false, ...empty, error: v.error?.message ?? v.stderr };
@@ -35,6 +44,7 @@ export function probeFfmpeg(): FfmpegInfo {
       loudnorm: has(fil, 'loudnorm'),
       sidechaincompress: has(fil, 'sidechaincompress'),
       alimiter: has(fil, 'alimiter'),
+      arnndn: has(fil, 'arnndn'),
     },
   };
 }
@@ -61,13 +71,15 @@ export interface RunOptions {
   /** Called with ffmpeg's `out_time` in seconds when `-progress pipe:1` is used. */
   onTime?: (sec: number) => void;
   bin?: string;
+  /** Working directory (lets filter arguments use bare file names, avoiding path escaping). */
+  cwd?: string;
 }
 
 /** Runs ffmpeg (or ffprobe with opts.bin) and resolves with stdout/stderr. */
 export function run(args: string[], opts: RunOptions = {}): Promise<{ stdout: string; stderr: string }> {
   return new Promise((resolve, reject) => {
     const bin = opts.bin ?? ffmpegBin();
-    const p = spawn(bin, args, { stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
+    const p = spawn(bin, args, { stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true, cwd: opts.cwd });
     running.add(p);
     let stdout = '';
     let stderr = '';

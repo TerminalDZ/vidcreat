@@ -1,10 +1,11 @@
 /** End-to-end: render fixtures/mini (SRS §12.1 integration), seeded V-9/V-10 bugs, offline guarantee. */
-import { cpSync, existsSync, mkdtempSync, readFileSync, statSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { decodeWav, encodeWav, mulberry32, toMono } from '@reelforge/audio';
 import { compileEpisode, episodePaths } from '@reelforge/core';
-import { countFrames, ffprobeJson, measureTimeline, renderEpisode } from '@reelforge/renderer';
+import { countFrames, ffprobeJson, measureTimeline, mixAudio, renderEpisode } from '@reelforge/renderer';
 import { ROOT } from './helpers.js';
 
 function copyFixture(rel: string): string {
@@ -72,6 +73,53 @@ describe('render pipeline (fixtures/mini)', () => {
     });
     await expect(p).rejects.toThrow(/aborted/i);
     expect(existsSync(path.join(dir, 'out', 'mini.master.mp4'))).toBe(false);
+  });
+});
+
+describe('voice noise cleanup (audio.denoise, RNNoise via arnndn)', () => {
+  it('lowers the noise floor and keeps the voice level', async () => {
+    const tmp = mkdtempSync(path.join(os.tmpdir(), 'rf-dn-'));
+    // 8 s of a real voice take with hiss and a low rumble added (a phone in a noisy room).
+    const pcm = decodeWav(readFileSync(path.join(ROOT, 'fixtures/align/en-zira/voice.wav')));
+    const m = toMono(pcm).subarray(0, pcm.sampleRate * 8);
+    const rnd = mulberry32(3);
+    let lp = 0;
+    const noisy = m.map((v) => {
+      const w = rnd() * 2 - 1;
+      lp += 0.02 * (w - lp);
+      return v + w * 0.02 + lp * 0.12;
+    });
+    const voice = path.join(tmp, 'voice.wav');
+    writeFileSync(voice, encodeWav({ sampleRate: pcm.sampleRate, channels: [noisy] }));
+    const sfx = path.join(tmp, 'sfx.wav');
+    writeFileSync(sfx, encodeWav({ sampleRate: 48000, channels: [new Float32Array(48000 * 8)] }));
+    const level = async (denoise: boolean) => {
+      const out = path.join(tmp, `mix-${denoise}.wav`);
+      await mixAudio({ voice, sfx, out, duration: 8, sfxGainDb: -16, duck: true, withSfx: false, denoise });
+      const x = toMono(decodeWav(readFileSync(out)));
+      const db = (a: number, b: number) => {
+        let s = 0;
+        for (let i = Math.round(a * 48000); i < Math.round(b * 48000); i++) s += x[i] * x[i];
+        return 10 * Math.log10(s / ((b - a) * 48000) + 1e-12);
+      };
+      return { silence: db(0.05, 0.55), speech: db(0.8, 3) }; // the take starts speaking at 0.7 s
+    };
+    const raw = await level(false);
+    const clean = await level(true);
+    expect(raw.silence - clean.silence).toBeGreaterThan(8);
+    expect(Math.abs(raw.speech - clean.speech)).toBeLessThan(3);
+  });
+
+  it('renders with denoise (partial range)', async () => {
+    const dir = copyFixture('fixtures/mini');
+    const r = await renderEpisode(episodePaths(dir, ROOT), {
+      workers: 1,
+      from: 0,
+      to: 1,
+      measure: false,
+      denoise: true,
+    });
+    expect(r.compliance.part!.problems).toEqual([]);
   });
 });
 

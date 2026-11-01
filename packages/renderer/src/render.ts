@@ -51,6 +51,8 @@ export interface RenderOptions {
   silent?: boolean;
   skipShare?: boolean;
   measure?: boolean;
+  /** Clean background noise from the voice; overrides `audio.denoise` in episode.yaml. */
+  denoise?: boolean;
   signal?: AbortSignal;
   onProgress?: (p: Progress) => void;
   onLog?: (msg: string) => void;
@@ -100,6 +102,12 @@ export async function renderEpisode(paths: EpisodePaths, opts: RenderOptions = {
     throw new RenderError('Validation failed; fix the errors before rendering', issues);
   const tl: Timeline = res.timeline;
   const voiceFile = res.voice?.file;
+  const denoise = Boolean(voiceFile) && (opts.denoise ?? tl.audio.denoise);
+  if (denoise && !ff.filters.arnndn)
+    throw new RenderError(
+      'Noise cleanup needs ffmpeg with the arnndn filter (ffmpeg 4.3+). Update ffmpeg, or render without --denoise.',
+      issues,
+    );
   if (!voiceFile && !opts.silent) {
     throw new RenderError(
       `No voice recording found for ${paths.id}. Record ${res.spec?.audio.voice ?? 'voice.wav'}, or pass --silent.`,
@@ -210,6 +218,7 @@ export async function renderEpisode(paths: EpisodePaths, opts: RenderOptions = {
       duration: tl.duration,
       sfxGainDb: tl.audio.sfxGainDb,
       duck: tl.audio.duck,
+      denoise,
       withSfx: opts.sfx !== false && tl.sfx.length > 0,
       signal,
     });

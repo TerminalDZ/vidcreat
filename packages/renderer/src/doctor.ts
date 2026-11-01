@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { RUNTIME_DIR } from '@reelforge/runtime';
 import { chromium } from 'playwright';
+import { DENOISE_DIR } from './audio.js';
 import { probeFfmpeg } from './ffmpeg.js';
 import { launchBrowser } from './host.js';
 
@@ -29,7 +30,7 @@ export async function runDoctor(): Promise<Check[]> {
     fix: 'Install Node.js 22 LTS from https://nodejs.org',
   });
 
-  const ff = probeFfmpeg();
+  const ff = probeFfmpeg(true);
   const hint = FFMPEG_HINT[process.platform] ?? FFMPEG_HINT.linux;
   checks.push({
     name: 'ffmpeg ≥ 6.0',
@@ -45,12 +46,19 @@ export async function runDoctor(): Promise<Check[]> {
       fix: `Use a full ffmpeg build: ${hint}`,
     });
     checks.push({
-      name: 'ffmpeg filters: loudnorm, sidechaincompress, alimiter',
+      name: 'ffmpeg filters: loudnorm, sidechaincompress, alimiter, arnndn',
       ok: Object.values(ff.filters).every(Boolean),
       detail: JSON.stringify(ff.filters),
       fix: `Use a full ffmpeg build: ${hint}`,
     });
   }
+  const model = path.join(DENOISE_DIR, 'sh.rnnn');
+  checks.push({
+    name: 'Noise cleanup model (RNNoise)',
+    ok: existsSync(model),
+    detail: existsSync(model) ? model : 'missing',
+    fix: 'Reinstall ReelForge (packages/renderer/assets/rnnoise/sh.rnnn)',
+  });
 
   let chromeDetail = '';
   let chromeOk = false;
