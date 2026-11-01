@@ -28,11 +28,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -59,7 +59,7 @@ jobs:
 
       - name: Cache Playwright Chromium
         id: playwright-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ matrix.playwright-cache }}
           key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
@@ -125,7 +125,7 @@ jobs:
 
       - name: Upload renders and golden diffs
         if: always() && runner.os == 'Linux'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: renders-and-diffs
           path: |
@@ -140,7 +140,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Component frames are linked from the site root (/components/…), which is docs/public.
       - name: Check relative links (offline)
