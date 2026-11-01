@@ -72,7 +72,7 @@ packs/<id>/
 | `pnpm docs:dev`   | يشغّل الموقع محلياً مع إعادة التحميل التلقائي                                                           |
 | `pnpm docs:site`  | يبني الموقع العام (بالمسار الأساسي `/vidcreat/`) في `docs/.site` (ويفشل عند وجود روابط معطلة)           |
 | `pnpm docs:local` | يبني الموقع نفسه بالمسار الأساسي `/docs/` في `documentation/site`، وتقدّمه لوحة التحكم على `/docs/`     |
-| `pnpm docs`       | يشغّل `docs:gen` ثم يبني الملف الواحد `documentation/index.html` (بالإنجليزية والعربية) ثم `docs:local` |
+| `pnpm docs:build` | يشغّل `docs:gen` ثم يبني الملف الواحد `documentation/index.html` (بالإنجليزية والعربية) ثم `docs:local` |
 
 توجد الصفحات الإنجليزية في `docs/guide/` و`docs/reference/`، وتقابلها نسخها العربية في `docs/ar/`. لا تعدّل الصفحات
 المولّدة يدوياً أبداً: يشغّل CI الأمر `node scripts/check-docs-fresh.mjs` ويفشل إذا لم تكن محدّثة. وفي الصفحات

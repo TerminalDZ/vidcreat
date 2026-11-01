@@ -169,7 +169,7 @@ too.
 ## Documentation
 
 - [Guide](https://terminaldz.github.io/vidcreat) (English) · [الدليل](https://terminaldz.github.io/vidcreat/ar/) (Arabic)
-- Offline copy: `pnpm docs` builds `documentation/index.html`
+- Offline copy: `pnpm docs:build` builds `documentation/index.html`
 - [Authoring reference](docs/authoring.md) · [Component reference](docs/components.md)
 - Architecture: [English](docs/architecture.md) · [Arabic](docs/architecture-ar.md) ·
   [Architecture decisions (ADRs)](docs/adr/)

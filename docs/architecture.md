@@ -1718,7 +1718,7 @@ flowchart LR
 | Suite     | Command             | What it covers                                                                                                                                                                                                                                     |
 | --------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `unit`    | `pnpm test:unit`    | `packages/*/test`: WAV, alignment, the PRNG, sounds, time, captions and bidi, the compiler and every V rule, themes and contrast, packs, blueprints and suggestions, motion, YAML edits, the tools, providers, verified installs, renderer helpers |
-| `browser` | `pnpm test:browser` | `tests/`: **golden frames** (fails above 0.2% difference), determinism, the full render pipeline, CLI, MCP, agents, editor, dashboard, gallery, motion                                                                                             |
+| `browser` | `pnpm test:browser` | `tests/`: **golden frames** (fails above 0.2% difference on the platform that rendered them, 0.6% elsewhere), determinism, the full render pipeline, CLI, MCP, agents, editor, dashboard, gallery, motion                                          |
 
 - `fixtures/lint/v01…v14`: an episode with a deliberate mistake for each rule.
 - `fixtures/golden/`: reference images for Arabic captions and every component (also used by the
@@ -1739,7 +1739,7 @@ system package manager, the pinned Playwright Chromium with a cache). Steps on a
 4. Browser and integration tests, the license check and `doctor`.
 5. Validating the season1 examples, `eval-agents.mjs --mock` (a scripted model, offline) and
    `eval-align.mjs`.
-6. `pnpm docs` (offline docs) and `pnpm docs:site` (fails on dead links).
+6. `pnpm docs:build` (offline docs) and `pnpm docs:site` (fails on dead links).
 7. Linux only: **a render with networking really disabled** (`unshare --net`) to prove it works offline,
    and uploading the outputs and golden diffs.
 

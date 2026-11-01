@@ -10,7 +10,7 @@ community on a best-effort basis.
 2. Run `reelforge validate <episode>`: every problem in an episode is listed with its file, line and a
    fix hint.
 3. Read **Troubleshooting & FAQ** in the documentation: <https://terminaldz.github.io/vidcreat>
-   (`pnpm docs` builds an offline copy in `documentation/index.html`).
+   (`pnpm docs:build` builds an offline copy in `documentation/index.html`).
 
 ## Where to ask
 

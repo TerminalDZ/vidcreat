@@ -25,7 +25,7 @@
     "format": "prettier --write \"**/*.{ts,json,yaml,md}\"",
     "check:licenses": "node scripts/check-licenses.mjs",
     "reelforge": "node packages/cli/bin/reelforge.js",
-    "docs": "node scripts/gen-docs.mjs && node scripts/build-docs.mjs && node scripts/build-docs-site.mjs",
+    "docs:build": "node scripts/gen-docs.mjs && node scripts/build-docs.mjs && node scripts/build-docs-site.mjs",
     "docs:gen": "node scripts/gen-docs.mjs",
     "docs:check": "node scripts/check-docs-fresh.mjs",
     "docs:dev": "vitepress dev docs",

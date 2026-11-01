@@ -112,7 +112,7 @@ jobs:
         run: node scripts/eval-align.mjs
 
       - name: Docs build (offline guide and the dashboard's /docs/ site)
-        run: pnpm docs
+        run: pnpm docs:build
 
       - name: Docs site build (fails on dead links)
         run: pnpm docs:site

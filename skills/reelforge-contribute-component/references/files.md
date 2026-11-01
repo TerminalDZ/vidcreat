@@ -65,7 +65,7 @@ Register it in `COMPONENT_REGISTRY`. `handles` lists enter animations the compon
 ## 5. Docs
 
 `node scripts/gen-components-doc.mjs` regenerates `docs/components.md` from the schemas
-(`pnpm docs` also rebuilds the site). Do not edit the generated file by hand.
+(`pnpm docs:build` also rebuilds the site). Do not edit the generated file by hand.
 
 ## 6. Studio
 

@@ -188,7 +188,7 @@ open http://127.0.0.1:4310/connect               # copy-paste setup for each cli
 ## التوثيق
 
 - [الدليل بالعربية](https://terminaldz.github.io/vidcreat/ar/) · [English guide](https://terminaldz.github.io/vidcreat)
-- نسخة تعمل دون اتصال: يبني الأمر `pnpm docs` الملف `documentation/index.html`
+- نسخة تعمل دون اتصال: يبني الأمر `pnpm docs:build` الملف `documentation/index.html`
 - [دليل الكتابة](docs/authoring.md) · [مرجع المكوّنات](docs/components.md)
 - المعمارية: [بالعربية](docs/architecture-ar.md) · [بالإنجليزية](docs/architecture.md) ·
   [سجلات القرارات المعمارية (ADRs)](docs/adr/)

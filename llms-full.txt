@@ -1845,7 +1845,7 @@ The site and the offline documentation are built from the same Markdown in `docs
 | `pnpm docs:dev`   | Serves the site locally with live reload                                                                         |
 | `pnpm docs:site`  | Builds the public site (base `/vidcreat/`) into `docs/.site` (fails on dead links)                               |
 | `pnpm docs:local` | Builds the same site with base `/docs/` into `documentation/site`, which the dashboard serves at `/docs/`        |
-| `pnpm docs`       | Runs `docs:gen`, the single-file `documentation/index.html` (English and Arabic) and `docs:local`; commit result |
+| `pnpm docs:build` | Runs `docs:gen`, the single-file `documentation/index.html` (English and Arabic) and `docs:local`; commit result |
 
 English pages live in `docs/guide/` and `docs/reference/`; their Arabic versions mirror them under
 `docs/ar/`. Never edit generated pages by hand: CI runs `node scripts/check-docs-fresh.mjs` and fails when
