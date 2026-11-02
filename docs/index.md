@@ -5,6 +5,9 @@ hero:
   name: ReelForge
   text: Your voice and one YAML file, as a finished vertical video
   tagline: 1080×1920 explainers for TikTok, Reels and Shorts. Animated components timed to your words, English and Arabic captions, mastered audio. Local, offline and deterministic.
+  image:
+    src: /preview.gif
+    alt: A ReelForge video with software, hospital, port and real-estate scenes
   actions:
     - theme: brand
       text: Quick start

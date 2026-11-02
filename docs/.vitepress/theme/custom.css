@@ -1,3 +1,20 @@
+/* Home hero: the preview video shown in a phone frame (VitePress centres it in .image-container). */
+.VPHero .image-bg {
+  display: none;
+}
+.VPHero .image-src {
+  max-width: 260px;
+  max-height: none;
+  border-radius: 28px;
+  border: 6px solid #1b1f29;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+@media (max-width: 960px) {
+  .VPHero .image-src {
+    max-width: 200px;
+  }
+}
+
 :root {
   --vp-c-brand-1: #4f7d00;
   --vp-c-brand-2: #5f9400;
