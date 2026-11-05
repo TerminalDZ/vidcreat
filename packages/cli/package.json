@@ -45,7 +45,7 @@
     "@reelforge/core": "workspace:*",
     "@reelforge/renderer": "workspace:*",
     "@reelforge/studio": "workspace:*",
-    "commander": "13.1.0"
+    "commander": "15.0.0"
   },
   "bin": {
     "reelforge": "bin/reelforge.js"
